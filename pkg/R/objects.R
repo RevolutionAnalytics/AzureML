@@ -1,7 +1,4 @@
-Dataset =
-  R6Class(
-    "Dataset" )
-
+Dataset = R6Class("Dataset" )
 
 SourceDataset =
   R6Class(
@@ -17,19 +14,17 @@ SourceDataset =
             self$metadata = metadata},
         get =
           function(mode = c("open", "text", "binary")) {
-            get.dataset.contents(self$contents.url, mode = mode)},
+            get.dataset.contents(self$contents.url(), mode = mode)},
         as.data.frame =
           function() {
-            deserialize.data.frame(self$get(), self$data.type.id)}))
-
-read.SourceDataset =
-  function(x, format)
-    read.dataset.content(content.url(x), format)
-
-as.dataframe.SourceDataset =
-  function(x) {
-    tc = textConnection(read.dataset.content(content.url(x), "raw"))
-    deserialize.SourceDataset(textConnectionValue(tc))}
+            to.data.frame(self$get(mode = "text"), self$metadata$DataTypeId)},
+        contents.url =
+          function() {
+            loc = self$download.location()
+            paste0(loc$BaseUri, loc$Location, loc$AccessCredential)},
+        download.location =
+          function(){
+            self$metadata$DownloadLocation}))
 
 #update.SourceDataset.data.frame
 #update.SourceDataset.raw
@@ -141,7 +136,7 @@ Experiments =
             self$example.filter = example.filter},
         get.item =
           function(index) {
-          experiments = self$get.experiments()
+            experiments = self$get.experiments()
             if(is.numeric(index)) {
               self$create.experiment(experiments[[index]])}
             else
@@ -187,3 +182,25 @@ Workspace =
             self$experiments = Experiments$new(self)
             self$user.experiments = Experiments$new(self, FALSE)
             self$example.experiments = Experiments$new(self, TRUE)}))
+
+
+serialize.dataframe =
+  function(df, type)
+    stop()
+
+to.data.frame =
+  function(data, format) {
+    textcon = textConnection(data, "r")
+    read.csv.character =
+      function(...)
+        read.csv(file = textcon, ...)
+    switch(
+      format,
+      ARFF = read.arff(textcon),
+      PlainText = dataframe.to.txt(data),
+      GenericCSV = capture.csv(),
+      GenericTSV = capture.csv(sep = "\t"),
+      GenericCSVNoHeader = capture.csv(header = FALSE),
+      GenericTSVNoHeader = capture.csv(sep = "\t", header = FALSE),
+      stop("Unknown Format"))}
+
