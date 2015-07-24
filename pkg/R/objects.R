@@ -1,3 +1,5 @@
+assert = function(x, f) {stopifnot(all(f(x))); x}
+
 Dataset = R6Class("Dataset" )
 
 SourceDataset =
@@ -48,10 +50,11 @@ Datasets =
               get.datasets(
                 self$workspace$id,
                 self$workspace$authorization.token)
-            if(is.numeric(index))
-              self$create.dataset(datasets[[index]])
-            else
-              keep(datasets, ~.["Name"] == index)[[1]]},
+            self$create.dataset(
+              if(is.numeric(index))
+                datasets[[index]]
+              else
+                assert(keep(datasets, ~.["Name"] == index), function(x) length(x) > 0)[[1]])},
         get.datasets =
           function() {
             datasets =
@@ -89,18 +92,16 @@ IntermediateDataset =
             self$port.name = port.name
             self$data.type.id = data.type.id},
         get =
-          function(mode = c("open", "text", "binary")) {
-            mode = match.arg(mode)
+          function() {
             get.intermediate.dataset.contents(
               workspace = self$workspace$id,
-              experiment = self$experiment$id,
+              experiment = self$experiment$id(),
               node = self$node.id,
               port = self$port.name,
-              mode = mode)},
+              authorization.token = self$workspace$authorization.token)},
         as.data.frame =
-          function(x) {
-            tc = textConnection(get.dataset.content(content.url(x), "raw"))
-            deserialize.IntermediateDataset(textConnectionValue(tc))}))
+          function() {
+            to.data.frame(self$get(), self$data.type.id)}))
 
 Experiment =
   R6Class(
@@ -113,7 +114,7 @@ Experiment =
           function(workspace, metadata) {
             self$workspace = workspace
             self$metadata = metadata},
-        experiment.id =
+        id =
           function()
             self$metadata['ExperimentId'],
         is.example =
@@ -121,7 +122,7 @@ Experiment =
             stri_startswith(self$id, fixed = global.workspace.id),
         get.intermediate.dataset =
           function(node.id, port.name, data.type.id)
-            IntermediateDataset(self$workspace, self, node.id, port.name, data.type.id)))
+            IntermediateDataset$new(self$workspace, self, node.id, port.name, data.type.id)))
 
 Experiments =
   R6Class(
@@ -140,10 +141,13 @@ Experiments =
             if(is.numeric(index)) {
               self$create.experiment(experiments[[index]])}
             else
-              self$create.experiment(keep(experiments, ~.$id == index)[[1]])},
+              self$create.experiment(keep(experiments, ~.$ExperimentId == index)[[1]])},
         get.experiments =
           function() {
-            experiments = get.experiments(self$workspace$id)
+            experiments =
+              get.experiments(
+                self$workspace$id,
+                self$workspace$authorization.token)
             if(is.na(self$example.filter))
               experiments
             else {
@@ -198,9 +202,9 @@ to.data.frame =
       format,
       ARFF = read.arff(textcon),
       PlainText = dataframe.to.txt(data),
-      GenericCSV = capture.csv(),
-      GenericTSV = capture.csv(sep = "\t"),
-      GenericCSVNoHeader = capture.csv(header = FALSE),
-      GenericTSVNoHeader = capture.csv(sep = "\t", header = FALSE),
+      GenericCSV = read.csv.character(),
+      GenericTSV = read.csv.character(sep = "\t"),
+      GenericCSVNoHeader = read.csv.character(header = FALSE),
+      GenericTSVNoHeader = read.csv.character(sep = "\t", header = FALSE),
       stop("Unknown Format"))}
 

@@ -9,4 +9,4 @@ Description: up- and download datasets from Azure ML, such as the Iris data set
 License: MIT
 LazyData: TRUE
 Collate: protocol.R objects.R
-Imports: webapi, purrr, R6
+Imports: webapi, purrr, R6, foreign

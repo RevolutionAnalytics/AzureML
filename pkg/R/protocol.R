@@ -24,7 +24,7 @@ make.web.call.headers =
         `User-Agent` = a(default = "R-azureml", export = NULL),
         `Content-Type` = a(default  = 'application/json;charset=UTF8', export = NULL),
         `x-ms-metaanalytics-authorizationtoken` = a(mandatory = TRUE, export = "authorization.token"),
-        `x-ms-client-session-id` = a(default  = "DefaultSession")))
+        `x-ms-client-session-id` = a(default  = "DefaultSession", export = NULL)))
 
 #neeeds custom content type for uploads
 
@@ -82,29 +82,25 @@ get.dataset =
 #
 
 get.intermediate.dataset.contents =
-  function(workspace, experiment, node, port, mode)
   make.web.call.headers(
     .method = "get",
     .parameters =
       list(
-        workspace = a(default = workspace),
-        experiment = a(default = experiment),
-        node = a(default = node),
-        port = a(default = port)),
+        workspace = a(mandatory = TRUE),
+        experiment = a(mandatory = TRUE),
+        node = a(mandatory = TRUE),
+        port = a(mandatory = TRUE)),
     .param.encoding = interpylate("workspaces/{workspace}/experiments/{experiment}/outputdata/{node}/{port}"),
-    .response.encoding =
-      switch(
-        mode,
-        stop()))
+    .response.encoding = "text")
 
 
 get.dataset.contents =
   function(url, mode) {
     web.call =
       make.web.call(
-      .method = "get",
-      .url = url,
-      .response.encoding = mode)
+        .method = "get",
+        .url = url,
+        .response.encoding = mode)
     web.call()}
 
 #
