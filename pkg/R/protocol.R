@@ -1,18 +1,4 @@
 
-#
-# UPLOAD_URI_FMI = SERVICE_ROOT + 'resourceuploads/workspaces/{0}/?userStorage=true&dataTypeId={1}'
-# SESSION_ID_HEADER_NAME = 'x-ms-client-session-id'
-# SESSION_ID_HEADER_VALUE = 'DefaultSession'
-# ACCESS_TOKEN_HEADER_NAME = 'x-ms-metaanalytics-authorizationtoken'
-# CONTENT_TYPE_HEADER_NAME = 'Content-Type'
-# CONTENT_TYPE_HEADER_VALUE_JSON = 'application/json;charset=UTF8'
-# DEFAULT_OWNER = 'Python SDK'
-
-# def __init__(self, service_endpoint, access_token):
-#   self._service_endpoint = service_endpoint
-# self._access_token = access_token
-#
-
 pasteslash = partial(paste, sep = "/", collapse = "/")
 
 make.web.call.headers =
@@ -110,26 +96,49 @@ get.dataset.contents =
 #   api_path = self.UPLOAD_URI_FMI.format(workspace_id, data_type_id)
 # upload_result = self._send_post_req(api_path, raw_data)
 #
-# # now get the id that was generated
-# upload_id = upload_result["Id"]
-#
-# # use that to construct the DataSource metadata
-# metadata = {
-#   "DataSource": {
-#     "Name": name,
-#     "DataTypeId":data_type_id,
-#     "Description":description,
-#     "FamilyId":family_id,
-#     "Owner": self.DEFAULT_OWNER,
-#     "SourceOrigin":"FromResourceUpload"
-#   },
-#   "UploadId": upload_id,
-#   "UploadedFromFileName":"",
-#   "ClientPoll": True
-# }
-#
+
 # api_path = self.DATASOURCES_URI_FMT.format(workspace_id)
 # datasource_id = self._send_post_req(
 #   api_path, json.dumps(metadata), self.CONTENT_TYPE_HEADER_VALUE_JSON)
 # return datasource_id
 #
+
+upload.dataset =
+  function(workspace, name, description, data.type.id, raw.data, family.id, authorization.token) {
+    upload.result =
+      make.web.call.headers(
+        .method = "post",
+        .parameters =
+          list(
+            workspace = a(),
+            data.type.id = a()),
+        .param.encoding = interpylate("resourceuploads/workspaces/{workspace}/?userStorage=true&dataTypeId={data.type.id}"),
+        .body = list(raw.data = a()),
+        .body.encoding = "text")(workspace, data.type.id, authorization.token, raw.data)
+    upload_id = upload_result["Id"]
+    metadata =
+      list(
+      DataSource =
+        list(
+          Name =  name,
+          DataTypeId = data.type.id,
+          Description = description,
+          FamilyId = family.id,
+          Owner =  "R SDK",
+          SourceOrigin = "FromResourceUpload"),
+      UploadId =  upload.id,
+      UploadedFromFileName = "",
+      ClientPoll =  TRUE)
+    make.web.call.headers(
+      .method = "post",
+      .parameters = list(
+        workspace = a()),
+      .param.encoding = interpylate('workspaces/{workspace}/datasources'),
+      .body = list(metadata = a()),
+      .body.encoding = "json")(workspace, metadata)}
+
+    #
+    # api_path = self.DATASOURCES_URI_FMT.format(workspace_id)
+    # datasource_id = self._send_post_req(
+    #   api_path, json.dumps(metadata), self.CONTENT_TYPE_HEADER_VALUE_JSON)
+    # return datasource_id}

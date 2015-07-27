@@ -189,8 +189,18 @@ Workspace =
 
 
 serialize.dataframe =
-  function(df, type)
-    stop()
+  function(df, format) {
+    capture.write =
+      function(...)
+         capture.output(write.csv(df, file = stdout()))
+    switch(
+      format,
+      ARFF = capture.output(write.arff(df, "")),
+      PlainText = dataframe.to.txt(df),
+      GenericCSV = capture.write(),
+      GenericTSV = capture.write(sep = "\t"),
+      GenericCSVNoHeader = capture.write(header = FALSE),
+      GenericTSVNoHeader = capture.write(sep = "\t", header = FALSE))}
 
 to.data.frame =
   function(data, format) {
@@ -201,7 +211,7 @@ to.data.frame =
     switch(
       format,
       ARFF = read.arff(textcon),
-      PlainText = dataframe.to.txt(data),
+      PlainText = txt.to.data.frame(data),
       GenericCSV = read.csv.character(),
       GenericTSV = read.csv.character(sep = "\t"),
       GenericCSVNoHeader = read.csv.character(header = FALSE),
