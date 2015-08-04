@@ -1,23 +1,23 @@
 
 
-as.data.frame.Dataset = function(x) x$as.data.frame()
+as.data.frame.Dataset = function(x, row.names, optional, ...) x$as.data.frame()
 
-`[[.Datasets` = function(xx, i) xx$get.item(i)
+`[[.Datasets` = function(x, i) x$get.item(i)
 
 as.list.Datasets =
-  function(xx) {
-    yy = xx$get.datasets()
-    setNames(yy, unlist(map(as.list(yy), "Name")))}
+  function(x, ...) {
+    y = x$get.datasets()
+    setNames(y, unlist(map(as.list(y), "Name")))}
 
-names.Datasets = function(xx) names(as.list(xx))
+names.Datasets = function(x) names(as.list(x))
 
-`[[.Experiments` = function(xx, i) xx$get.item(i)
+`[[.Experiments` = function(x, i) x$get.item(i)
 
 as.list.Experiments =
-  function(xx) {
-    yy = xx$get.experiments()
-    setNames(yy, unlist(map(as.list(yy), "ExperimentId")))}
+  function(x, ...) {
+    y = x$get.experiments()
+    setNames(y, unlist(map(as.list(y), "ExperimentId")))}
 
-names.Experiments = function(xx) names(as.list(xx))
+names.Experiments = function(x) names(as.list(x))
 
-`[[.Workspace` = function(xx, slot) xx$get(slot)
+`[[.Workspace` = function(x, slot) x$get(slot)
