@@ -197,7 +197,6 @@ Workspace =
         user.experiments = NA,
         example.experiments = NA))
 
-
 serialize.dataframe =
   function(df, format) {
     capture.write =
@@ -228,3 +227,10 @@ to.data.frame =
       GenericTSVNoHeader = read.csv.character(sep = "\t", header = FALSE),
       stop("Unknown Format"))}
 
+dataframe.to.txt =
+  function(df) {
+    paste(df[, 1,drop = TRUE], collapse = "\n")}
+
+txt.to.data.frame =
+  function(data) {
+    data.frame(txt = strsplit(data, "\n"))[[1]]}
