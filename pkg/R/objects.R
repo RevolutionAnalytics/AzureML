@@ -192,7 +192,7 @@ serialize.dataframe =
   function(df, format) {
     capture.write =
       function(...)
-         capture.output(write.csv(df, file = stdout()))
+        capture.output(write.csv(df, file = stdout()))
     switch(
       format,
       ARFF = capture.output(write.arff(df, "")),

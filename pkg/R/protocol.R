@@ -85,6 +85,7 @@ get.dataset.contents =
     web.call =
       make.web.call(
         .method = "get",
+        .param.encoding = "none",
         .url = url,
         .response.encoding = mode)
     web.call()}
@@ -114,31 +115,38 @@ upload.dataset =
             data.type.id = a()),
         .param.encoding = interpylate("resourceuploads/workspaces/{workspace}/?userStorage=true&dataTypeId={data.type.id}"),
         .body = list(raw.data = a()),
-        .body.encoding = "text")(workspace, data.type.id, authorization.token, raw.data)
-    upload_id = upload_result["Id"]
+        .body.encoding = "multipart")(
+          workspace = workspace,
+          data.type.id = data.type.id,
+          authorization.token = authorization.token,
+          raw.data = raw.data)
+    upload.id = upload.result[["Id"]]
     metadata =
       list(
-      DataSource =
-        list(
-          Name =  name,
-          DataTypeId = data.type.id,
-          Description = description,
-          FamilyId = family.id,
-          Owner =  "R SDK",
-          SourceOrigin = "FromResourceUpload"),
-      UploadId =  upload.id,
-      UploadedFromFileName = "",
-      ClientPoll =  TRUE)
+        DataSource =
+          list(
+            Name =  name,
+            DataTypeId = data.type.id,
+            Description = description,
+            FamilyId = family.id,
+            Owner =  "R SDK",
+            SourceOrigin = "FromResourceUpload"),
+        UploadId =  upload.id,
+        UploadedFromFileName = "",
+        ClientPoll =  TRUE)
     make.web.call.headers(
       .method = "post",
       .parameters = list(
         workspace = a()),
       .param.encoding = interpylate('workspaces/{workspace}/datasources'),
-      .body = list(metadata = a()),
-      .body.encoding = "json")(workspace, metadata)}
+      .body = list(metadata = a(conversion = identity)),
+      .body.encoding = "json")(
+        workspace = workspace,
+        metadata = metadata,
+        authorization.token = authorization.token)}
 
-    #
-    # api_path = self.DATASOURCES_URI_FMT.format(workspace_id)
-    # datasource_id = self._send_post_req(
-    #   api_path, json.dumps(metadata), self.CONTENT_TYPE_HEADER_VALUE_JSON)
-    # return datasource_id}
+#
+# api_path = self.DATASOURCES_URI_FMT.format(workspace_id)
+# datasource_id = self._send_post_req(
+#   api_path, json.dumps(metadata), self.CONTENT_TYPE_HEADER_VALUE_JSON)
+# return datasource_id}
