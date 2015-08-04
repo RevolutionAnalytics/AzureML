@@ -1,6 +1,7 @@
 
 
 as.data.frame.Dataset = function(x) x$as.data.frame()
+
 `[[.Datasets` = function(xx, i) xx$get.item(i)
 
 as.list.Datasets =
@@ -18,3 +19,5 @@ as.list.Experiments =
     setNames(yy, unlist(map(as.list(yy), "ExperimentId")))}
 
 names.Experiments = function(xx) names(as.list(xx))
+
+`[[.Workspace` = function(xx, slot) xx$get(slot)
