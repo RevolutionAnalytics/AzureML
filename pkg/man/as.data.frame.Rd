@@ -1,5 +1,6 @@
-\name{as.data.frame}
-\alias{as.data.frame}
+\docType{methods}
+\name{as.data.frame, Dataset-method}
+\alias{as.data.frame, Dataset-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Convert Dataset to data.frame

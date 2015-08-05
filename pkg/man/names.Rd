@@ -1,5 +1,6 @@
-\name{names}
-\alias{names}
+\docType{methods}
+\name{names, Experiments-method}
+\alias{names, Datasets-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Return the names of available experiments or datasets.

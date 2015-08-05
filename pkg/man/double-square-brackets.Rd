@@ -10,11 +10,13 @@ Access experiment or dataset by index or name/id}
 Access individual experiments or datasets in a workspace by index or by name for datasets, id for experiments
 }
 \usage{
-x[[i]]
-x[[name]]
-x[[id]]
+\method{[[}{Experiments}(x, i)
+\method{[[}{Datasets}(x, i)
+\method{[[}{Datasets}(x, name)
+\method{[[}{Experiments}(x, id)
 }
 \arguments{
+\item{x}{The experiments or datasets slots of a Workspace object}
 \item{i}{The index of the dataset or experiment}
 \item{name}{The name of the dataset}
 \item{id}{The id of the experiment}
@@ -31,7 +33,8 @@ A dataset or experiment object
 ws = workspace(id, authorization.token)
 ws$experiments[[1]]
 ws$datasets[[1]]
-# name from ML studio ->datasets -> my datasets or samples -> name
+# name from ML studio ->datasets -> my datasets or samples -> name or
+# names(ws$datsets)
 ws$datasets[[name]]
 # id from ML studio -> experiments -> my datasets or samples -> name
 ws$experiments[[id]]

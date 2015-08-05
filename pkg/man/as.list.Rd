@@ -1,5 +1,6 @@
-\name{as.list}
-\alias{as.list}
+\docType{methods}
+\name{as.list, Experiments-method}
+\alias{as.list, Datasets-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Convert Collection of Datasets and Experiments to lists
