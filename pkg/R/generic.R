@@ -19,5 +19,3 @@ as.list.Experiments =
     setNames(y, unlist(map(as.list(y), "ExperimentId")))}
 
 names.Experiments = function(x) names(as.list(x))
-
-`[[.Workspace` = function(x, slot) x$get(slot)

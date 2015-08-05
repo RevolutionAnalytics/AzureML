@@ -43,8 +43,8 @@ Datasets =
           function(index) {
             datasets =
               get.datasets(
-                private$workspace[["id"]],
-                private$workspace[["authorization.token"]])
+                private$workspace$id,
+                private$workspace$authorization.token)
             private$create.dataset(
               if(is.numeric(index))
                 datasets[[index]]
@@ -54,8 +54,8 @@ Datasets =
           function() {
             datasets =
               get.datasets(
-                private$workspace[["id"]],
-                private$workspace[["authorization.token"]])
+                private$workspace$id,
+                private$workspace$authorization.token)
             if(is.na(private$example.filter))
               datasets
             else
@@ -98,11 +98,11 @@ IntermediateDataset =
         get =
           function() {
             get.intermediate.dataset.contents(
-              workspace = private$workspace[["id"]],
+              workspace = private$workspace$id,
               experiment = private$experiment$id(),
               node = private$node.id,
               port = private$port.name,
-              authorization.token = private$workspace[["authorization.token"]])}))
+              authorization.token = private$workspace$authorization.token)}))
 
 Experiment =
   R6Class(
@@ -147,8 +147,8 @@ Experiments =
           function() {
             experiments =
               get.experiments(
-                private$workspace[["id"]],
-                private$workspace[["authorization.token"]])
+                private$workspace$id,
+                private$workspace$authorization.token)
             if(is.na(private$example.filter))
               experiments
             else {
@@ -175,19 +175,14 @@ Workspace =
       list(
         initialize =
           function(id, authorization.token) {
-            private$id = id
-            private$authorization.token = authorization.token
-            private$datasets = Datasets$new(self)
-            private$user.datasets = Datasets$new(self, FALSE)
-            private$example.datasets = Datasets$new(self, TRUE)
-            private$experiments = Experiments$new(self)
-            private$user.experiments = Experiments$new(self, FALSE)
-            private$example.experiments = Experiments$new(self, TRUE)},
-        get =
-          function(slot)
-            private[[slot]]),
-    private =
-      list(
+            self$id = id
+            self$authorization.token = authorization.token
+            self$datasets = Datasets$new(self)
+            self$user.datasets = Datasets$new(self, FALSE)
+            self$example.datasets = Datasets$new(self, TRUE)
+            self$experiments = Experiments$new(self)
+            self$user.experiments = Experiments$new(self, FALSE)
+            self$example.experiments = Experiments$new(self, TRUE)},
         id = NA,
         authorization.token = NA,
         datasets = NA,
