@@ -1,6 +1,6 @@
 
 
-as.data.frame.Dataset = function(x, row.names, optional, ...) x$as.data.frame()
+as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) x$as.data.frame()
 
 `[[.Datasets` = function(x, i) x$get.item(i)
 
