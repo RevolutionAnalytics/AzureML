@@ -14,7 +14,20 @@ SourceDataset =
             private$metadata = metadata},
         as.data.frame =
           function() {
-            to.data.frame(private$get(mode = "text"), private$metadata$DataTypeId)}),
+            to.data.frame(private$get(mode = "text"), private$metadata$DataTypeId)},
+        update =
+          function(
+            data,
+            data.type = private$metadata$DataTypeId,
+            name = private$metadata$Name,
+            description = private$metadata$Description){
+            raw.data = {
+              if(is.data.frame(data))
+                serialize.dataframe(data)
+              else
+                data}
+            upload.and.refresh(raw.data, data.type, name, description)
+          }),
     private =
       list(
         workspace = NA,
@@ -28,7 +41,21 @@ SourceDataset =
             paste0(loc$BaseUri, loc$Location, loc$AccessCredential)},
         download.location =
           function(){
-            private$metadata$DownloadLocation}))
+            private$metadata$DownloadLocation},
+        upload.and.refresh =
+          function(raw.data, data.type, name, description) {
+            dataset.id =
+              upload.dataset(
+                private$workspace$id,
+                name,
+                description,
+                data.type,
+                raw.data,
+                private$metadata$FamilyId)
+            private$metadata =
+              get.dataset(
+                private$workspace$id,
+                dataset.id)}))
 
 Datasets =
   R6Class(
