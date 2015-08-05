@@ -5,8 +5,8 @@ Version: 0.0.0
 Date: 2015-07-16
 Author: Microsoft <davidsmi@microsoft.com>
 Maintainer: Microsoft <davidsmi@microsoft.com>
-Description: up- and download datasets from Azure ML, such as the Iris data set
-License: MIT
+Description: Functions and datasets to support Azure ML.
+License: MIT + file LICENSE
 LazyData: TRUE
 Collate: protocol.R objects.R generic.R
 Imports: webapi, purrr, R6, foreign, stringi
