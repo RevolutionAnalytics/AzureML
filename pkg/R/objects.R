@@ -219,6 +219,10 @@ Workspace =
         user.experiments = NA,
         example.experiments = NA))
 
+workspace =
+  function(id, authorization.token)
+    Workspace$new(id, authorization.token)
+
 serialize.dataframe =
   function(df, format) {
     capture.write =
