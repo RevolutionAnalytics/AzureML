@@ -26,7 +26,7 @@ SourceDataset =
                 serialize.dataframe(data)
               else
                 data}
-            upload.and.refresh(raw.data, data.type, name, description)
+            private$upload.and.refresh(raw.data, data.type, name, description)
           }),
     private =
       list(
@@ -51,7 +51,8 @@ SourceDataset =
                 description,
                 data.type,
                 raw.data,
-                private$metadata$FamilyId)
+                private$metadata$FamilyId,
+                private$workspace$authorization.token)
             private$metadata =
               get.dataset(
                 private$workspace$id,
@@ -89,7 +90,7 @@ Datasets =
               keep(
                 datasets,
                 ~stri_startswith(
-                  .$id, fixed = global.workspace.id) ==
+                  .$Id, fixed = global.workspace.id) ==
                   private$example.filter)}),
     private =
       list(
