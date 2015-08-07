@@ -53,7 +53,14 @@ get.dataset.contents =
     web.call()}
 
 upload.dataset =
-  function(workspace, name, description, data.type.id, raw.data, family.id, authorization.token) {
+  function(
+    workspace,
+    name,
+    description,
+    data.type.id,
+    raw.data,
+    family.id,
+    authorization.token) {
     upload.result =
       make.web.call.headers(
         .method = "post",
@@ -61,7 +68,9 @@ upload.dataset =
           list(
             workspace = a(),
             data.type.id = a()),
-        .param.encoding = interpylate("resourceuploads/workspaces/{workspace}/?userStorage=true&dataTypeId={data.type.id}"),
+        .param.encoding =
+          interpylate(
+            "resourceuploads/workspaces/{workspace}/?userStorage=true&dataTypeId={data.type.id}"),
         .body = list(raw.data = a()),
         .body.encoding = function(x) unname(unlist(x)))(
           workspace = workspace,
