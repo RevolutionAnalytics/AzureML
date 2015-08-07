@@ -63,7 +63,7 @@ upload.dataset =
             data.type.id = a()),
         .param.encoding = interpylate("resourceuploads/workspaces/{workspace}/?userStorage=true&dataTypeId={data.type.id}"),
         .body = list(raw.data = a()),
-        .body.encoding = "multipart")(
+        .body.encoding = function(x) unname(unlist(x)))(
           workspace = workspace,
           data.type.id = data.type.id,
           authorization.token = authorization.token,
@@ -88,7 +88,7 @@ upload.dataset =
         workspace = a()),
       .param.encoding = interpylate('workspaces/{workspace}/datasources'),
       .body = list(metadata = a(conversion = identity)),
-      .body.encoding = "json")(
+      .body.encoding = function(x) jsonlite::toJSON(x$metadata, auto_unbox = TRUE))(
         workspace = workspace,
         metadata = metadata,
         authorization.token = authorization.token)}
