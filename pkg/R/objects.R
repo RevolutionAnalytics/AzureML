@@ -1,6 +1,6 @@
 assert = function(x, f) {stopifnot(all(f(x))); x}
 
-Dataset = R6Class("Dataset" )
+Dataset = R6Class("Dataset")
 
 SourceDataset =
   R6Class(
@@ -21,9 +21,11 @@ SourceDataset =
             data.type = private$metadata$DataTypeId,
             name = private$metadata$Name,
             description = private$metadata$Description){
+            if(is.example(private$metadata$Id))
+              stop("Can't update Azure ML example")
             raw.data = {
               if(is.data.frame(data))
-                serialize.dataframe(data)
+                serialize.dataframe(data, data.type)
               else
                 data}
             private$upload.and.refresh(raw.data, data.type, name, description)
@@ -56,7 +58,13 @@ SourceDataset =
             private$metadata =
               get.dataset(
                 private$workspace$id,
-                dataset.id)}))
+                dataset.id,
+                private$workspace$authorization.token)}))
+
+
+is.example =
+  function(id)
+    stri_startswith(id, fixed = global.workspace.id)
 
 Datasets =
   R6Class(
@@ -89,16 +97,33 @@ Datasets =
             else
               keep(
                 datasets,
-                ~stri_startswith(
-                  .$Id, fixed = global.workspace.id) ==
-                  private$example.filter)}),
+                ~is.example(.$Id) ==
+                  private$example.filter)},
+        add =
+          function(data, data.type, name, description) {
+            if(is.data.frame(data))
+              data = serialize.dataframe(data, data.type)
+            private$upload(data, data.type, name, description)}),
     private =
       list(
         workspace = NA,
         example.filter = NA,
         create.dataset =
           function(metadata) {
-            SourceDataset$new(private$workspace, metadata)}))
+            SourceDataset$new(private$workspace, metadata)},
+        upload =
+          function(raw.data, data.type, name, description) {
+            dataset.id =
+              upload.dataset(
+                private$workspace$id,
+                name,
+                description,
+                data.type,
+                raw.data,
+                family.id = UUIDgenerate(),
+                authorization.token)
+            metadata = get.dataset(private$workspace$id, dataset.id, private$workspace$authorization.token)
+          private$create.dataset(metadata)}))
 
 IntermediateDataset =
   R6Class(
@@ -153,7 +178,7 @@ Experiment =
         metadata = NA,
         is.example =
           function()
-            stri_startswith(private$id, fixed = global.workspace.id)))
+            is.example(private$id)))
 
 Experiments =
   R6Class(
@@ -182,10 +207,7 @@ Experiments =
             else {
               keep(
                 experiments,
-                ~stri_startswith(
-                  .$id,
-                  fixed = global.workspace.id) ==
-                  private$example.filter)}}),
+                ~is.example(.$Id) == private$example.filter)}}),
     private =
       list(
         workspace = NA,
