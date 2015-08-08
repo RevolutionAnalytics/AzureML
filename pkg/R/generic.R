@@ -20,6 +20,10 @@ as.list.Experiments =
 
 names.Experiments = function(x) names(as.list(x))
 
+create =
+  function(data, workspace, data.type, name, description)
+    workspace$datasets$add(data, data.type, name, description)
+
 update.Dataset =
   function(
     x,
@@ -28,3 +32,7 @@ update.Dataset =
     name = NULL,
     description = NULL){
       x$update(data, data.type, name, description)}
+
+length.Datasets =
+length.Exoeriments =
+  function(x) length(as.list(x))
