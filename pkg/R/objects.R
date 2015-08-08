@@ -21,6 +21,9 @@ SourceDataset =
             data.type = private$metadata$DataTypeId,
             name = private$metadata$Name,
             description = private$metadata$Description){
+            if(is.null(data.type)) data.type = private$metadata$DataTypeId
+            if(is.null(name)) name = private$metadata$Name
+            if(is.null(description)) description = private$metadata$Description
             if(is.example(private$metadata$Id))
               stop("Can't update Azure ML example")
             raw.data = {

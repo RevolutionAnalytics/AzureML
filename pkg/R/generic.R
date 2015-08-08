@@ -19,3 +19,12 @@ as.list.Experiments =
     setNames(y, unlist(map(as.list(y), "ExperimentId")))}
 
 names.Experiments = function(x) names(as.list(x))
+
+update.Dataset =
+  function(
+    x,
+    data,
+    data.type = NULL,
+    name = NULL,
+    description = NULL){
+      x$update(data, data.type, name, description)}
