@@ -1,21 +1,31 @@
 
+workspace =
+  function(id, authorization.token)
+    Workspace$new(id, authorization.token)
 
-as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) x$as.data.frame()
+datasets = function(workspace) private(workspace)$datasets
+experiments = function(workspace) private(workspace)$experiments
 
-`[[.Datasets` = function(x, i) x$get.item(i)
+as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) private(x)$as.data.frame()
+
+`[[.Datasets` = function(x, i) private(x)$get.item(i)
 
 as.list.Datasets =
   function(x, ...) {
-    y = x$get.datasets()
+    y = private(x)$get.datasets()
     setNames(y, unlist(map(as.list(y), "Name")))}
 
 names.Datasets = function(x) names(as.list(x))
 
-`[[.Experiments` = function(x, i) x$get.item(i)
+`[[.Experiments` = function(x, i) private(x)$get.item(i)
+
+dataset =
+  function(x, node, port, data.type) {
+    private(x)$get.intermediate.dataset(node, port, data.type)}
 
 as.list.Experiments =
   function(x, ...) {
-    y = x$get.experiments()
+    y = private(x)$get.experiments()
     setNames(y, unlist(map(as.list(y), "ExperimentId")))}
 
 names.Experiments = function(x) names(as.list(x))
@@ -31,7 +41,7 @@ update.Dataset =
     data.type = NULL,
     name = NULL,
     description = NULL){
-      x$update(data, data.type, name, description)}
+      private(x)$update(data, data.type, name, description)}
 
 length.Datasets =
 length.Exoeriments =

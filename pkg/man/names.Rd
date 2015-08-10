@@ -24,6 +24,6 @@ A character vector.
 \examples{
 \dontrun{
 ws = workspace(id, authorization.token)
-names(ws$experiments)
-names(ws$datasets)
+names(experiments(ws))
+names(datasets(ws))
 }}

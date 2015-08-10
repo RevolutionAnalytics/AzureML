@@ -27,6 +27,6 @@ A Dataset or Experiment object
 \examples{
 \dontrun{
 ws = workspace(id, authorization.token)
-as.list(ws$experiments)
-as.list(ws$datasets[[1]])
+as.list(experiments(ws))
+as.list(datasets(ws))
 }}

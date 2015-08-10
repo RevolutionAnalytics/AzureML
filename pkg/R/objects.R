@@ -1,5 +1,7 @@
 assert = function(x, f) {stopifnot(all(f(x))); x}
 
+private = function(x) x$.__enclos_env__$private
+
 Dataset = R6Class("Dataset")
 
 SourceDataset =
@@ -11,7 +13,11 @@ SourceDataset =
         initialize =
           function(workspace, metadata) {
             private$workspace = workspace
-            private$metadata = metadata},
+            private$metadata = metadata}),
+    private =
+      list(
+        workspace = NA,
+        metadata = NA,
         as.data.frame =
           function() {
             to.data.frame(private$get(mode = "text"), private$metadata$DataTypeId)},
@@ -31,12 +37,7 @@ SourceDataset =
                 serialize.dataframe(data, data.type)
               else
                 data}
-            private$upload.and.refresh(raw.data, data.type, name, description)
-          }),
-    private =
-      list(
-        workspace = NA,
-        metadata = NA,
+            private$upload.and.refresh(raw.data, data.type, name, description)},
         get =
           function(mode = c("open", "text", "binary")) {
             get.dataset.contents(private$contents.url(), mode = mode)},
@@ -51,18 +52,18 @@ SourceDataset =
           function(raw.data, data.type, name, description) {
             dataset.id =
               upload.dataset(
-                private$workspace$id,
+                private(private$workspace)$id,
                 name,
                 description,
                 data.type,
                 raw.data,
                 private$metadata$FamilyId,
-                private$workspace$authorization.token)
+                private(private$workspace)$authorization.token)
             private$metadata =
               get.dataset(
-                private$workspace$id,
+                private(private$workspace)$id,
                 dataset.id,
-                private$workspace$authorization.token)}))
+                private(private$workspace)$authorization.token)}))
 
 
 is.example =
@@ -77,13 +78,17 @@ Datasets =
         initialize =
           function(workspace, example.filter = NA) {
             private$workspace = workspace
-            private$example.filter = example.filter},
+            private$example.filter = example.filter}),
+    private =
+      list(
+        workspace = NA,
+        example.filter = NA,
         get.item =
           function(index) {
             datasets =
               get.datasets(
-                private$workspace$id,
-                private$workspace$authorization.token)
+                private(private$workspace)$id,
+                private(private$workspace)$authorization.token)
             private$create.dataset(
               if(is.numeric(index))
                 datasets[[index]]
@@ -93,8 +98,8 @@ Datasets =
           function() {
             datasets =
               get.datasets(
-                private$workspace$id,
-                private$workspace$authorization.token)
+                private(private$workspace)$id,
+                private(private$workspace)$authorization.token)
             if(is.na(private$example.filter))
               datasets
             else
@@ -106,11 +111,7 @@ Datasets =
           function(data, data.type, name, description) {
             if(is.data.frame(data))
               data = serialize.dataframe(data, data.type)
-            private$upload(data, data.type, name, description)}),
-    private =
-      list(
-        workspace = NA,
-        example.filter = NA,
+            private$upload(data, data.type, name, description)},
         create.dataset =
           function(metadata) {
             SourceDataset$new(private$workspace, metadata)},
@@ -118,15 +119,15 @@ Datasets =
           function(raw.data, data.type, name, description) {
             dataset.id =
               upload.dataset(
-                private$workspace$id,
+                private(private$workspace)$id,
                 name,
                 description,
                 data.type,
                 raw.data,
                 family.id = UUIDgenerate(),
                 authorization.token)
-            metadata = get.dataset(private$workspace$id, dataset.id, private$workspace$authorization.token)
-          private$create.dataset(metadata)}))
+            metadata = get.dataset(private(private$workspace)$id, dataset.id, private(private$workspace)$authorization.token)
+            private$create.dataset(metadata)}))
 
 IntermediateDataset =
   R6Class(
@@ -140,10 +141,7 @@ IntermediateDataset =
             private$experiment = experiment
             private$node.id = node.id
             private$port.name = port.name
-            private$data.type.id = data.type.id},
-        as.data.frame =
-          function() {
-            to.data.frame(private$get(), private$data.type.id)}),
+            private$data.type.id = data.type.id}),
     private =
       list(
         workspace = NA,
@@ -151,14 +149,17 @@ IntermediateDataset =
         node.id = NA,
         port.name = NA,
         data.type.id = NA,
+        as.data.frame =
+          function() {
+            to.data.frame(private$get(), private$data.type.id)},
         get =
           function() {
             get.intermediate.dataset.contents(
-              workspace = private$workspace$id,
-              experiment = private$experiment$id(),
+              workspace = private(private$workspace)$id,
+              experiment = private(private$experiment)$id(),
               node = private$node.id,
               port = private$port.name,
-              authorization.token = private$workspace$authorization.token)}))
+              authorization.token = private(private$workspace)$authorization.token)}))
 
 Experiment =
   R6Class(
@@ -168,20 +169,20 @@ Experiment =
         initialize =
           function(workspace, metadata) {
             private$workspace = workspace
-            private$metadata = metadata},
-        get.intermediate.dataset =
-          function(node.id, port.name, data.type.id)
-            IntermediateDataset$new(private$workspace, self, node.id, port.name, data.type.id),
-        id =
-          function()
-            private$metadata['ExperimentId']),
+            private$metadata = metadata}),
     private =
       list(
         workspace = NA,
         metadata = NA,
         is.example =
           function()
-            is.example(private$id)))
+            is.example(private$id),
+        get.intermediate.dataset =
+          function(node.id, port.name, data.type.id)
+            IntermediateDataset$new(private$workspace, self, node.id, port.name, data.type.id),
+        id =
+          function()
+            private$metadata['ExperimentId']))
 
 Experiments =
   R6Class(
@@ -191,10 +192,14 @@ Experiments =
         initialize =
           function(workspace, example.filter = NA) {
             private$workspace = workspace
-            private$example.filter = example.filter},
+            private$example.filter = example.filter}),
+    private =
+      list(
+        workspace = NA,
+        example.filter = NA,
         get.item =
           function(index) {
-            experiments = self$get.experiments()
+            experiments = private$get.experiments()
             if(is.numeric(index)) {
               private$create.experiment(experiments[[index]])}
             else
@@ -203,18 +208,14 @@ Experiments =
           function() {
             experiments =
               get.experiments(
-                private$workspace$id,
-                private$workspace$authorization.token)
+                private(private$workspace)$id,
+                private(private$workspace)$authorization.token)
             if(is.na(private$example.filter))
               experiments
             else {
               keep(
                 experiments,
-                ~is.example(.$Id) == private$example.filter)}}),
-    private =
-      list(
-        workspace = NA,
-        example.filter = NA,
+                ~is.example(.$Id) == private$example.filter)}},
         create.experiment =
           function(metadata)
             Experiment$new(private$workspace, metadata)))
@@ -228,14 +229,16 @@ Workspace =
       list(
         initialize =
           function(id, authorization.token) {
-            self$id = id
-            self$authorization.token = authorization.token
-            self$datasets = Datasets$new(self)
-            self$user.datasets = Datasets$new(self, FALSE)
-            self$example.datasets = Datasets$new(self, TRUE)
-            self$experiments = Experiments$new(self)
-            self$user.experiments = Experiments$new(self, FALSE)
-            self$example.experiments = Experiments$new(self, TRUE)},
+            private$id = id
+            private$authorization.token = authorization.token
+            private$datasets = Datasets$new(self)
+            private$user.datasets = Datasets$new(self, FALSE)
+            private$example.datasets = Datasets$new(self, TRUE)
+            private$experiments = Experiments$new(self)
+            private$user.experiments = Experiments$new(self, FALSE)
+            private$example.experiments = Experiments$new(self, TRUE)}),
+    private =
+      list(
         id = NA,
         authorization.token = NA,
         datasets = NA,
@@ -245,9 +248,7 @@ Workspace =
         user.experiments = NA,
         example.experiments = NA))
 
-workspace =
-  function(id, authorization.token)
-    Workspace$new(id, authorization.token)
+
 
 serialize.dataframe =
   function(df, format) {

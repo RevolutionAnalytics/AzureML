@@ -14,6 +14,7 @@ Access individual experiments or datasets in a workspace by index or by name for
 \method{[[}{Datasets}(x, i)
 \method{[[}{Datasets}(x, name)
 \method{[[}{Experiments}(x, id)
+\method{[[}{Experiment}(x, node, port, data.type)
 }
 \arguments{
 \item{x}{The experiments or datasets slots of a Workspace object}
@@ -31,13 +32,13 @@ A dataset or experiment object
 \dontrun{
 # provide id and auth token from ML studio -> settings
 ws = workspace(id, authorization.token)
-ws$experiments[[1]]
-ws$datasets[[1]]
+experiments(ws)[[1]]
+datasets(ws)[[1]]
 # name from ML studio ->datasets -> my datasets or samples -> name or
 # names(ws$datsets)
-ws$datasets[[name]]
+datasets(ws)[[name]]
 # id from ML studio -> experiments -> my datasets or samples -> name
-ws$experiments[[id]]
+experiments(ws)[[id]]
 }
 }
 
