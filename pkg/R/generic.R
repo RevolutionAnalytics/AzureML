@@ -44,5 +44,5 @@ update.Dataset =
       private(x)$update(data, data.type, name, description)}
 
 length.Datasets =
-length.Exoeriments =
+length.Experiments =
   function(x) length(as.list(x))
