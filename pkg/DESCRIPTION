@@ -13,4 +13,7 @@ Imports: webapi,
   R6, 
   foreign, 
   stringi, 
-  uuid
+  uuid,
+  jsonlite
+Suggests:
+  testthat
