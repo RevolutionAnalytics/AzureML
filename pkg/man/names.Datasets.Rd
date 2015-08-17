@@ -13,9 +13,6 @@
 A character vector.
 }
 \description{
-%% ~~ A concise (1-5 lines) description of what the function does. ~~
-}
-\details{
 In the case of Experiments, the names are actually experiment ids.
 }
 \examples{

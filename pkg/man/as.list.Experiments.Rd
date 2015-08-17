@@ -2,20 +2,20 @@
 % Please edit documentation in R/generic.R
 \name{as.list.Experiments}
 \alias{as.list.Experiments}
-\title{Convert Collection of Datasets and Experiments to lists}
+\title{Convert collection of Experiments to lists}
 \usage{
 \method{as.list}{Experiments}(x, ...)
 }
 \arguments{
-\item{x}{The object to convert to a list}
+\item{x}{A \code{\link{experiments}} object to convert to a list}
 
-\item{\dots}{Unused, just for compatibility with generic}
+\item{...}{Unused, just for compatibility with generic}
 }
 \value{
 A Dataset or Experiment object
 }
 \description{
-Convert Collection of Datasets and Experiments to lists
+Convert collection of Experiments to lists
 }
 \examples{
 \dontrun{
@@ -25,7 +25,7 @@ as.list(datasets(ws))
 }
 }
 \seealso{
-Other experiment functions: \code{\link{dataset}};
-  \code{\link{experiments}}
+Other experiment functions: \code{\link{as.list.Datasets}};
+  \code{\link{dataset}}; \code{\link{experiments}}
 }
 

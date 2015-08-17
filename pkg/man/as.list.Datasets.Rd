@@ -2,19 +2,36 @@
 % Please edit documentation in R/generic.R
 \name{as.list.Datasets}
 \alias{as.list.Datasets}
-\title{Convert Datsets object to list}
+\title{Convert collection of datasets list.}
 \usage{
 \method{as.list}{Datasets}(x, ...)
 }
+\arguments{
+\item{x}{A \code{\link{datasets}} object to convert to a list}
+
+\item{\dots}{Unused, just for compatibility with generic}
+}
 \value{
+A Dataset or Experiment object
+
 A list of datasets
 }
 \description{
-Convert Datsets object to list
+Convert collection of datasets list.
+}
+\examples{
+\dontrun{
+ws = workspace(id, authorization.token)
+as.list(experiments(ws))
+as.list(datasets(ws))
+}
 }
 \seealso{
 Other dataset functions: \code{\link{[[.Datasets}};
   \code{\link{as.data.frame.Dataset}};
   \code{\link{datasets}}; \code{\link{names.Datasets}}
+
+Other experiment functions: \code{\link{as.list.Experiments}};
+  \code{\link{dataset}}; \code{\link{experiments}}
 }
 

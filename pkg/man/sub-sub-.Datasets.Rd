@@ -10,10 +10,6 @@
 \item{x}{The experiments or datasets slots of a Workspace object}
 
 \item{i}{The index of the dataset or experiment}
-
-\item{name}{The name of the dataset}
-
-\item{id}{The id of the experiment}
 }
 \value{
 A dataset or experiment object

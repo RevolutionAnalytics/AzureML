@@ -32,11 +32,6 @@ workspace =
 #' 
 #' @param workspace workspace object, as returned by \code{\link{workspace}}
 #' 
-#' @param x Experiment from which to extract a dataset
-#' @param node Node id
-#' @param port Port name
-#' @param data.type Format of intermediate data set
-#' 
 #' @return A remote dataset
 #' @export
 #' 
@@ -89,8 +84,6 @@ as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) pri
 
 #' @param x The experiments or datasets slots of a Workspace object
 #' @param i The index of the dataset or experiment
-#' @param name The name of the dataset
-#' @param id The id of the experiment
 
 #' @export
 #' @family dataset functions
@@ -113,8 +106,22 @@ as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) pri
 `[[.Datasets` = function(x, i) private(x)$get.item(i)
 
 
-#' Convert Datsets object to list
+#' Convert collection of datasets list.
 #' 
+#' @param x A \code{\link{datasets}} object to convert to a list
+#' @param \dots Unused, just for compatibility with generic
+#' 
+#' @export
+#' @return A Dataset or Experiment object
+#' @family experiment functions
+
+#' @examples
+#' 
+#' \dontrun{
+#' ws = workspace(id, authorization.token)
+#' as.list(experiments(ws))
+#' as.list(datasets(ws))
+#' }
 #' @export
 #' @family dataset functions
 #' 
@@ -126,8 +133,6 @@ as.list.Datasets =
 
 
 #' Return the names of available experiments or datasets.
-#' 
-#' %% ~~ A concise (1-5 lines) description of what the function does. ~~
 #' 
 #' In the case of Experiments, the names are actually experiment ids.
 #' 
@@ -174,12 +179,11 @@ dataset =
     private(x)$get.intermediate.dataset(node, port, data.type)}
 
 
-#' Convert Collection of Datasets and Experiments to lists
+#' Convert collection of Experiments to lists
 #' 
+#' @param x A \code{\link{experiments}} object to convert to a list
 #' 
-#' 
-#' @param x The object to convert to a list
-#' @param \dots Unused, just for compatibility with generic
+#' @inheritParams as.list.Datasets
 #' 
 #' @export
 #' @return A Dataset or Experiment object

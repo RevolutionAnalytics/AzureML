@@ -13,7 +13,7 @@ experiments(workspace)
 Extract experiments from Azure ML studio
 }
 \seealso{
-Other experiment functions: \code{\link{as.list.Experiments}};
-  \code{\link{dataset}}
+Other experiment functions: \code{\link{as.list.Datasets}};
+  \code{\link{as.list.Experiments}}; \code{\link{dataset}}
 }
 

@@ -8,14 +8,6 @@ datasets(workspace)
 }
 \arguments{
 \item{workspace}{workspace object, as returned by \code{\link{workspace}}}
-
-\item{x}{Experiment from which to extract a dataset}
-
-\item{node}{Node id}
-
-\item{port}{Port name}
-
-\item{data.type}{Format of intermediate data set}
 }
 \value{
 A remote dataset
