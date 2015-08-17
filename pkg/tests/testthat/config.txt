@@ -1,0 +1,15 @@
+To run the unit tests, you have to supply some Azure ML Studio keys.
+
+To to this, copy the snippet of JSON below to a file called "config.json"
+and put this in the same folder as the unit tests. Then edit the file to
+contain your own test key values.
+
+-----------------------------
+
+
+{
+"workspace_id": ["Add your workspace id here"],
+"authorization_token": ["Add your authorization token here"],
+"exp_id" : ["Add your experiment id here"],
+"node_id" : ["Add your node id here"]
+}
