@@ -29,7 +29,7 @@ as.data.frame(ws$datasets[[1]])
 }
 \seealso{
 Other dataset functions: \code{\link{[[.Datasets}};
-  \code{\link{as.list.Datasets}}; \code{\link{datasets}};
+  \code{\link{as.list.Datasets}}, \code{\link{datasets}};
   \code{\link{names.Datasets}}
 }
 
