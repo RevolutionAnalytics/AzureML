@@ -22,7 +22,8 @@ A remote dataset
 Extract datasets from experiments
 }
 \seealso{
-Other experiment functions: \code{\link{as.list.Datasets}};
+Other experiment functions: \code{\link{as.list.Datasets}},
+  \code{\link{datasets}};
   \code{\link{as.list.Experiments}};
   \code{\link{experiments}}
 }

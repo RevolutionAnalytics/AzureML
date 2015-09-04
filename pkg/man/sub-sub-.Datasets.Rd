@@ -35,7 +35,7 @@ Both names and ids can be obtained with the function names applied to the experi
 }
 \seealso{
 Other dataset functions: \code{\link{as.data.frame.Dataset}};
-  \code{\link{as.list.Datasets}}; \code{\link{datasets}};
+  \code{\link{as.list.Datasets}}, \code{\link{datasets}};
   \code{\link{names.Datasets}}
 }
 

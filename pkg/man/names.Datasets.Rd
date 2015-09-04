@@ -25,6 +25,6 @@ names(datasets(ws))
 \seealso{
 Other dataset functions: \code{\link{[[.Datasets}};
   \code{\link{as.data.frame.Dataset}};
-  \code{\link{as.list.Datasets}}; \code{\link{datasets}}
+  \code{\link{as.list.Datasets}}, \code{\link{datasets}}
 }
 

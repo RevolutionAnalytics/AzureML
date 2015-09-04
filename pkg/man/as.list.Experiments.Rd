@@ -25,7 +25,8 @@ as.list(datasets(ws))
 }
 }
 \seealso{
-Other experiment functions: \code{\link{as.list.Datasets}};
-  \code{\link{dataset}}; \code{\link{experiments}}
+Other experiment functions: \code{\link{as.list.Datasets}},
+  \code{\link{datasets}}; \code{\link{dataset}};
+  \code{\link{experiments}}
 }
 
