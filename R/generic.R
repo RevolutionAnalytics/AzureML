@@ -155,7 +155,8 @@ as.data.frame.Dataset = function(x, row.names = NULL, optional = FALSE, ...) pri
 as.list.Datasets =
   function(x, ...) {
     y = private(x)$get.datasets()
-    setNames(y, unlist(map(as.list(y), "Name")))}
+    setNames(y, unlist(Map(function(x) x[["Name"]], as.list(y))))}  ## Adjusted to remove purrr dependency
+##     setNames(y, unlist(map(as.list(y), "Name")))}
 
 
 #' Return the names of available experiments or datasets.
@@ -226,7 +227,8 @@ dataset =
 as.list.Experiments =
   function(x, ...) {
     y = private(x)$get.experiments()
-    setNames(y, unlist(map(as.list(y), "ExperimentId")))}
+    setNames(y, unlist(Map(function(x) x[["ExperimentId"]], as.list(y))))}  ## Adjusted to remove purrr dependency
+##    setNames(y, unlist(map(as.list(y), "ExperimentId")))}
 
 #' @export
 #' @family experiment functions

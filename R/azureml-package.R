@@ -47,7 +47,6 @@
 #' }
 #' 
 #' @import R6
-#' @import purrr
 #' @import webapi
 #' @import stringi
 #' @importFrom foreign read.arff

@@ -21,11 +21,25 @@
 # THE SOFTWARE.
 
 
-pasteslash = partial(paste, sep = "/", collapse = "/")
+#pasteslash = partial(paste, sep = "/", collapse = "/")
+pasteslash = function(...) paste(..., sep = "/", collapse = "/")
+
+#make.web.call.headers =
+#  partial(
+#    make.web.call,
+#    .url = "https://studio.azureml.net/api",
+#    .headers =
+#      list(
+#        `User-Agent` = a(default = "R-azureml", export = NULL),
+#        `Content-Type` = a(default  = 'application/json;charset=UTF8', export = NULL),
+#        `x-ms-metaanalytics-authorizationtoken` = a(mandatory = TRUE, export = "authorization.token"),
+#        `x-ms-client-session-id` = a(default  = "DefaultSession", export = NULL)))
 
 make.web.call.headers =
-  partial(
-    make.web.call,
+  function(...)
+  {
+    make.web.call(
+    ...,
     .url = "https://studio.azureml.net/api",
     .headers =
       list(
@@ -33,6 +47,8 @@ make.web.call.headers =
         `Content-Type` = a(default  = 'application/json;charset=UTF8', export = NULL),
         `x-ms-metaanalytics-authorizationtoken` = a(mandatory = TRUE, export = "authorization.token"),
         `x-ms-client-session-id` = a(default  = "DefaultSession", export = NULL)))
+  }
+
 
 get.experiments =
   make.web.call.headers(
