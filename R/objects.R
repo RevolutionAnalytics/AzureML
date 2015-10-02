@@ -118,7 +118,9 @@ Datasets =
               else
               {
 ##                assert(keep(datasets, ~.["Name"] == index), function(x) length(x) > 1)[[1]]
-              assert(datasets[which(vapply(datasets, function(x) x$Name == index, TRUE))], function(x) length(x)>1)[[1]]
+                d = datasets[which(vapply(datasets, function(x) x$Name == index, TRUE))]
+                if(length(d)==0) return(d)
+                d[[1]]
               }
             )},
         get.datasets =

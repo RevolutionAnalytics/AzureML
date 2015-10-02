@@ -10,7 +10,7 @@ library(azureml)
 
 # workspace_id <- ""
 # authorization_token <- ""
-dataset <- "New York weather"
+dataset <- "Book Reviews from Amazon"
 
 ws <- workspace(
   id = workspace_id,
