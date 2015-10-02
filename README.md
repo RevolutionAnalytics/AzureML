@@ -8,18 +8,15 @@ The `azureml` package is not yet available on CRAN.
 To install the package and all its dependencies, try:
 
 ```r
-library(devtools)
+# Install devtools
+if(!require("devtools")) install.packages("devtools")
 
 # Install webapi dependencies ---------------------------------------------
 
 if(!require("httr")) install.packages("httr")
 if(!require("jsonlite")) install.packages("jsonlite")
 if(!require("RCurl")) install.packages("RCurl")
-# if(!require("magrittr")) install.packages("magrittr")
-# if(!require("Rcpp")) install.packages("Rcpp")
-# if(!require("dplyr")) install.packages("dplyr")
 
-# install_github("Hadley/purrr")
 devtools::install_github("RevolutionAnalytics/webapi")
 
 
