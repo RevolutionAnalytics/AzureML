@@ -116,7 +116,11 @@ Datasets =
               if(is.numeric(index))
                 datasets[[index]]
               else
-                assert(keep(datasets, ~.["Name"] == index), function(x) length(x) > 0)[[1]])},
+              {
+##                assert(keep(datasets, ~.["Name"] == index), function(x) length(x) > 1)[[1]]
+              assert(datasets[which(vapply(datasets, function(x) x$Name == index, TRUE))], function(x) length(x)>1)[[1]]
+              }
+            )},
         get.datasets =
           function() {
             datasets =
@@ -126,10 +130,8 @@ Datasets =
             if(is.na(private$example.filter))
               datasets
             else
-              keep(
-                datasets,
-                ~is.example(.$Id) ==
-                  private$example.filter)},
+##              keep( datasets, ~is.example(.$Id) == private$example.filter)},
+              datasets[which(vapply(datasets, function(x) is.example(x$Id) == private$example.filter,TRUE))]},
         add =
           function(data, data.type, name, description) {
             if(is.data.frame(data))
@@ -226,7 +228,14 @@ Experiments =
             if(is.numeric(index)) {
               private$create.experiment(experiments[[index]])}
             else
-              private$create.experiment(keep(experiments, ~.$ExperimentId == index)[[1]])},
+            {
+##              private$create.experiment(keep(experiments, ~.$ExperimentId == index)[[1]])}, # Not so nice
+              idx = which(vapply(experiments, function(x) x$ExperimentId == index,TRUE))
+              if(length(idx)==0) return(NULL)   # Return a sensible thing with no match
+              private$create.experiment(experiments[[idx]])
+##
+            }
+          },
         get.experiments =
           function() {
             experiments =
@@ -235,15 +244,16 @@ Experiments =
                 private(private$workspace)$authorization.token)
             if(is.na(private$example.filter))
               experiments
-            else {
-              keep(
-                experiments,
-                ~is.example(.$Id) == private$example.filter)}},
+            else
+            {
+##              keep( experiments, ~is.example(.$Id) == private$example.filter)
+              experiments[which(vapply(experiments, function(x) is.example(x$Id) == private$example.filter,TRUE))]
+            }},
         create.experiment =
           function(metadata)
             Experiment$new(private$workspace, metadata)))
 
-global.workspace.id =  '506153734175476c4f62416c57734963'
+global.workspace.id =  '506153734175476c4f62416c57734963'   ## XXX ?
 
 Workspace =
   R6Class(
