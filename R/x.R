@@ -9,8 +9,8 @@ print.Workspace =  function(x)
   cat("Workspace ID: ",x$id,"\n")
 }
 
-print.Datasets = function(x) print.default(x$Name)
 print.Experiments = function(x) print.default(x$Description)
+print.Datasets = function(x) print.default(x$Name)
 
 #' workspace Create a reference to an AzureML Studio workspace
 #'
@@ -36,6 +36,10 @@ workspace = function(id, auth)
   e$id = id
   e$.auth = auth
   e$.baseuri = "https://studio.azureml.net/api"
+  e$.headers = list(`User-Agent`="R",
+                    `Content-Type`="application/json;charset=UTF8",
+                    `x-ms-client-session-id`="DefaultSession",
+                    `x-ms-metaanalytics-authorizationtoken`=auth)
   delayedAssign("experiments", get_experiments(e), assign.env=e)
   delayedAssign("datasets", get_datasets(e), assign.env=e)
   e
@@ -62,11 +66,7 @@ refresh = function(w, what=c("everything", "datasets", "experiments"))
 get_datasets = function(w)
 {
   h = new_handle()
-  handle_setheaders(h,
-                    `User-Agent`="R",
-                    `Content-Type`="application/json;charset=UTF8",
-                    `x-ms-client-session-id`="DefaultSession",
-                    `x-ms-metaanalytics-authorizationtoken`=w$.auth)
+  handle_setheaders(h, .list=w$.headers)
   r = curl(sprintf("%s/workspaces/%s/datasources", w$.baseuri, w$id), handle=h)
   x = fromJSON(readLines(r, warn=FALSE))
   close(r)
@@ -83,11 +83,7 @@ get_datasets = function(w)
 get_experiments = function(w)
 {
   h = new_handle()
-  handle_setheaders(h,
-                    `User-Agent`="R",
-                    `Content-Type`="application/json;charset=UTF8",
-                    `x-ms-client-session-id`="DefaultSession",
-                    `x-ms-metaanalytics-authorizationtoken`=w$.auth)
+  handle_setheaders(h, .list=w$.headers)
   r = curl(sprintf("%s/workspaces/%s/experiments", w$.baseuri, w$id), handle=h)
   x = fromJSON(readLines(r, warn=FALSE))
   close(r)
