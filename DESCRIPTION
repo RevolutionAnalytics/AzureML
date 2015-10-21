@@ -10,3 +10,4 @@ Description: Functions and datasets to support Azure ML.
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports: jsonlite, curl, foreign
+Suggests: testthat
