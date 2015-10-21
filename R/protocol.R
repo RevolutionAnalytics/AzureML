@@ -161,7 +161,7 @@ download.datasets = function(datasets, ...)
 #' of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
 #' Conversion modules to convert data to a supported format.
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}}
-#' \code{\linke{download.datasets}}
+#' \code{\link{download.datasets}}
 #' @importFrom curl curl_escape new_handle handle_setheaders
 #' @export
 download.intermediate.dataset = function(w, experiment, node_id, port_name, data_type_id, ...)
