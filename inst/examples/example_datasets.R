@@ -10,14 +10,18 @@ library(azureml)
 
 # workspace_id <- ""
 # authorization_token <- ""
-dataset <- "Book Reviews from Amazon"
+dataset <- "New York weather"
 
 ws <- workspace(
   id = workspace_id,
-  authorization.token = authorization_token
+  auth = authorization_token
 )
-ds <- datasets(ws)[[dataset]]
-frame <- as.data.frame(ds)
+
+ws$datasets
+datasets(ws)
+
+ds <- match(dataset, ws$datasets$Name)
+frame <- download.datasets(ws$datasets[ds, ])
 head(frame)
 
 
@@ -32,10 +36,13 @@ node_id <- '2a472ae1-ecb1-4f40-ae4e-cd3cecb1003f-268'
 
 ws <- workspace(
   id = workspace_id,
-  authorization.token = authorization_token
+  auth = authorization_token
 )
-ex = experiments(ws)[[experiment]]
-ds <- dataset(ex, node = node_id, port = "Results dataset", data.type = "GenericCSV")
-frame <- as.data.frame(ds)
+
+ws$experiments
+experiments(ws)
+frame <- download.intermediate.dataset(ws, experiment, node_id,
+                                       port_name = "Results dataset", 
+                                       data_type_id = "GenericCSV")
 head(frame)
 
