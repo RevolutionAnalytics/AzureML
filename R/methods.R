@@ -1,12 +1,12 @@
 #' @export
-print.Workspace =  function(x)
+print.Workspace =  function(x, ...)
 {
   cat("AzureML Workspace\n")
   cat("Workspace ID: ",x$id,"\n")
 }
 
 #' @export
-print.Experiments = function(x)
+print.Experiments = function(x, ...)
 {
   dots = character()
   if(nrow(x) > 0) dots = "..."
@@ -21,7 +21,7 @@ print.Experiments = function(x)
 }
 
 #' @export
-print.Datasets = function(x)
+print.Datasets = function(x, ...)
 {
   dots = character()
   if(nrow(x) > 0) dots = "..."
