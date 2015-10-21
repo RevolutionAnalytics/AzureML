@@ -46,13 +46,6 @@
 #'    \item Get experiments: \code{\link{experiments}}
 #' }
 #' 
-#' @import R6
-#' @import webapi
-#' @import stringi
-#' @importFrom foreign read.arff
-#' @importFrom foreign write.arff
-#' @importFrom uuid UUIDgenerate
-#' @importFrom jsonlite fromJSON
 #' 
 #' @name azureml-package
 #' @aliases azureml

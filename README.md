@@ -13,18 +13,7 @@ if(!require("devtools")) install.packages("devtools")
 
 # Install webapi dependencies ---------------------------------------------
 
-if(!require("httr")) install.packages("httr")
 if(!require("jsonlite")) install.packages("jsonlite")
-if(!require("RCurl")) install.packages("RCurl")
-
-devtools::install_github("RevolutionAnalytics/webapi")
-
-
-# Install azureml dependencies --------------------------------------------
-
-if(!require("R6")) install.packages("R6")
-if(!require("stringi")) install.packages("stringi")
-if(!require("uuid")) install.packages("uuid")
-
+if(!require("curl")) install.packages("curl")
 devtools::install_github("RevolutionAnalytics/azureml")
 ```
