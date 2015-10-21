@@ -31,6 +31,6 @@ Conversion modules to convert data to a supported format.
 }
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
-\code{\link{download.intermediate.datasets}}
+\code{\link{download.intermediate.dataset}}
 }
 
