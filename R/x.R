@@ -12,9 +12,11 @@ print.Workspace =  function(x)
 
 print.Experiments = function(x)
 {
-  d = data.frame(Description=substr(x$Description,1,48),
-                 CreationTime=x$CreationTime,
-                 `...`="...")
+  dots = character()
+  if(nrow(x) > 0) dots = "..."
+  d = data.frame(Description=substr(x[, "Description"], 1, 48),
+                 CreationTime=x[, "CreationTime"],
+                 `...`=dots)
   print(d)
   cat("-------------------------------------------------\n")
   cat("AzureML experiments data.frame variables include:\n")
@@ -24,7 +26,9 @@ print.Experiments = function(x)
 
 print.Datasets = function(x)
 {
-  d = data.frame(Size=x$Size, Name=substr(x$Name,1,50), `...`="...")
+  dots = character()
+  if(nrow(x) > 0) dots = "..."
+  d = data.frame(Size=x[, "Size"], Name=substr(x[, "Name"], 1, 50), `...`=dots)
   print(d)
   cat("----------------------------------------------\n")
   cat("AzureML datasets data.frame variables include:\n")
@@ -109,6 +113,14 @@ refresh = function(w, what=c("everything", "datasets", "experiments"))
   if(what %in% c("everything", "experiments")) w$experiments = get_experiments(w)
   if(what %in% c("everything", "datasets")) w$datasets    = get_datasets(w)
   invisible()
+}
+
+datasets = function(w, filter=c("all", "my datasets", "samples"))
+{
+  filter = match.arg(filter)
+  if(filter == "all") return(w$datasets)
+  i = grep(paste("^", w$id, sep=""), w$datasets[,"Id"])
+  w$datasets[i, ]
 }
 
 #' get_datasets internal function that retrieves datasets
@@ -250,19 +262,17 @@ get_dataset = function(x, h, ...)
   opts = options(stringsAsFactors=FALSE)
   on.exit(options(opts))
   if(missing(h)) h = new_handle()
+  uri = curl(x$DownloadLocation, handle=h)
+  on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
 
    # Existence of DataTypeId, DowloadLocation guaranteed by caller
    switch(tolower(x$DataTypeId),
-     arff = read.arff(curl(x$DownloadLocation, handle=h)),
-     plaintext = paste(readLines(curl(x$DownloadLocation)), collapse="\n"),
-     generictsvnoheader = read.table(curl(x$DownloadLocation), sep="\t",
-                                     header=FALSE, ...),
-     generictsv = read.table(curl(x$DownloadLocation), sep="\t",
-                                     header=TRUE, ...),
-     genericcsvnoheader = read.table(curl(x$DownloadLocation), sep=",",
-                                     header=FALSE, ...),
-     genericcsv = read.table(curl(x$DownloadLocation), sep=",",
-                                     header=TRUE, ...),
+     arff = read.arff(uri),
+     plaintext = paste(readLines(uri), collapse="\n"),
+     generictsvnoheader = read.table(uri, sep="\t", header=FALSE, ...),
+     generictsv = read.table(uri, sep="\t", header=TRUE, ...),
+     genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
+     genericcsv = read.table(uri, sep=",", header=TRUE, ...),
      stop("unsupported data type '",x$DataTypeId,"'")
    )
 }
