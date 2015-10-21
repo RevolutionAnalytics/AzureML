@@ -115,12 +115,42 @@ refresh = function(w, what=c("everything", "datasets", "experiments"))
   invisible()
 }
 
+#' datasets Return datasets in an AzureML workspace
+#'
+#' Return datasets in an AzureML workspace, optionally filtering on sample or my
+#' datasets.
+#' @param w An AzureML workspace reference returned by \code{\link{workspace}}.
+#' @param filter Optionally filter result, returing all, mine, or sample datasets.
+#' @return A data.frame with class \code{Datasets} listing available datasets in the workspace.
+#' @note \code{datasets(w) is equivalent to w$datasets. Since w$datasets is simply an R data.frame, you can alternatively filter on any variable as desired.
+#' @seealso \code{\link{workspace}}, \code{\link{experiments}}
+#' @export
 datasets = function(w, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
   if(filter == "all") return(w$datasets)
-  i = grep(paste("^", w$id, sep=""), w$datasets[,"Id"])
+  samples = filter == "samples"
+  i = grep(paste("^", w$id, sep=""), w$datasets[,"Id"], invert=samples)
   w$datasets[i, ]
+}
+
+#' experiments Return experiments in an AzureML workspace
+#'
+#' Return experiments in an AzureML workspace, optionally filtering on sample or my
+#' experiments.
+#' @param w An AzureML workspace reference returned by \code{\link{workspace}}.
+#' @param filter Optionally filter result, returing all, mine, or sample experiments.
+#' @return A data.frame with class \code{Experiments} listing available experiments in the workspace.
+#' @note \code{experiments(w) is equivalent to w$experiments. Since w$experiments is simply an R data.frame, you can alternatively filter on any variable as desired.
+#' @seealso \code{\link{workspace}}, \code{\link{datasets}}
+#' @export
+experiments = function(w, filter=c("all", "my datasets", "samples"))
+{
+  filter = match.arg(filter)
+  if(filter == "all") return(w$experiments)
+  samples = filter == "samples"
+  i = grep(paste("^", w$id, sep=""), w$experiments[,"ExperimentId"], invert=samples)
+  w$experiments[i, ]
 }
 
 #' get_datasets internal function that retrieves datasets
