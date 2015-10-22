@@ -169,6 +169,7 @@ download.datasets = function(datasets, name, ...)
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}}
 #' \code{\link{download.datasets}}
 #' @importFrom curl curl_escape new_handle handle_setheaders
+#' @importFrom jsonlite toJSON
 #' @export
 download.intermediate.dataset = function(w, experiment, node_id, port_name, data_type_id, ...)
 {
