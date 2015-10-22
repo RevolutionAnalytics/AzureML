@@ -131,7 +131,7 @@ experiments = function(ws, filter=c("all", "my datasets", "samples"))
 #' of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
 #' Conversion modules to convert data to a supported format.
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
-#' \code{\link{download.intermediate.datasets}}
+#' \code{\link{download.intermediate.dataset}}
 #' @export
 download.datasets = function(datasets, name, ...)
 {
@@ -173,7 +173,7 @@ download.datasets = function(datasets, name, ...)
 #' @export
 #' @family dataset functions
 #' @family experiment functions
-download.intermediate.datasets = function(ws, experiment, node_id, port_name, data_type_id, ...)
+download.intermediate.dataset = function(ws, experiment, node_id, port_name, data_type_id, ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
                 ws$.baseuri, curl_escape(ws$id),

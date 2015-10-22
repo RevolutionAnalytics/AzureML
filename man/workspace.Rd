@@ -37,10 +37,10 @@ If the \code{id} and \code{auth} parameters are missing, the function attempts t
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 
 Other dataset functions: \code{\link{datasets}};
-  \code{\link{download.intermediate.datasets}};
+  \code{\link{download.intermediate.dataset}};
   \code{\link{upload.dataset}}
 
-Other experiment functions: \code{\link{download.intermediate.datasets}};
+Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}
 }
 

@@ -49,7 +49,7 @@ an R data.frame, you can alternatively filter on any variable as desired.
 \seealso{
 \code{\link{workspace}}, \code{\link{experiments}}, \code{\link{download.datasets}}
 
-Other dataset functions: \code{\link{download.intermediate.datasets}};
+Other dataset functions: \code{\link{download.intermediate.dataset}};
   \code{\link{upload.dataset}}; \code{\link{workspace}}
 }
 

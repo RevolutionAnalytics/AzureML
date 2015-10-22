@@ -41,7 +41,7 @@ Return experiments in an AzureML workspace, optionally filtering on sample or my
   
   ws$experiments
   experiments(ws)
-  frame <- download.intermediate.datasets(ws, experiment, node_id,
+  frame <- download.intermediate.dataset(ws, experiment, node_id,
                                          port_name = "Results dataset", 
                                          data_type_id = "GenericCSV")
   head(frame)
@@ -50,7 +50,7 @@ Return experiments in an AzureML workspace, optionally filtering on sample or my
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.datasets}}
 
-Other experiment functions: \code{\link{download.intermediate.datasets}};
+Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{workspace}}
 }
 

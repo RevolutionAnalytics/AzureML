@@ -18,7 +18,7 @@
   
   ws$experiments
   experiments(ws)
-  frame <- download.intermediate.datasets(ws, experiment, node_id,
+  frame <- download.intermediate.dataset(ws, experiment, node_id,
                                          port_name = "Results dataset", 
                                          data_type_id = "GenericCSV")
   head(frame)
