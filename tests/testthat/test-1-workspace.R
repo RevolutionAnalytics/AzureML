@@ -6,8 +6,9 @@ if(keyfile == ""){
   message("No tests ran")
 } else {
   jsondata <- jsonlite::fromJSON(keyfile)
-  list2env(jsondata, envir = globalenv())
-  
+  workspace_id <- jsondata$id
+  authorization_token <- jsondata$authorization_token
+
   #  ------------------------------------------------------------------------
   
   context("Connect to workspace")
