@@ -10,9 +10,11 @@ if(keyfile == ""){
   
   #  ------------------------------------------------------------------------
   
-  context("Read dataset")
+  context("Connect to workspace")
   
   test_that("Can connect to workspace with supplied id and auth", {
+    skip_on_cran()
+    skip_on_travis()
     
     ws <- workspace(workspace_id, authorization_token)
     
