@@ -48,7 +48,7 @@ Return experiments in an AzureML workspace, optionally filtering on sample or my
 }
 }
 \seealso{
-\code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.datasets}}
+\code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
 
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{workspace}}

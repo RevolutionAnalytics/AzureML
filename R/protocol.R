@@ -276,7 +276,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   id = gsub("\\\"","",rawToChar(step2$content))
 
   # Success, refresh datasets
-  refresh(w, "datasets")
+  refresh(ws, "datasets")
 
   # Return the row of ws$datasets corresponding to the uploaded data
   ws$datasets[ws$datasets$Id == id, ]

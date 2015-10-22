@@ -13,14 +13,16 @@ if(keyfile == ""){
     # The 'airquality' dataset might already exist, especially if you ran this test
     # before without manually deleting it. In such cases we expect a 409 (conflict)
     # error. We check for that kind of error here and tolerate it.
-    tryCatch(upload.dataset(airquality, ws, "airquality"), error=function(e)
-    {
-      if(grepl("HTTP ERROR 409", as.character(e))) return()
-      stop(e)
-    })
     
-    ds <- datasets(ws)
-    expect_true("airquality" %in% ds$Name)
+    airquality_exists <- "airquality" %in% datasets(ws)$Name
+    
+    if(!airquality_exists){
+      upload.dataset(airquality, ws, "airquality")
+      ds <- datasets(ws)
+      expect_true("airquality" %in% ds$Name)
+    } else {
+      expect_error(upload.dataset(airquality, ws, "airquality"))
+    }
     
   })
   
