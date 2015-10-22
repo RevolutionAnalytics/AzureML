@@ -80,8 +80,9 @@ refresh = function(w, what=c("everything", "datasets", "experiments"))
 #' @return A data.frame with class \code{Datasets} listing available datasets in the workspace.
 #' @note \code{datasets(w)} is equivalent to \code{w$datasets}. Since \code{w$datasets} is simply
 #' an R data.frame, you can alternatively filter on any variable as desired.
-#' @seealso \code{\link{workspace}}, \code{\link{experiments}}
+#' @seealso \code{\link{workspace}}, \code{\link{experiments}}, \code{\link{download.datasets}}
 #' @export
+#' @example inst\examples\example_datasets.R
 datasets = function(w, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
@@ -100,8 +101,9 @@ datasets = function(w, filter=c("all", "my datasets", "samples"))
 #' @return A data.frame with class \code{Experiments} listing available experiments in the workspace.
 #' @note \code{experiments(w)} is equivalent to \code{w$experiments}. Since \code{w$experiments} is
 #' simply an R data.frame, you can alternatively filter on any variable as desired.
-#' @seealso \code{\link{workspace}}, \code{\link{datasets}}
+#' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
 #' @export
+#' @example inst\examples\example_experiments.R
 experiments = function(w, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
