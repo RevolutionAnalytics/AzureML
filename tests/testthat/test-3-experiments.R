@@ -34,7 +34,7 @@ if(keyfile == ""){
     expect_is(experiment, "Experiments")
     expect_is(experiment, "data.frame")
     
-    frame = download.intermediate.datasets(ws, experiment = exp_id, node_id = node_id,
+    frame = download.intermediate.dataset(ws, experiment = exp_id, node_id = node_id,
                                           port_name='Results dataset',
                                           data_type_id='GenericCSV')
     

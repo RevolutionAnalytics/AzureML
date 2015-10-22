@@ -43,13 +43,13 @@ simply an R data.frame, you can alternatively filter on any variable as desired.
   
   ws$experiments
   experiments(ws)
-  frame <- download.intermediate.datasets(ws, experiment, node_id,
+  frame <- download.intermediate.dataset(ws, experiment, node_id,
                                          port_name = "Results dataset", 
                                          data_type_id = "GenericCSV")
   head(frame)
 }
 }
 \seealso{
-\code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.datasets}}
+\code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
 }
 
