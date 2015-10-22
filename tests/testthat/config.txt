@@ -8,8 +8,10 @@ contain your own test key values.
 
 
 {
-"workspace_id": ["Add your workspace id here"],
-"authorization_token": ["Add your authorization token here"],
-"exp_id" : ["Add your experiment id here"],
-"node_id" : ["Add your node id here"]
+"id"                  : "Add your workspace id here",
+"authorization_token" : "Add your authorization token here",
+"api_endpoint"        : "Add your api_endpoint here",
+"management_endpoint" : "Add your management_endpoint here",
+"exp_id"              : "Add your experiment id here",
+"node_id"             : "Add your node id here"
 }

@@ -35,7 +35,7 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
   {
     if(!file.exists(config))  stop("missing file ",config)
     s = fromJSON(file(config))
-    id = s$workspace_id
+    id = s$id
     auth = s$authorization_token
   }
   e$id = id
