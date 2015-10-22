@@ -15,7 +15,6 @@
 #' attempts to read values from the \code{config} file, JSON formatted as
 #' shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
 #' 
-#' @export
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 #' 
 #' @return An R environment of class "Workspace" containing at least the following objects:
@@ -37,6 +36,8 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
     s = fromJSON(file(config))
     id = s$id
     auth = s$authorization_token
+    if(!is.null(s$api_endpoint)) api_endpoint = s$api_endpoint
+    if(!is.null(s$management_endpoint)) management_endpoint = s$management_endpoint
   }
   e$id = id
   e$.auth = auth
@@ -82,7 +83,7 @@ refresh = function(w, what=c("everything", "datasets", "experiments"))
 #' an R data.frame, you can alternatively filter on any variable as desired.
 #' @seealso \code{\link{workspace}}, \code{\link{experiments}}, \code{\link{download.datasets}}
 #' @export
-#' @example inst\examples\example_datasets.R
+#' @example inst/examples/example_datasets.R
 datasets = function(w, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
@@ -103,7 +104,7 @@ datasets = function(w, filter=c("all", "my datasets", "samples"))
 #' simply an R data.frame, you can alternatively filter on any variable as desired.
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
 #' @export
-#' @example inst\examples\example_experiments.R
+#' @example inst/examples/example_experiments.R
 experiments = function(w, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
@@ -202,6 +203,7 @@ download.intermediate.dataset = function(w, experiment, node_id, port_name, data
 #'   object now available in w$datasets.
 #' @importFrom curl curl_escape new_handle handle_setheaders handle_reset handle_setopt curl_fetch_memory
 #' @importFrom jsonlite fromJSON
+#' @example inst/examples/example_upload.R
 #' @export
 upload.dataset = function(x, w, name, description="", family_id="", ...)
 {
@@ -227,19 +229,19 @@ upload.dataset = function(x, w, name, description="", family_id="", ...)
   step1 = fromJSON(rawToChar(step1$content))
 
   # Step 2
-   metadata = toJSON(
-     list(
-       DataSource =
-         list(
-           Name =  name,
-           DataTypeId = "GenericTSV",
-           Description = description,
-           FamilyId = family_id,
-           Owner =  "R",
-           SourceOrigin = "FromResourceUpload"),
-        UploadId = step1$Id,                    # From Step 1
-        UploadedFromFileName = "",
-        ClientPoll =  TRUE), auto_unbox=TRUE)
+  metadata = toJSON(
+    list(
+      DataSource =
+        list(
+          Name =  name,
+          DataTypeId = "GenericTSV",
+          Description = description,
+          FamilyId = family_id,
+          Owner =  "R",
+          SourceOrigin = "FromResourceUpload"),
+       UploadId = step1$Id,                    # From Step 1
+       UploadedFromFileName = "",
+       ClientPoll =  TRUE), auto_unbox=TRUE)
 
   url = sprintf("%s/workspaces/%s/datasources",
                 w$.baseuri, curl_escape(w$id))
@@ -248,7 +250,13 @@ upload.dataset = function(x, w, name, description="", family_id="", ...)
   body = charToRaw(paste(metadata, collapse="\n"))
   handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
   step2 = curl_fetch_memory(url, handle=h)
-  if(step2$status_code != 200) stop("HTTP ", step2$status_code, " ", rawToChar(step2$content))
+  switch(as.character(step2$status_code),
+    "409"=stop("A dataset with the name ",
+          name," already exists. Dataset names must be unique. HTTP ERROR 409 ",
+          rawToChar(step2$content)),
+    "200"=invisible(),
+    stop("HTTP ERROR ", step2$status_code, " ", rawToChar(step2$content))
+  )
   id = gsub("\\\"","",rawToChar(step2$content))
 
   # Success, refresh datasets
