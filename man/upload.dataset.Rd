@@ -2,14 +2,14 @@
 % Please edit documentation in R/protocol.R
 \name{upload.dataset}
 \alias{upload.dataset}
-\title{upload.dataset Upload an R data.frame to an AzureML workspace}
+\title{Upload an R data.frame to an AzureML workspace.}
 \usage{
-upload.dataset(x, w, name, description = "", family_id = "", ...)
+upload.dataset(x, ws, name, description = "", family_id = "", ...)
 }
 \arguments{
 \item{x}{An R data.frame object}
 
-\item{w}{A reference to an AzureML workspace returned by \code{workspace}}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
 \item{name}{A character name for the new AzureML dataset (may not match an existing dataset name)}
 
@@ -20,16 +20,18 @@ upload.dataset(x, w, name, description = "", family_id = "", ...)
 \item{...}{Optional additional options passed to \code{write.table}}
 }
 \value{
-A single-row data.frame of "Datasets" class that corresponds to the uploaded
-  object now available in w$datasets.
+A single-row data.frame of "Datasets" class that corresponds to the uploaded object now available in ws$datasets.
 }
 \description{
-Upload any R data.frame to an AzureML workspace using the "GenericTSV" format.
+Upload any R data.frame to an AzureML workspace using the \code{GenericTSV} format.
 }
 \note{
-The additional \code{write.table} options may not include \code{sep} or \code{row.names} or \code{file},
-      but any other options are accepted.
-The AzureML API does not support uploads for _replacing_ datasets with new data by re-using a name. If
-you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
+The additional \code{\link[utils]{write.table}} options may not include \code{sep} or \code{row.names} or \code{file}, but any other options are accepted.
+The AzureML API does not support uploads for _replacing_ datasets with new data by re-using a name. If you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
+}
+\seealso{
+Other dataset functions: \code{\link{datasets}};
+  \code{\link{download.intermediate.datasets}};
+  \code{\link{workspace}}
 }
 

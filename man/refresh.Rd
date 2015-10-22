@@ -2,23 +2,20 @@
 % Please edit documentation in R/protocol.R
 \name{refresh}
 \alias{refresh}
-\title{refresh Refresh data in an AzureML workspace object}
+\title{Refresh data in an AzureML workspace object.}
 \usage{
-refresh(w, what = c("everything", "datasets", "experiments"))
+refresh(ws, what = c("everything", "datasets", "experiments"))
 }
 \arguments{
-\item{w}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{what}{Select "everything" to update all cached data, or other values
-to selectively update those values.}
+\item{what}{Select "everything" to update all cached data, or other values to selectively update those values.}
 }
 \value{
-NULL is invisibly returned--this function updates data in the
-\code{w} environment.
+NULL is invisibly returned--this function updates data in the \code{w} environment.
 }
 \description{
-Contact the AzureML web service and refresh/update data in an AzureML
-workspace object.
+Contact the AzureML web service and refresh/update data in an AzureML workspace object.
 }
 \seealso{
 \code{\link{workspace}}

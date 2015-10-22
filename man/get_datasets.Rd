@@ -2,17 +2,18 @@
 % Please edit documentation in R/internal.R
 \name{get_datasets}
 \alias{get_datasets}
-\title{get_datasets internal function that retrieves datasets}
+\title{Internal function that retrieves datasets.}
 \usage{
-get_datasets(w)
+get_datasets(ws)
 }
 \arguments{
-\item{w}{A workspace object}
+\item{ws}{A workspace object}
 }
 \value{
 a data.frame
 }
 \description{
-internal function that retrieves datasets
+Internal function that retrieves datasets.
 }
+\keyword{Internal}
 

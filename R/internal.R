@@ -9,18 +9,18 @@ urlconcat = function(a,b)
   ans
 }
 
-#' get_datasets internal function that retrieves datasets
+#' Internal function that retrieves datasets.
 #'
-#' internal function that retrieves datasets
-#' @param w A workspace object
+#' @param ws A workspace object
 #' @return a data.frame
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
-get_datasets = function(w)
+#' @keywords Internal
+get_datasets = function(ws)
 {
   h = new_handle()
-  handle_setheaders(h, .list=w$.headers)
-  r = curl(sprintf("%s/workspaces/%s/datasources", w$.baseuri, w$id), handle=h)
+  handle_setheaders(h, .list=ws$.headers)
+  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.baseuri, ws$id), handle=h)
   on.exit(close(r))
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data
@@ -36,18 +36,18 @@ get_datasets = function(w)
   x
 }
 
-#' get_experiments internal function that retrieves experiments
+#' Internal function that retrieves experiments.
 #'
-#' internal function that retrieves experiments
-#' @param w A workspace object
+#' @param ws A workspace object
 #' @return a data.frame
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
-get_experiments = function(w)
+#' @keywords Internal
+get_experiments = function(ws)
 {
   h = new_handle()
-  handle_setheaders(h, .list=w$.headers)
-  r = curl(sprintf("%s/workspaces/%s/experiments", w$.baseuri, w$id), handle=h)
+  handle_setheaders(h, .list=ws$.headers)
+  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.baseuri, ws$id), handle=h)
   on.exit(close(r))
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data
@@ -64,15 +64,15 @@ get_experiments = function(w)
   x
 }
 
-#' get_dataset internal function that retrieves a dataset from AzureML
+#' Internal function that retrieves a dataset from AzureML.
 #'
-#' internal function that retrieves a dataset from AzureML
 #' @param x a list or data.frame with \code{DownloadLocation} and \code{DataTypeId} fields
 #' @param h optional curl handle
 #' @param ... additional parameters to pass to \code{read.table}
 #' @return a data.frame
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
+#' @keywords Internal
 get_dataset = function(x, h, ...)
 {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...

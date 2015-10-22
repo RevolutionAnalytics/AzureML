@@ -2,7 +2,7 @@
 % Please edit documentation in R/internal.R
 \name{get_dataset}
 \alias{get_dataset}
-\title{get_dataset internal function that retrieves a dataset from AzureML}
+\title{Internal function that retrieves a dataset from AzureML.}
 \usage{
 get_dataset(x, h, ...)
 }
@@ -17,6 +17,7 @@ get_dataset(x, h, ...)
 a data.frame
 }
 \description{
-internal function that retrieves a dataset from AzureML
+Internal function that retrieves a dataset from AzureML.
 }
+\keyword{Internal}
 

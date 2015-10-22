@@ -2,13 +2,13 @@
 % Please edit documentation in R/protocol.R
 \name{download.intermediate.datasets}
 \alias{download.intermediate.datasets}
-\title{download.intermediate.datasets Donwload a dataset from an AzureML experiment port}
+\title{Download a dataset from an AzureML experiment port.}
 \usage{
-download.intermediate.datasets(w, experiment, node_id, port_name, data_type_id,
+download.intermediate.datasets(ws, experiment, node_id, port_name, data_type_id,
   ...)
 }
 \arguments{
-\item{w}{An AzureML workspace object}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
 \item{experiment}{AzureML experiment ID obtained from "Generate Data Access Code"}
 
@@ -18,14 +18,13 @@ download.intermediate.datasets(w, experiment, node_id, port_name, data_type_id,
 
 \item{data_type_id}{Experiment data type id obtained from "Generate Data Access Code"}
 
-\item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example,
-specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
+\item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
 }
 \value{
 A data.frame.
 }
 \description{
-Donwload a dataset from an AzureML experiment node/port.
+Download a dataset from an AzureML experiment port.
 }
 \note{
 TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE}
@@ -36,7 +35,13 @@ of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML D
 Conversion modules to convert data to a supported format.
 }
 \seealso{
-\code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}}
+\code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}}
 \code{\link{download.datasets}}
+
+Other dataset functions: \code{\link{datasets}};
+  \code{\link{upload.dataset}}; \code{\link{workspace}}
+
+Other experiment functions: \code{\link{experiments}};
+  \code{\link{workspace}}
 }
 

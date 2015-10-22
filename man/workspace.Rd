@@ -2,7 +2,7 @@
 % Please edit documentation in R/protocol.R
 \name{workspace}
 \alias{workspace}
-\title{workspace Create a reference to an AzureML Studio workspace}
+\title{Create a reference to an AzureML Studio workspace.}
 \usage{
 workspace(id, auth, api_endpoint = "https://studio.azureml.net",
   management_endpoint = "https://management.azureml.net",
@@ -17,9 +17,7 @@ workspace(id, auth, api_endpoint = "https://studio.azureml.net",
 
 \item{management_endpoint}{Optional AzureML management web service URI}
 
-\item{config}{Optional settings file containing id and authorization info.
-Only used if \code{id} and \code{auth} are missing. The default config file is
-\code{~/.azureml/settings.json}.}
+\item{config}{Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.}
 }
 \value{
 An R environment of class "Workspace" containing at least the following objects:
@@ -29,16 +27,20 @@ An R environment of class "Workspace" containing at least the following objects:
 }
 }
 \description{
-Create a reference to an AzureML Studio workspace. Data corresponding
-to experiments and datasets in the workspace are cached in the result.
+Create a reference to an AzureML Studio workspace. Data corresponding to experiments and datasets in the workspace are cached in the result.
 See \code{\link{refresh}} to update cached data.
 }
 \note{
-If the \code{id} and \code{auth} parameters are missing, the function
-attempts to read values from the \code{config} file, JSON formatted as
-shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
+If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file, JSON formatted as shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
 }
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
+
+Other dataset functions: \code{\link{datasets}};
+  \code{\link{download.intermediate.datasets}};
+  \code{\link{upload.dataset}}
+
+Other experiment functions: \code{\link{download.intermediate.datasets}};
+  \code{\link{experiments}}
 }
 

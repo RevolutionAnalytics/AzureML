@@ -2,12 +2,12 @@
 % Please edit documentation in R/protocol.R
 \name{datasets}
 \alias{datasets}
-\title{datasets Return datasets in an AzureML workspace}
+\title{Return datasets in an AzureML workspace.}
 \usage{
-datasets(w, filter = c("all", "my datasets", "samples"))
+datasets(ws, filter = c("all", "my datasets", "samples"))
 }
 \arguments{
-\item{w}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
 \item{filter}{Optionally filter result, returing all, mine, or sample datasets.}
 }
@@ -15,8 +15,7 @@ datasets(w, filter = c("all", "my datasets", "samples"))
 A data.frame with class \code{Datasets} listing available datasets in the workspace.
 }
 \description{
-Return datasets in an AzureML workspace, optionally filtering on sample or my
-datasets.
+Return datasets in an AzureML workspace, optionally filtering on sample or my datasets.
 }
 \note{
 \code{datasets(w)} is equivalent to \code{w$datasets}. Since \code{w$datasets} is simply
@@ -49,5 +48,8 @@ an R data.frame, you can alternatively filter on any variable as desired.
 }
 \seealso{
 \code{\link{workspace}}, \code{\link{experiments}}, \code{\link{download.datasets}}
+
+Other dataset functions: \code{\link{download.intermediate.datasets}};
+  \code{\link{upload.dataset}}; \code{\link{workspace}}
 }
 

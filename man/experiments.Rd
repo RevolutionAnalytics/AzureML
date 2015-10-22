@@ -2,25 +2,23 @@
 % Please edit documentation in R/protocol.R
 \name{experiments}
 \alias{experiments}
-\title{experiments Return experiments in an AzureML workspace}
+\title{Return experiments in an AzureML workspace.}
 \usage{
-experiments(w, filter = c("all", "my datasets", "samples"))
+experiments(ws, filter = c("all", "my datasets", "samples"))
 }
 \arguments{
-\item{w}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{filter}{Optionally filter result, returing all, mine, or sample experiments.}
+\item{filter}{Optionally filter result, returing all, mine, or sample datasets.}
 }
 \value{
 A data.frame with class \code{Experiments} listing available experiments in the workspace.
 }
 \description{
-Return experiments in an AzureML workspace, optionally filtering on sample or my
-experiments.
+Return experiments in an AzureML workspace, optionally filtering on sample or my experiments.
 }
 \note{
-\code{experiments(w)} is equivalent to \code{w$experiments}. Since \code{w$experiments} is
-simply an R data.frame, you can alternatively filter on any variable as desired.
+\code{experiments(w)} is equivalent to \code{w$experiments}. Since \code{w$experiments} is simply an R data.frame, you can alternatively filter on any variable as desired.
 }
 \examples{
 \dontrun{
@@ -51,5 +49,8 @@ simply an R data.frame, you can alternatively filter on any variable as desired.
 }
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.datasets}}
+
+Other experiment functions: \code{\link{download.intermediate.datasets}};
+  \code{\link{workspace}}
 }
 

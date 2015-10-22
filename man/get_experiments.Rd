@@ -2,17 +2,18 @@
 % Please edit documentation in R/internal.R
 \name{get_experiments}
 \alias{get_experiments}
-\title{get_experiments internal function that retrieves experiments}
+\title{Internal function that retrieves experiments.}
 \usage{
-get_experiments(w)
+get_experiments(ws)
 }
 \arguments{
-\item{w}{A workspace object}
+\item{ws}{A workspace object}
 }
 \value{
 a data.frame
 }
 \description{
-internal function that retrieves experiments
+Internal function that retrieves experiments.
 }
+\keyword{Internal}
 

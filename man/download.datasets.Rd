@@ -2,7 +2,7 @@
 % Please edit documentation in R/protocol.R
 \name{download.datasets}
 \alias{download.datasets}
-\title{download.datasets Donwload one or more datasets from an AzureML workspace}
+\title{Download one or more datasets from an AzureML workspace.}
 \usage{
 download.datasets(datasets, name, ...)
 }
@@ -21,8 +21,7 @@ then a single data.frame is returned.
 If more than one dataset is specified (more than one row), then a list of data.frames is returned.
 }
 \description{
-Download one or more datasets from an AzureML workspace into local R
-data.frame objects.
+Download one or more datasets from an AzureML workspace into local R data.frame objects.
 }
 \note{
 TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE}
