@@ -23,30 +23,31 @@ experiments.
 simply an R data.frame, you can alternatively filter on any variable as desired.
 }
 \examples{
-keyfile <- system.file("tests/testthat/config.json", package = "azureml")
-jsondata <- jsonlite::fromJSON(keyfile)
-list2env(jsondata, envir = globalenv())
-
-
-library(azureml)
-
-# workspace_id <- ""
-# authorization_token <- ""
-experiment <- "dd01c7e4a424432c9a9f83142d5cfec4.f-id.d2f351dd4cec4c06a4592ac83f7af55a"
-node_id <- '2a472ae1-ecb1-4f40-ae4e-cd3cecb1003f-268'
-
-ws <- workspace(
-  id = workspace_id,
-  auth = authorization_token
-)
-
-ws$experiments
-experiments(ws)
-frame <- download.intermediate.dataset(ws, experiment, node_id,
-                                       port_name = "Results dataset", 
-                                       data_type_id = "GenericCSV")
-head(frame)
-
+\dontrun{
+  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  jsondata <- jsonlite::fromJSON(keyfile)
+  list2env(jsondata, envir = globalenv())
+  
+  
+  library(azureml)
+  
+  # workspace_id <- ""
+  # authorization_token <- ""
+  experiment <- "dd01c7e4a424432c9a9f83142d5cfec4.f-id.d2f351dd4cec4c06a4592ac83f7af55a"
+  node_id <- '2a472ae1-ecb1-4f40-ae4e-cd3cecb1003f-268'
+  
+  ws <- workspace(
+    id = workspace_id,
+    auth = authorization_token
+  )
+  
+  ws$experiments
+  experiments(ws)
+  frame <- download.intermediate.dataset(ws, experiment, node_id,
+                                         port_name = "Results dataset", 
+                                         data_type_id = "GenericCSV")
+  head(frame)
+}
 }
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
