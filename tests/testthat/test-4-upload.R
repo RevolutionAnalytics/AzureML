@@ -6,7 +6,7 @@ if(keyfile == ""){
   message("No tests ran")
 } else {
 
-  context("Read dataset")
+  context("Upload dataset")
   test_that("Can upload dataset to workspace", {
     ws <- workspace(config = keyfile)
     # Note!
