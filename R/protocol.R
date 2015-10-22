@@ -101,7 +101,7 @@ datasets = function(w, filter=c("all", "my datasets", "samples"))
 #' @return A data.frame with class \code{Experiments} listing available experiments in the workspace.
 #' @note \code{experiments(w)} is equivalent to \code{w$experiments}. Since \code{w$experiments} is
 #' simply an R data.frame, you can alternatively filter on any variable as desired.
-#' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.dataset}}
+#' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{download.intermediate.datasets}}
 #' @export
 #' @example inst\examples\example_experiments.R
 experiments = function(w, filter=c("all", "my datasets", "samples"))
@@ -133,7 +133,7 @@ experiments = function(w, filter=c("all", "my datasets", "samples"))
 #' of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
 #' Conversion modules to convert data to a supported format.
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
-#' \code{\link{download.intermediate.dataset}}
+#' \code{\link{download.intermediate.datasets}}
 #' @export
 download.datasets = function(datasets, name, ...)
 {
@@ -151,7 +151,7 @@ download.datasets = function(datasets, name, ...)
   ans
 }
 
-#' download.intermediate.dataset Donwload a dataset from an AzureML experiment port
+#' download.intermediate.datasets Donwload a dataset from an AzureML experiment port
 #'
 #' Donwload a dataset from an AzureML experiment node/port.
 #' @param w An AzureML workspace object
@@ -173,7 +173,7 @@ download.datasets = function(datasets, name, ...)
 #' @importFrom curl curl_escape new_handle handle_setheaders
 #' @importFrom jsonlite toJSON
 #' @export
-download.intermediate.dataset = function(w, experiment, node_id, port_name, data_type_id, ...)
+download.intermediate.datasets = function(w, experiment, node_id, port_name, data_type_id, ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
                 w$.baseuri, curl_escape(w$id),
