@@ -72,7 +72,7 @@ get_experiments = function(w)
 #' @param ... additional parameters to pass to \code{read.table}
 #' @return a data.frame
 #' @importFrom foreign read.arff
-#' @importFrom curl new_handle
+#' @importFrom curl new_handle curl
 get_dataset = function(x, h, ...)
 {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
@@ -91,6 +91,6 @@ get_dataset = function(x, h, ...)
      generictsv = read.table(uri, sep="\t", header=TRUE, ...),
      genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
      genericcsv = read.table(uri, sep=",", header=TRUE, ...),
-     stop("unsupported data type '",x$DataTypeId,"'")
+     stop("unsupported data type: '",x$DataTypeId,"'")
    )
 }

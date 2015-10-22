@@ -7,7 +7,9 @@
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS
 #' @param api_endpoint Optional AzureML API web service URI
 #' @param management_endpoint Optional AzureML management web service URI
-#' @param config Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing.
+#' @param config Optional settings file containing id and authorization info.
+#' Only used if \code{id} and \code{auth} are missing. The default config file is
+#' \code{~/.azureml/settings.json}.
 #'
 #' @note If the \code{id} and \code{auth} parameters are missing, the function
 #' attempts to read values from the \code{config} file, JSON formatted as
@@ -115,6 +117,8 @@ experiments = function(w, filter=c("all", "my datasets", "samples"))
 #' Download one or more datasets from an AzureML workspace into local R
 #' data.frame objects.
 #' @param datasets One or more rows from a \code{datasets} data.frame in a workspace.
+#' @param name Optional character vector of one or more dataset names to filter the \code{datasets}
+#'   parameter list by.
 #' @param ... Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example,
 #' specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.
 #' @return If one dataset is specified (that is, one row from a workspace \code{datasets} data.frame),
@@ -129,14 +133,16 @@ experiments = function(w, filter=c("all", "my datasets", "samples"))
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
 #' \code{\link{download.intermediate.dataset}}
 #' @export
-download.datasets = function(datasets, ...)
+download.datasets = function(datasets, name, ...)
 {
-# Coerce to data.frame, if for example presented as a list.
+  # Coerce to data.frame, if for example presented as a list.
   if(is.null(dim(datasets))) datasets = as.data.frame(datasets)
-  if(!all(c("DownloadLocation", "DataTypeId") %in% names(datasets)))
+  if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets)))
   {
     stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
   }
+  # check for dataset name filter
+  if(!missing(name)) datasets = datasets[datasets$Name %in% name, ]
   ans = lapply(1:nrow(datasets), function(j) get_dataset(datasets[j,], ...))
   if(length(ans)==1) return(ans[[1]])
   names(ans) = datasets$Name
@@ -173,4 +179,52 @@ download.intermediate.dataset = function(w, experiment, node_id, port_name, data
   h = new_handle()
   handle_setheaders(h, .list=w$.headers)
   get_dataset(list(DataTypeId="GenericTSV", DownloadLocation=url), h, ...)
+}
+
+
+#' XXX Prototype upload function, not functioning fully yet (step 2 broken) XXX
+#' @importFrom curl curl_escape new_handle handle_setheaders handle_setform handle_reset handle_setopt
+#' @importFrom jsonlite fromJSON
+upload.dataset = function(x, w, name, description="", family_id="", ...)
+{
+  # Uploading data to AzureML is a two-step process.
+  # 1. Upload raw data, retrieving an ID.
+  # 2. Construct a DataSource metadata JSON object describing the data and
+  #    upload that.
+
+  # Step 1
+  tsv = capture.output(write.table(x, file="", sep="\n", row.names=FALSE, ...))
+  url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
+                w$.baseuri, curl_escape(w$id))
+  h = new_handle()
+  handle_setheaders(h, .list=w$.headers)
+  handle_setform(h, raw_data=tsv)
+  step1 = curl_fetch_memory(url, handle=h)
+  # Check for error (see ?curl_fetch_memory)
+  if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
+  # Parse the response
+  step1 = fromJSON(rawToChar(step1$content))
+
+  # Step 2
+   metadata = toJSON(
+     list(
+       DataSource =
+         list(
+         Name =  name,
+         DataTypeId = "GenericTSV",
+         Description = description,
+         FamilyId = family_id,
+         Owner =  "R",
+         SourceOrigin = "FromResourceUpload"),
+        UploadId = step1$Id,                    # From Step 1
+        UploadedFromFileName = "",
+        ClientPoll =  TRUE), auto_unbox=TRUE)
+  url = sprintf("%s/workspaces/%s/datasources",
+                w$.baseuri, curl_escape(w$id))
+  handle_reset(h)                               # Preserves connection, cookies
+  handle_setheaders(h, .list=w$.headers)
+  handle_setform(h, metadata=metadata)
+  step2 = curl_fetch_memory(url, handle=h)
+  if(step2$status_code != 200) stop("HTTP ", step2$status_code, rawToChar(step2$content))
+  step2
 }
