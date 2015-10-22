@@ -4,10 +4,13 @@
 \alias{download.datasets}
 \title{download.datasets Donwload one or more datasets from an AzureML workspace}
 \usage{
-download.datasets(datasets, ...)
+download.datasets(datasets, name, ...)
 }
 \arguments{
 \item{datasets}{One or more rows from a \code{datasets} data.frame in a workspace.}
+
+\item{name}{Optional character vector of one or more dataset names to filter the \code{datasets}
+parameter list by.}
 
 \item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example,
 specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}

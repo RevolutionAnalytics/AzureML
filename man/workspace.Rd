@@ -17,7 +17,9 @@ workspace(id, auth, api_endpoint = "https://studio.azureml.net",
 
 \item{management_endpoint}{Optional AzureML management web service URI}
 
-\item{config}{Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing.}
+\item{config}{Optional settings file containing id and authorization info.
+Only used if \code{id} and \code{auth} are missing. The default config file is
+\code{~/.azureml/settings.json}.}
 }
 \value{
 An R environment of class "Workspace" containing at least the following objects:

@@ -221,10 +221,86 @@ upload.dataset = function(x, w, name, description="", family_id="", ...)
         ClientPoll =  TRUE), auto_unbox=TRUE)
   url = sprintf("%s/workspaces/%s/datasources",
                 w$.baseuri, curl_escape(w$id))
-  handle_reset(h)                               # Preserves connection, cookies
+#  handle_reset(h)                               # Preserves connection, cookies
+  h = new_handle()
   handle_setheaders(h, .list=w$.headers)
-  handle_setform(h, metadata=metadata)
+  body = charToRaw(paste(metadata, collapse="\n"))
+  handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
   step2 = curl_fetch_memory(url, handle=h)
   if(step2$status_code != 200) stop("HTTP ", step2$status_code, rawToChar(step2$content))
   step2
+}
+
+
+#' upload.dataset Upload an R data.frame to an AzureML workspace
+#'
+#' Upload any R data.frame to an AzureML workspace using the "GenericTSV" format.
+#' @param x An R data.frame object
+#' @param w A reference to an AzureML workspace returned by \code{workspace}
+#' @param name A character name for the new AzureML dataset (may not match an existing dataset name)
+#' @param description An optional character description of the dataset
+#' @param family_id An optional AzureML family identifier
+#' @param ... Optional additional options passed to \code{write.table}
+#' @note The additional \code{write.table} options may not include \code{sep} or \code{row.names} or \code{file},
+#'       but any other options are accepted.
+#' The AzureML API does not support uploads for _replacing_ datasets with new data by re-using a name. If
+#' you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
+#' @return A single-row data.frame of "Datasets" class that corresponds to the uploaded
+#'   object now available in w$datasets.
+#' @importFrom curl curl_escape new_handle handle_setheaders handle_reset handle_setopt curl_fetch_memory
+#' @importFrom jsonlite fromJSON
+#' @export
+upload.dataset = function(x, w, name, description="", family_id="", ...)
+{
+  # Uploading data to AzureML is a two-step process.
+  # 1. Upload raw data, retrieving an ID.
+  # 2. Construct a DataSource metadata JSON object describing the data and
+  #    upload that.
+
+  # Step 1
+  tsv = capture.output(write.table(x, file="", sep="\t", row.names=FALSE, ...))
+  url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
+                w$.baseuri, curl_escape(w$id))
+  h = new_handle()
+  hdr = w$.headers
+  hdr["Content-Type"] = "text/plain"
+  handle_setheaders(h, .list=hdr)
+  body = charToRaw(paste(tsv, collapse="\n"))
+  handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
+  step1 = curl_fetch_memory(url, handle=h)
+  # Check for error (see ?curl_fetch_memory)
+  if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
+  # Parse the response
+  step1 = fromJSON(rawToChar(step1$content))
+
+  # Step 2
+   metadata = toJSON(
+     list(
+       DataSource =
+         list(
+           Name =  name,
+           DataTypeId = "GenericTSV",
+           Description = description,
+           FamilyId = family_id,
+           Owner =  "R",
+           SourceOrigin = "FromResourceUpload"),
+        UploadId = step1$Id,                    # From Step 1
+        UploadedFromFileName = "",
+        ClientPoll =  TRUE), auto_unbox=TRUE)
+
+  url = sprintf("%s/workspaces/%s/datasources",
+                w$.baseuri, curl_escape(w$id))
+  handle_reset(h)                               # Preserves connection, cookies
+  handle_setheaders(h, .list=w$.headers)
+  body = charToRaw(paste(metadata, collapse="\n"))
+  handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
+  step2 = curl_fetch_memory(url, handle=h)
+  if(step2$status_code != 200) stop("HTTP ", step2$status_code, " ", rawToChar(step2$content))
+  id = gsub("\\\"","",rawToChar(step2$content))
+
+  # Success, refresh datasets
+  refresh(w, "datasets")
+
+  # Return the row of w$datasets corresponding to the uploaded data
+  w$datasets[w$datasets$Id == id, ]
 }
