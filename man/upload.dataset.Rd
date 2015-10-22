@@ -2,10 +2,8 @@
 % Please edit documentation in R/protocol.R
 \name{upload.dataset}
 \alias{upload.dataset}
-\title{XXX Prototype upload function, not functioning fully yet (step 2 broken) XXX}
+\title{upload.dataset Upload an R data.frame to an AzureML workspace}
 \usage{
-upload.dataset(x, w, name, description = "", family_id = "", ...)
-
 upload.dataset(x, w, name, description = "", family_id = "", ...)
 }
 \arguments{
@@ -26,8 +24,6 @@ A single-row data.frame of "Datasets" class that corresponds to the uploaded
   object now available in w$datasets.
 }
 \description{
-XXX Prototype upload function, not functioning fully yet (step 2 broken) XXX
-
 Upload any R data.frame to an AzureML workspace using the "GenericTSV" format.
 }
 \note{

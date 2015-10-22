@@ -182,56 +182,6 @@ download.intermediate.dataset = function(w, experiment, node_id, port_name, data
 }
 
 
-#' XXX Prototype upload function, not functioning fully yet (step 2 broken) XXX
-#' @importFrom curl curl_escape new_handle handle_setheaders handle_setform handle_reset handle_setopt
-#' @importFrom jsonlite fromJSON
-upload.dataset = function(x, w, name, description="", family_id="", ...)
-{
-  # Uploading data to AzureML is a two-step process.
-  # 1. Upload raw data, retrieving an ID.
-  # 2. Construct a DataSource metadata JSON object describing the data and
-  #    upload that.
-
-  # Step 1
-  tsv = capture.output(write.table(x, file="", sep="\n", row.names=FALSE, ...))
-  url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
-                w$.baseuri, curl_escape(w$id))
-  h = new_handle()
-  handle_setheaders(h, .list=w$.headers)
-  handle_setform(h, raw_data=tsv)
-  step1 = curl_fetch_memory(url, handle=h)
-  # Check for error (see ?curl_fetch_memory)
-  if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
-  # Parse the response
-  step1 = fromJSON(rawToChar(step1$content))
-
-  # Step 2
-   metadata = toJSON(
-     list(
-       DataSource =
-         list(
-         Name =  name,
-         DataTypeId = "GenericTSV",
-         Description = description,
-         FamilyId = family_id,
-         Owner =  "R",
-         SourceOrigin = "FromResourceUpload"),
-        UploadId = step1$Id,                    # From Step 1
-        UploadedFromFileName = "",
-        ClientPoll =  TRUE), auto_unbox=TRUE)
-  url = sprintf("%s/workspaces/%s/datasources",
-                w$.baseuri, curl_escape(w$id))
-#  handle_reset(h)                               # Preserves connection, cookies
-  h = new_handle()
-  handle_setheaders(h, .list=w$.headers)
-  body = charToRaw(paste(metadata, collapse="\n"))
-  handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
-  step2 = curl_fetch_memory(url, handle=h)
-  if(step2$status_code != 200) stop("HTTP ", step2$status_code, rawToChar(step2$content))
-  step2
-}
-
-
 #' upload.dataset Upload an R data.frame to an AzureML workspace
 #'
 #' Upload any R data.frame to an AzureML workspace using the "GenericTSV" format.
