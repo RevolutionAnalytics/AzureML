@@ -1,13 +1,17 @@
 Package: azureml
 Type: Package
 Title: Interface with Azure ML datasets
-Version: 0.0.4
-Date: 2015-10-20
+Version: 0.0.5
+Date: 2015-10-22
 Author: Microsoft
 Copyright: Microsoft
 Maintainer: Andrie de Vries <adevries@microsoft.com>
 Description: Functions and datasets to support Azure ML.
 License: MIT + file LICENSE
 LazyData: TRUE
-Imports: jsonlite, curl, foreign
-Suggests: testthat
+Imports:
+    jsonlite(>= 0.9.16), 
+    curl(>= 0.8), 
+    foreign
+Suggests:
+    testthat
