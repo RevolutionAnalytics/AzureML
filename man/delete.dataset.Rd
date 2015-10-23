@@ -2,11 +2,24 @@
 % Please edit documentation in R/delete_dataset.R
 \name{delete.dataset}
 \alias{delete.dataset}
-\title{Delete one or more datasets from an AzureML workspace.}
+\title{delete.dataset Delete datasets from an AzureML workspace.}
 \usage{
-delete.dataset(ws, name, ...)
+delete.dataset(ws, name)
+}
+\arguments{
+\item{name}{Either one or more \code{Dataset} objects (rows from the workspace
+\code{datasets} data.frame), or a character vector of dataset names to delete.}
+}
+\value{
+A data.frame with columns Name, Deleted, status_code indicating the HTTP
+status code and success/failure result of the delete operation for each dataset.
 }
 \description{
-Delete one or more datasets from an AzureML workspace.
+delete.dataset Delete datasets from an AzureML workspace.
+}
+\seealso{
+Other dataset functions: \code{\link{datasets}};
+  \code{\link{download.intermediate.dataset}};
+  \code{\link{upload.dataset}}; \code{\link{workspace}}
 }
 

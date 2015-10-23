@@ -125,7 +125,7 @@ datasets = function(ws, filter=c("all", "my datasets", "samples"))
 #' 
 #' @export
 #' @family experiment functions
-#' @example inst\examples\example_experiments.R
+#' @example inst/examples/example_experiments.R
 experiments = function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)

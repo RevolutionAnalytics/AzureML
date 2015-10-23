@@ -31,6 +31,7 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
 }
 \seealso{
 Other dataset functions: \code{\link{datasets}};
+  \code{\link{delete.dataset}};
   \code{\link{download.intermediate.dataset}};
   \code{\link{workspace}}
 }
