@@ -14,4 +14,7 @@
 
   # Example datasets (airquality should be among them now)
   head(datasets(ws))
+
+  # Now delete what we've just uploaded
+  delete.dataset(ws, "airquality")
 }

@@ -156,6 +156,7 @@ experiments = function(ws, filter=c("all", "my datasets", "samples"))
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
 #' \code{\link{download.intermediate.dataset}}
 #' @export
+#' @example inst/examples/example_download.R
 download.datasets = function(datasets, name, ...)
 {
   # Coerce to data.frame, if for example presented as a list.
@@ -227,6 +228,7 @@ download.intermediate.dataset = function(ws, experiment, node_id, port_name, dat
 #' @importFrom jsonlite fromJSON
 #' @export
 #' @family dataset functions
+#' @example inst/examples/example_upload.R
 upload.dataset = function(x, ws, name, description="", family_id="", ...)
 {
   # Uploading data to AzureML is a two-step process.
