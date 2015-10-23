@@ -103,7 +103,7 @@ refresh = function(ws, what=c("everything", "datasets", "experiments"))
 #' 
 #' @export
 #' @family dataset functions
-#' @example inst\examples\example_datasets.R
+#' @example inst/examples/example_datasets.R
 datasets = function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
