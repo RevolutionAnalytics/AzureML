@@ -9,5 +9,6 @@
   
   ws <- workspace(config = keyfile)
   
-  download.datasets(ws, dataset)
+  frame <- download.datasets(datasets(ws), dataset)
+  head(frame)
 }

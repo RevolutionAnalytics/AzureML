@@ -43,7 +43,7 @@ Conversion modules to convert data to a supported format.
   
   ws <- workspace(config = keyfile)
   
-  download.datasets(ws, dataset)
+  download.datasets(datasets(ws), dataset)
 }
 }
 \seealso{
