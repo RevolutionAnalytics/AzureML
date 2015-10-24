@@ -39,6 +39,7 @@ Conversion modules to convert data to a supported format.
 \code{\link{download.datasets}}
 
 Other dataset functions: \code{\link{datasets}};
+  \code{\link{delete.datasets}};
   \code{\link{upload.dataset}}; \code{\link{workspace}}
 
 Other experiment functions: \code{\link{experiments}};

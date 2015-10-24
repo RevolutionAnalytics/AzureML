@@ -6,29 +6,22 @@ if(keyfile == ""){
   message("No tests ran")
 } else {
 
-  context("Upload dataset")
+  context("Upload and delete dataset")
+  
+  timestamped_name <- paste0("dataset-test-upload-", format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
   test_that("Can upload dataset to workspace", {
     ws <- workspace(config = keyfile)
-    # Note!
-    # The 'airquality' dataset might already exist, especially if you ran this test
-    # before without manually deleting it. In such cases we expect a 409 (conflict)
-    # error. We check for that kind of error here and tolerate it.
-    
-    airquality_exists <- "airquality" %in% datasets(ws)$Name
-    
-    if(!airquality_exists){
-      upload.dataset(airquality, ws, "airquality")
-      ds <- datasets(ws)
-      expect_true("airquality" %in% ds$Name)
-    } else {
-      expect_error(upload.dataset(airquality, ws, "airquality"))
-    }
-    
+    upload.dataset(airquality, ws, timestamped_name)
+    ds <- datasets(ws, filter = "my")
+    expect_true(timestamped_name %in% ds$Name)
   })
-  
-  # Update to AML
-  
-  ## create
-  ## update
+
+  test_that("Can delete dataset from workspace", {
+    ws <- workspace(config = keyfile)
+    delete.datasets(ws, timestamped_name)
+    ds <- datasets(ws, filter = "my")
+    expect_false(timestamped_name %in% ds$Name)
+  })
   
 }

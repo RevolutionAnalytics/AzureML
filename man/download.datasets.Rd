@@ -31,6 +31,21 @@ This function can download datasets with various CSV and TSV "DataTypeIds", or "
 of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
 Conversion modules to convert data to a supported format.
 }
+\examples{
+\dontrun{
+  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  
+  library(azureml)
+  
+  # workspace_id <- ""
+  # authorization_token <- ""
+  dataset <- "New York weather"
+  
+  ws <- workspace(config = keyfile)
+  
+  download.datasets(ws, dataset)
+}
+}
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
 \code{\link{download.intermediate.dataset}}

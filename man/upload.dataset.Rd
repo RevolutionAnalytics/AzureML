@@ -29,8 +29,31 @@ Upload any R data.frame to an AzureML workspace using the \code{GenericTSV} form
 The additional \code{\link[utils]{write.table}} options may not include \code{sep} or \code{row.names} or \code{file}, but any other options are accepted.
 The AzureML API does not support uploads for _replacing_ datasets with new data by re-using a name. If you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
 }
+\examples{
+\dontrun{
+  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  
+  library(azureml)
+  
+  # workspace_id <- ""
+  # authorization_token <- ""
+  dataset <- "New York weather"
+  
+  ws <- workspace(config = keyfile)
+  
+  # Upload the R airquality data.frame to the workspace.
+  upload.dataset(airquality, ws, "airquality")
+
+  # Example datasets (airquality should be among them now)
+  head(datasets(ws))
+
+  # Now delete what we've just uploaded
+  delete.dataset(ws, "airquality")
+}
+}
 \seealso{
 Other dataset functions: \code{\link{datasets}};
+  \code{\link{delete.datasets}};
   \code{\link{download.intermediate.dataset}};
   \code{\link{workspace}}
 }
