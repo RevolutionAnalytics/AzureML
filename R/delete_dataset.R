@@ -1,9 +1,8 @@
 #' Delete datasets from an AzureML workspace.
 #'
-#' @param name Either one or more \code{Dataset} objects (rows from the workspace
-#'        \code{datasets} data.frame), or a character vector of dataset names to delete.
-#' @return A data.frame with columns Name, Deleted, status_code indicating the HTTP
-#' status code and success/failure result of the delete operation for each dataset.
+#' @inheritParams refresh
+#' @param name Either one or more \code{Dataset} objects (rows from the workspace \code{datasets} data.frame), or a character vector of dataset names to delete.
+#' @return A data.frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 #' @family dataset functions
 #' @export
 delete.datasets = function(ws, name)
