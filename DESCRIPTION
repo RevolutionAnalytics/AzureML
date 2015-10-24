@@ -1,12 +1,12 @@
 Package: azureml
 Type: Package
 Title: Interface with Azure ML datasets
-Version: 0.0.5
-Date: 2015-10-22
+Description: Functions and datasets to support Azure ML.
+Version: 0.0.6
+Date: 2015-10-24
 Author: Microsoft
 Copyright: Microsoft
 Maintainer: Andrie de Vries <adevries@microsoft.com>
-Description: Functions and datasets to support Azure ML.
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
