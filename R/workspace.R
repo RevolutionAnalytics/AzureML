@@ -43,6 +43,7 @@
 #' @export
 #' @family dataset functions
 #' @family experiment functions
+#' @family discovery functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                      management_endpoint="https://management.azureml.net",

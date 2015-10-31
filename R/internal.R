@@ -109,7 +109,7 @@ get_dataset = function(x, h, ...)
    # Existence of DataTypeId, DowloadLocation guaranteed by caller
    switch(tolower(x$DataTypeId),
      arff = read.arff(uri),
-     plaintext = paste(readLines(uri), collapse="\n"),
+     plaintext = paste(readLines(uri, warn=FALSE), collapse="\n"),
      generictsvnoheader = read.table(uri, sep="\t", header=FALSE, ...),
      generictsv = read.table(uri, sep="\t", header=TRUE, ...),
      genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
