@@ -22,6 +22,9 @@
 
 
 #' @export
+is.Workspace = function(x) "Workspace" %in% class(x)
+
+#' @export
 print.Workspace =  function(x, ...)
 {
   cat("AzureML Workspace\n")
