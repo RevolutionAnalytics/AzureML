@@ -1,6 +1,6 @@
 if(interactive()) library("testthat")
 
-keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
 if(keyfile == ""){
   message("To run tests, add a file tests/testthat/config.R containing AzureML keys")
   message("No tests ran")

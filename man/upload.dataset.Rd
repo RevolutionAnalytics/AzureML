@@ -29,9 +29,9 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
   
-  library(azureml)
+  library(AzureML)
   
   # workspace_id <- ""
   # authorization_token <- ""

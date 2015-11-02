@@ -1,2 +1,2 @@
 library(testthat)
-test_check("azureml")
+test_check("AzureML")

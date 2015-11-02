@@ -1,7 +1,7 @@
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
   
-  library(azureml)
+  library(AzureML)
   
   # workspace_id <- ""
   # authorization_token <- ""

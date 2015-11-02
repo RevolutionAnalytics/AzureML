@@ -1,9 +1,9 @@
-Package: azureml
+Package: AzureML
 Type: Package
 Title: Interface with Azure ML datasets
 Description: Functions and datasets to support Azure ML.
-Version: 0.0.6
-Date: 2015-10-24
+Version: 0.0.7
+Date: 2015-11-02
 Author: Microsoft
 Copyright: Microsoft
 Maintainer: Raymond Laghaeian <raymondl@microsoft.com>

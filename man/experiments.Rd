@@ -22,12 +22,12 @@ List experiments in an AzureML workspace, optionally filtering on sample or my e
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
+  keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
   jsondata <- jsonlite::fromJSON(keyfile)
   list2env(jsondata, envir = globalenv())
   
   
-  library(azureml)
+  library(AzureML)
   
   # workspace_id <- ""
   # authorization_token <- ""
