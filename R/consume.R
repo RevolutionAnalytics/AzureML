@@ -18,23 +18,23 @@
 #' endpoints <- getEndpoints("wsID", "wsAuth", "webserviceID")
 #' wsSchema <- discoverSchema(endpoints[[1]]$HelpLocation)
 #' }
+#' @importFrom RCurl getURLContent basicTextGatherer basicHeaderGatherer curlPerform httpPUT
 discoverSchema <- function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0") {
   endpointId = getDetailsFromUrl(helpURL)[[1]]
   workspaceId = getDetailsFromUrl(helpURL)[[2]]
   # Construct swagger document URL using parameters
-  # Use paste method without separator
-  swaggerURL = paste(scheme,"://", host, "/workspaces/", workspaceId, "/services/", endpointId,"/swagger.json", sep = "")
-  print(swaggerURL)
+  swaggerURL <- sprintf("%s://%s/workspaces/%s/services/%s/swagger.json", scheme, host, workspaceId, endpointId)
 
   # Automatically parses the content and gets the swagger document
 
-  response <- RCurl::getURLContent(swaggerURL)
-  swagger = rjson::fromJSON(response)
+  cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")
+  response <- RCurl::getURLContent(swaggerURL, cainfo = cainfo)
+  swagger = jsonlite::fromJSON(response)
 
   # Accesses the input schema in the swagger document
   inputSchema = swagger$definition$input1Item
   #Accesses the example in the swagger document and converts it to JSON
-  exampleJson <- rjson::toJSON(swagger$definitions$ExecutionRequest$example)
+  exampleJson <- jsonlite::toJSON(swagger$definitions$ExecutionRequest$example)
 
   #Accesses a single specific JSON object and formats it to be a request inputted as a list in R
   inputExample = as.list((jsonlite::fromJSON((exampleJson)))$Inputs$input1)
@@ -170,8 +170,8 @@ consumeFile <- function(apiKey, requestUrl, inFileName, globalParam = setNames(l
       batchResults = data.frame(stringsAsFactors=FALSE)
       # Store a single batch of requests in a data frame
       requestBatch = scoreDataFrame[(lastProc+1):i,]
-      # Convert them into key-value lists using rjson and df2json packages
-      keyvalues = rjson::fromJSON((df2json::df2json(requestBatch)))
+      # Convert them into key-value lists using jsonlite and df2json packages
+      keyvalues = jsonlite::fromJSON(jsonlite::toJSON(requestBatch))
       # Store results returned from call in temp variable
       temp <- callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay)
       # Set last processed to current row
@@ -313,8 +313,8 @@ consumeDataframe <- function(apiKey, requestUrl, scoreDataFrame, globalParam=set
       batchResults = data.frame(stringsAsFactors=FALSE)
       # Store a single batch of requests in a data frame
       requestBatch = scoreDataFrame[(lastProc+1):i,]
-      # Convert them into key-value lists using rjson and df2json packages
-      keyvalues = rjson::fromJSON((df2json::df2json(requestBatch)))
+      # Convert them into key-value lists using jsonlite and df2json packages
+      keyvalues = jsonlite::fromJSON(jsonlite::toJSON(requestBatch))
       # Store results returned from call in temp variable
       temp <- callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay)
       # Set last processed to current row
@@ -383,7 +383,7 @@ callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay) {
         ,GlobalParameters = globalParam
       )
       # Convert request payload to JSON
-      body = enc2utf8((rjson::toJSON(req)))
+      body = enc2utf8((jsonlite::toJSON(req)))
       # Create authorization header
       authz_hdr = paste('Bearer', apiKey, sep=' ')
 

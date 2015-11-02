@@ -12,6 +12,10 @@ LazyData: TRUE
 Imports:
     jsonlite(>= 0.9.16), 
     curl(>= 0.8), 
-    foreign
+    foreign,
+    codetools,
+    RCurl,
+    base64enc,
+    uuid
 Suggests:
     testthat

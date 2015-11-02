@@ -15,6 +15,7 @@ wrapper <- "inputDF <- maml.mapInputPort(1)\r\noutputDF <- matrix(ncol = %s, nro
 #' @return source code of the function as a string
 #'
 #' @keywords internal
+#' @importFrom codetools findGlobals
 getFunctionString <- function (x)
 {
   if (tryCatch(!is.character(x), error = function(e) TRUE))
@@ -89,6 +90,8 @@ getFunctionString <- function (x)
 #' @return list containing the guid for the rdta file and the encoded zip
 #'
 #' @import utils
+#' @importFrom base64enc base64encode
+#' @importFrom uuid UUIDgenerate
 #'
 #' @keywords internal
 packDependencies <- function(functionName) {
@@ -125,7 +128,7 @@ packDependencies <- function(functionName) {
   }
 
   # Recursive step for object packaging
-  # NOTE: will not work if the user function specifies the names directly, e.g. won't find rjson::toJSON
+  # NOTE: will not work if the user function specifies the names directly, e.g. won't find jsonlite::toJSON
   # from findGlobals man page: "R semantics only allow variables that might be local to be identified"
   recurDep <- function(objName, depList, pkgList) {
     # findGlobals() gets all external dependencies
@@ -359,7 +362,7 @@ publishWebService <- function(functionName, serviceName, inputSchema, outputSche
 
 
   # convert the payload to JSON as expected by API
-  body = rjson::toJSON(req)
+  body = jsonlite::toJSON(req)
 
   # Response gatherer
   h = RCurl::basicTextGatherer()
@@ -377,7 +380,7 @@ publishWebService <- function(functionName, serviceName, inputSchema, outputSche
                  writefunction = h$update)
 
   # Format output
-  newService <- rjson::fromJSON(h$value())
+  newService <- jsonlite::fromJSON(h$value())
   print(newService)
 
   # Use discovery functions to get endpoints for immediate use
@@ -456,7 +459,7 @@ updateWebService <- function(functionName, serviceName, wsID, inputSchema, outpu
 
   # convert the payload to JSON as expected by API
   # TODO: consolidate json packages, i.e. use only one if possible
-  body = rjson::toJSON(req)
+  body = jsonlite::toJSON(req)
 
   # Response gatherer
   h = RCurl::basicTextGatherer()
@@ -471,7 +474,7 @@ updateWebService <- function(functionName, serviceName, wsID, inputSchema, outpu
                  writefunction = h$update)
 
   # Format output
-  updatedService <- rjson::fromJSON(h$value())
+  updatedService <- jsonlite::fromJSON(h$value())
 
   # Use discovery functions to get default endpoint for immediate use
   endpoints <- getEndpoints(wkID, authToken, updatedService["Id"])
