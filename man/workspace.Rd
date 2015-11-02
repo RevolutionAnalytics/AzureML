@@ -41,9 +41,9 @@ Other dataset functions: \code{\link{datasets}};
   \code{\link{download.intermediate.dataset}};
   \code{\link{upload.dataset}}
 
-Other discovery functions: \code{\link{endpoints}},
-  \code{\link{getEndpoints}}; \code{\link{getWebServices}},
-  \code{\link{services}}
+Other discovery functions: \code{\link{discoverSchema}};
+  \code{\link{endpoints}}, \code{\link{getEndpoints}};
+  \code{\link{getWebServices}}, \code{\link{services}}
 
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}

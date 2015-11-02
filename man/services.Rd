@@ -49,7 +49,8 @@ getWebServices(ws)
 }
 }
 \seealso{
-Other discovery functions: \code{\link{endpoints}},
-  \code{\link{getEndpoints}}; \code{\link{workspace}}
+Other discovery functions: \code{\link{discoverSchema}};
+  \code{\link{endpoints}}, \code{\link{getEndpoints}};
+  \code{\link{workspace}}
 }
 
