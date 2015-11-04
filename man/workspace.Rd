@@ -36,16 +36,21 @@ If the \code{id} and \code{auth} parameters are missing, the function attempts t
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 
+Other consumption functions: \code{\link{consumeLists}}
+
 Other dataset functions: \code{\link{datasets}};
   \code{\link{delete.datasets}};
   \code{\link{download.intermediate.dataset}};
   \code{\link{upload.dataset}}
 
-Other discovery functions: \code{\link{endpoints}},
+Other discovery functions: \code{\link{discoverSchema}};
+  \code{\link{endpointHelp}}; \code{\link{endpoints}},
   \code{\link{getEndpoints}}; \code{\link{getWebServices}},
   \code{\link{services}}
 
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}
+
+Other publishing functions: \code{\link{publishWebService}}
 }
 

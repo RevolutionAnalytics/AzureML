@@ -24,6 +24,7 @@
 #' List Available Web Services.
 #'
 #' Return a list of web services available to the specified Microsoft Azure Machine Learning workspace.
+#' The result is cached in the workspace environment similarly to datasets and experiments.
 #'
 #' @inheritParams datasets
 #' @param uri The AzureML web services URI
@@ -56,7 +57,7 @@
 #' getWebServices(ws)
 #' }
 #' @export
-services = function(ws, service_id, uri="https://management-tm.azureml.net")
+services = function(ws, service_id, name, uri="https://management-tm.azureml.net")
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
   h = new_handle()
@@ -69,7 +70,11 @@ services = function(ws, service_id, uri="https://management-tm.azureml.net")
   else service_id = sprintf("/%s", service_id)
   r = curl(sprintf("%s/workspaces/%s/webservices%s", uri, ws$id, service_id), handle=h)
   on.exit(close(r))
-  fromJSON(readLines(r, warn=FALSE))
+  ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
+  # Cache the result in the workspace
+  if(service_id=="") ws$services = ans
+  if(!missing(name)) return(ans[ans$Name==name,])
+  ans
 }
 
 #' @rdname services
@@ -82,7 +87,7 @@ getWebServices = services
 #'
 #' @inheritParams datasets
 #' @param uri The AzureML web services URI
-#' @param service_id A web service id, for example returned by \code{\link{services}}.
+#' @param service_id A web service Id, for example returned by \code{\link{services}}.
 #' @param endpoint_id An optional endpoint id. If supplied, return the endpoint information for just
 #' that id. Leave undefined to return a data.frame of all end points associated with the service.
 #' @return Returns a data.frame with variables:
@@ -116,6 +121,10 @@ getWebServices = services
 #'
 #' s <- services(ws)
 #' endpoints(ws, s$Id[1])
+#' 
+#' # Note that you can alternatively just use the entire row that
+#' # describes the service.
+#' endpoints(ws, s[1,])
 #'
 #' # Equivalent:
 #' getEndpoints(ws, s$Id[1])
@@ -132,6 +141,7 @@ endpoints = function(ws, service_id, endpoint_id, uri="https://management-tm.azu
   handle_setheaders(h, .list=headers)
   if(missing(endpoint_id)) endpoint_id = ""
   else endpoint_id = sprintf("/%s", endpoint_id)
+  if(is.list(service_id)) service_id = service_id$Id[1]
   r = curl(sprintf("%s/workspaces/%s/webservices/%s/endpoints%s", uri, ws$id, service_id, endpoint_id), handle=h)
   on.exit(close(r))
   ans = fromJSON(readLines(r, warn=FALSE))
@@ -146,3 +156,51 @@ endpoints = function(ws, service_id, endpoint_id, uri="https://management-tm.azu
 #' @rdname endpoints
 #' @export
 getEndpoints = endpoints
+
+
+#' Display AzureML Web Service Endpoint Help Screens
+#'
+#' Download and display help for the specified AzureML web service endpoint.
+#' The result is displayed as text using the pager.
+#'
+#' @param e an AzureML web service endpoint from the \code{\link{endpoints}} function.
+#' @param type the type of help to display.
+#' @return The help text is invisibly returned.
+#' @family discovery functions
+#' @examples
+#' \dontrun{
+#' workspace_id <- ""          # Your AzureML workspace id
+#' authorization_token <- ""   # Your AsureML authorization token
+#'
+#' ws <- workspace(
+#'   id = workspace_id,
+#'   auth = authorization_token
+#' )
+#'
+#' s <- services(ws)
+#' e <- endpoints(ws, s[1,])
+#' endpointHelp(e[1,])
+#' 
+#' }
+#' @export
+endpointHelp = function(e, type=c("r-snippet","score","jobs","update"))
+{
+  type = match.arg(type)
+  rsnip = FALSE
+  if(type=="r-snippet")
+  {
+    type = "score"
+    rsnip = TRUE
+  }
+  pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
+  text = paste(gsub("&.?quot;","'",gsub(pattern,"\\1",readLines(curl(paste(e$HelpLocation[1], type, sep="/")), warn=FALSE))), collapse="\n")
+  if(rsnip)
+  {
+    text = substr(text,grepRaw("code-snippet-r",text)+nchar("code-snippet-r")+2,nchar(text))
+  }
+  f = tempfile()
+  writeLines(text, con=f)
+  file.show(f)
+  unlink(f)
+  invisible(text)
+}

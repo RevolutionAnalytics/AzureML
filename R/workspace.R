@@ -44,6 +44,8 @@
 #' @family dataset functions
 #' @family experiment functions
 #' @family discovery functions
+#' @family consumption functions
+#' @family publishing functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                      management_endpoint="https://management.azureml.net",
@@ -69,6 +71,7 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                     `x-ms-metaanalytics-authorizationtoken`=auth)
   delayedAssign("experiments", get_experiments(e), assign.env=e)
   delayedAssign("datasets", get_datasets(e), assign.env=e)
+  delayedAssign("services", services(e), assign.env=e)
   e
 }
 
@@ -82,11 +85,12 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
 #' @return NULL is invisibly returned--this function updates data in the \code{w} environment.
 #' @seealso \code{\link{workspace}}
 #' @export
-refresh = function(ws, what=c("everything", "datasets", "experiments"))
+refresh = function(ws, what=c("everything", "datasets", "experiments", "services"))
 {
   what = match.arg(what)
   if(what %in% c("everything", "experiments")) ws$experiments = get_experiments(ws)
   if(what %in% c("everything", "datasets")) ws$datasets    = get_datasets(ws)
+  if(what %in% c("everything", "services")) ws$services    = services(ws)
   invisible()
 }
 

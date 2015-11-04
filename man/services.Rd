@@ -5,9 +5,10 @@
 \alias{services}
 \title{List Available Web Services.}
 \usage{
-services(ws, service_id, uri = "https://management-tm.azureml.net")
+services(ws, service_id, name, uri = "https://management-tm.azureml.net")
 
-getWebServices(ws, service_id, uri = "https://management-tm.azureml.net")
+getWebServices(ws, service_id, name,
+  uri = "https://management-tm.azureml.net")
 }
 \arguments{
 \item{service_id}{An optional web service id. If supplied, return the web service information for just
@@ -29,6 +30,7 @@ Each row of the returned data.frame corresponds to a service.
 }
 \description{
 Return a list of web services available to the specified Microsoft Azure Machine Learning workspace.
+The result is cached in the workspace environment similarly to datasets and experiments.
 }
 \note{
 \code{getWebServices} is an alias for \code{services}.
@@ -49,7 +51,8 @@ getWebServices(ws)
 }
 }
 \seealso{
-Other discovery functions: \code{\link{endpoints}},
+Other discovery functions: \code{\link{discoverSchema}};
+  \code{\link{endpointHelp}}; \code{\link{endpoints}},
   \code{\link{getEndpoints}}; \code{\link{workspace}}
 }
 
