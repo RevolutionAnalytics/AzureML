@@ -42,7 +42,7 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
   head(datasets(ws))
 
   # Now delete what we've just uploaded
-  delete.dataset(ws, "airquality")
+  delete.datasets(ws, "airquality")
 }
 }
 \seealso{
