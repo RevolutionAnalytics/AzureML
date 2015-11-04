@@ -46,6 +46,12 @@ get_datasets = function(ws)
   r = curl(sprintf("%s/workspaces/%s/datasources", ws$.baseuri, ws$id), handle=h)
   on.exit(close(r))
   x = fromJSON(readLines(r, warn=FALSE))
+  if(is.na(x$Name))
+  {
+    x = data.frame()
+    class(x) = c("Datasets", "data.frame")
+    return(x)
+  }
   # Use strict variable name matching to look up data
   d = x[,"DownloadLocation"]
   x$DownloadLocation = paste(d[,"BaseUri"], d[,"Location"],

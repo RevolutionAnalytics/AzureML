@@ -1,3 +1,85 @@
+#' Use a web service to score data in list (key=value) format
+#'
+#' Score data represented as lists where each list key represents
+#' a parameter of the web service.
+#'
+#' @export
+#'
+#' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
+#' @param ... variable number of requests entered as lists in key-value format
+#' @param globalParam global parameters entered as a list, default value is an empty list
+#' @param retryDelay the time in seconds to delay before retrying in case of a server error
+#' @return data frame containing results returned from web service call
+#' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
+#' @family consumption functions
+#' @importFrom jsonlite fromJSON
+#' @example inst/examples/example_publish.R
+consumeLists = function(endpoint, ..., globalParam, retryDelay=10)
+{
+  apiKey = endpoint$PrimaryKey
+  requestUrl = endpoint$ApiLocation
+  if(missing(globalParam)) {
+    globalParam = setNames(list(), character(0))
+  }
+  # Store variable number of lists entered as a list of lists
+  requestsLists = list(...)
+  # Make API call with parameters
+  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  # Access output by converting from JSON into list and indexing into Results
+  resultStored = fromJSON(result)
+  resultList = resultStored$Results$output1
+  data.frame(resultList)
+}
+
+
+
+#' Framework for making an Azure ML web service API call.
+#'
+#' Helper function that constructs and send the API call to a Microsoft Azure
+#' Machine Learning web service, then receives and returns the response in JSON format.
+#'
+#' @param apiKey primary API key
+#' @param requestUrl API URL
+#' @param keyvalues the data to be passed to the web service
+#' @param globalParam the global parameters for the web service
+#' @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
+#' @return result the response
+#'
+#' @importFrom jsonlite toJSON
+#' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
+#' @keywords internal
+callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
+{
+  # Set number of tries and HTTP status to 0
+  result = NULL
+  tries = 0
+  while(tries < 3) # Limit number of API calls to 3
+  {
+    # Construct request payload
+    req = list(Inputs=list(input1=keyvalues), GlobalParameters=globalParam)
+    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE),collapse="\n"))
+    h = new_handle()
+    headers = list(`User-Agent`="R",
+		   `Content-Type`="application/json",
+		   `Authorization`=sprintf("Bearer %s", apiKey))
+    handle_setheaders(h, .list=headers)
+    handle_setopt(h, .list=list(post=TRUE, postfieldsize=length(body), postfields=body))
+    r = curl_fetch_memory(requestUrl, handle=h)
+    # Get HTTP status to decide whether to throw bad request or retry, or return etc.
+    httpStatus = r$status_code
+    result = rawToChar(r$content)
+    if(httpStatus == 200) break
+    if(tries==0)
+      warning(sprintf("Request failed with status %s. Retrying request...", httpStatus), immediate.=TRUE)
+    Sys.sleep(retryDelay)
+    tries = tries + 1
+  }
+  if(httpStatus >= 400) stop(result)
+  result
+}
+
+
+
 #' Discover web service schema
 #'
 #' Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
@@ -109,86 +191,4 @@ getDetailsFromUrl = function(helpURL) {
   #Uses a strong split to extract the endpoint ID and the workspace ID
   return (list((strsplit(((strsplit(helpURL,"endpoints/"))[[1]][2]),"/")[[1]][[1]]),(strsplit(((strsplit(helpURL,"/workspaces/"))[[1]][2]),"/")[[1]][[1]])))
 
-}
-
-
-
-#' Use a web service to score data in list (key=value) format
-#'
-#' Score data represented as lists where each list key represents
-#' a parameter of the web service.
-#'
-#' @export
-#'
-#' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
-#' @param ... variable number of requests entered as lists in key-value format
-#' @param globalParam global parameters entered as a list, default value is an empty list
-#' @param retryDelay the time in seconds to delay before retrying in case of a server error
-#' @return data frame containing results returned from web service call
-#' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
-#' @family consumption functions
-#' @importFrom jsonlite fromJSON
-#' @example inst/examples/example_publish.R
-consumeLists = function(endpoint, ..., globalParam, retryDelay=10)
-{
-  apiKey = endpoint$PrimaryKey
-  requestUrl = endpoint$ApiLocation
-  if(missing(globalParam)) {
-    globalParam = setNames(list(), character(0))
-  }
-  # Store variable number of lists entered as a list of lists
-  requestsLists = list(...)
-  # Make API call with parameters
-  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
-  # Access output by converting from JSON into list and indexing into Results
-  resultStored = fromJSON(result)
-  resultList = resultStored$Results$output1
-  data.frame(resultList)
-}
-
-
-
-#' Framework for making an Azure ML web service API call.
-#'
-#' Helper function that constructs and send the API call to a Microsoft Azure
-#' Machine Learning web service, then receives and returns the response in JSON format.
-#'
-#' @param apiKey primary API key
-#' @param requestUrl API URL
-#' @param keyvalues the data to be passed to the web service
-#' @param globalParam the global parameters for the web service
-#' @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
-#' @return result the response
-#'
-#' @importFrom jsonlite toJSON
-#' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
-#' @keywords internal
-callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay)
-{
-  # Set number of tries and HTTP status to 0
-  result = NULL
-  tries = 0
-  while(tries < 3) # Limit number of API calls to 3
-  {
-    # Construct request payload
-    req = list(Inputs=list(input1=keyvalues), GlobalParameters=globalParam)
-    body = paste(toJSON(req, auto_unbox=TRUE),collapse="\n")
-    h = new_handle()
-    headers = list(`User-Agent`="R",
-                   `Content-Type`="application/json",
-                   `Authorization`=sprintf("Bearer %s", apiKey))
-    handle_setheaders(h, .list=headers)
-    body = charToRaw(body)
-    handle_setopt(h, .list=list(post=TRUE, postfieldsize=length(body), postfields=body))
-    r = curl_fetch_memory(requestUrl, handle=h)
-    # Get HTTP status to decide whether to throw bad request or retry, or return etc.
-    httpStatus = r$status_code
-    result = rawToChar(r$content)
-    if(httpStatus == 200) break
-    if(tries==0)
-      warning("Request failed with status %s. Retrying request...", immediate.=TRUE)
-    tries = tries + 1
-  }
-  if(httpStatus >= 400) stop(result)
-  result
 }

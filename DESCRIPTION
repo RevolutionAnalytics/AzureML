@@ -14,6 +14,7 @@ Imports:
     curl(>= 0.8), 
     foreign,
     codetools,
-    miniCRAN, uuid
+    miniCRAN,
+    uuid
 Suggests:
     testthat

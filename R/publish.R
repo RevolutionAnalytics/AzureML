@@ -11,7 +11,7 @@ wrapper = "inputDF <- maml.mapInputPort(1)\r\nload('src/env.RData')\r\n outputDF
 #' @return list of the format expected by the API
 #'
 #' @keywords internal
-publishPreprocess = function(argList) {
+azureSchema = function(argList) {
   form = list()
   for (arg in names(argList)) {
     type = argList[[arg]]
@@ -54,7 +54,7 @@ publishPreprocess = function(argList) {
 #' @export
 #'
 #' @param fun a function to publish; the function must have at least one argument
-#' @param serviceName name of the new web service
+#' @param name name of the new web service
 #' @param inputSchema a list of \code{fun} input parameters and their AzureML types
 #'   formatted as \code{list("arg1"="type", "arg2"="type", ...)}; see the note below
 #'   for details
@@ -83,7 +83,7 @@ publishPreprocess = function(argList) {
 #' @importFrom jsonlite toJSON
 #' @importFrom uuid UUIDgenerate
 #' @importFrom curl new_handle handle_setheaders handle_setopt
-publishWebService = function(ws, fun, serviceName,
+publishWebService = function(ws, fun, name,
                              inputSchema, outputSchema,
                              export=character(0), noexport=character(0), packages,
                              version="3.1.0")
@@ -96,8 +96,8 @@ publishWebService = function(ws, fun, serviceName,
   {
     stop(sprintf("Input schema does not contain the proper input. You provided %s inputs and %s were expected",length(inputSchema),length(formals(fun))), call. = TRUE)
   }
-  inputSchema = publishPreprocess(inputSchema)
-  outputSchema = publishPreprocess(outputSchema)
+  inputSchema = azureSchema(inputSchema)
+  outputSchema = azureSchema(outputSchema)
 
   # Get and encode the dependencies
   if(missing(packages)) packages=NULL
@@ -111,7 +111,7 @@ publishWebService = function(ws, fun, serviceName,
 
   # Build the body of the request
   req = list(
-    "Name" = serviceName,
+    "Name" = name,
     "Type" = "Code",
     "CodeBundle" = list(
       "InputSchema" = inputSchema,

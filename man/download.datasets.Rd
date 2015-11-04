@@ -35,15 +35,11 @@ Conversion modules to convert data to a supported format.
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
-  
   library(azureml)
   
-  # workspace_id <- ""
-  # authorization_token <- ""
   name <- "Blood donation data"
   
-  ws <- workspace(config = keyfile)
+  ws <- workspace()
   
   # The following three alternatives produce the same output:
   frame1 <- download.datasets(ws, name)

@@ -32,7 +32,15 @@
 #' @param management_endpoint Optional AzureML management web service URI
 #' @param config Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.
 #'
-#' @note If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file, JSON formatted as shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
+#' @note If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
+#'  with JSON format: \preformatted{
+#'  {"workspace":{
+#'    "id":"test_id",
+#'    "authorization_token": "test_token",
+#'    "api_endpoint": "api_endpoint",
+#'    "management_endpoint": "management_endpoint"
+#'  }}
+#' } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 #' 
 #' @return An R environment of class "Workspace" containing at least the following objects:
 #' \describe{
@@ -57,8 +65,8 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
   {
     if(!file.exists(config))  stop("missing file ",config)
     s = fromJSON(file(config))
-    id = s$id
-    auth = s$authorization_token
+    id = s[[1]]$id
+    auth = s[[1]]$authorization_token
   }
   e$id = id
   e$.auth = auth

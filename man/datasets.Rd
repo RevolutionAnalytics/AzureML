@@ -23,26 +23,30 @@ an R data.frame, you can alternatively filter on any variable as desired.
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
-  jsondata <- jsonlite::fromJSON(keyfile)
-  list2env(jsondata, envir = globalenv())
-  
   library(azureml)
   
-  # workspace_id <- ""
-  # authorization_token <- ""
-  dataset <- "New York weather"
+  # Use the default config file ~/azureml/settings.json with format:
+  #   {"workspace":{
+  #     "id":"test_id",
+  #     "authorization_token": "test_token",
+  #     "api_endpoint":"api_endpoint",
+  #     "management_endpoint":"management_endpoint"
+  #    }}
+  # or, optionally set the `id` and `auth` parameters in the workspace
+  # function.
+  ws <- workspace()
   
-  ws <- workspace(
-    id = workspace_id,
-    auth = authorization_token
-  )
-  
+  # List datasets
   ws$datasets
   datasets(ws)
   
+  dataset <- "New York weather"
   ds <- match(dataset, ws$datasets$Name)
   frame <- download.datasets(ws$datasets[ds, ])
+  head(frame)
+
+  # Alternative approach:
+  frame <- download.datasets(ws, name=dataset)
   head(frame)
 }
 }

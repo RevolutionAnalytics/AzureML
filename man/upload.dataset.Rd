@@ -29,15 +29,11 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "azureml")
-  
   library(azureml)
   
-  # workspace_id <- ""
-  # authorization_token <- ""
   dataset <- "New York weather"
   
-  ws <- workspace(config = keyfile)
+  ws <- workspace()
   
   # Upload the R airquality data.frame to the workspace.
   upload.dataset(airquality, ws, "airquality")

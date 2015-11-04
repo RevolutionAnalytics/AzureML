@@ -4,7 +4,7 @@
 \alias{callAPI}
 \title{Framework for making an Azure ML web service API call.}
 \usage{
-callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay)
+callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay = 10)
 }
 \arguments{
 \item{apiKey}{primary API key}

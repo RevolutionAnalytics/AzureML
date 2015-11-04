@@ -4,14 +4,14 @@
 \alias{publishWebService}
 \title{Publish a function to Microsoft Azure}
 \usage{
-publishWebService(ws, fun, serviceName, inputSchema, outputSchema,
+publishWebService(ws, fun, name, inputSchema, outputSchema,
   export = character(0), noexport = character(0), packages,
   version = "3.1.0")
 }
 \arguments{
 \item{fun}{a function to publish; the function must have at least one argument}
 
-\item{serviceName}{name of the new web service}
+\item{name}{name of the new web service}
 
 \item{inputSchema}{a list of \code{fun} input parameters and their AzureML types
 formatted as \code{list("arg1"="type", "arg2"="type", ...)}; see the note below
@@ -53,7 +53,7 @@ are needed. Use \code{noexport} to explicitlt prevent objects from being exporte
 }
 \examples{
 \dontrun{
-# Use a default configuration in ~/.azureml/config, alternatively
+# Use a default configuration in ~/.azureml, alternatively
 # see help for `workspace`.
 ws <- workspace()
 
@@ -65,12 +65,12 @@ result <- consumeLists(endpoint, list(x=pi, y=2))
 result$ans
 
 # A neat trick to evaluate any expression  and view its output:
-p <- publishWebService(ws, fun=function(expr) {
+ep <- publishWebService(ws, fun=function(expr) {
        paste(capture.output(eval(parse(text=expr))), collapse="\\n")},
        name="commander", inputSchema=list(x="character"),
        outputSchema=list(ans="character"))
-cat(consumeList(ep, list=(expr="getwd()"))$ans)
-cat(consumeList(ep, list=(expr=".packages(all=TRUE)"))$ans)
+cat(consumeLists(ep, list=(expr="getwd()"))$ans)
+cat(consumeLists(ep, list=(expr=".packages(all=TRUE)"))$ans)
 
 # The following example illustrates scoping rules. Note that the function
 # refers to the variable y defined outside the function body. That value
@@ -78,7 +78,7 @@ cat(consumeList(ep, list=(expr=".packages(all=TRUE)"))$ans)
 y <- pi
 ep <- publishWebService(ws, fun=function(x) x + y, name="lexi",
         inputSchema=list(x="numeric"), outputSchema=list(ans="numeric"))
-cat(consumeList(ep, list(x=2))$ans)
+cat(consumeLists(ep, list(x=2))$ans)
 }
 }
 \seealso{
