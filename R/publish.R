@@ -67,7 +67,7 @@ azureSchema = function(argList) {
 #'  in the web service
 #' @param packages optional character vector of R packages required by the function
 #' @param version optional R version string for required packages (the version of R running in the AzureML Web Service)
-#' @return A data.frame describing the new service endpoints, cf. \code{link{endpoints}}. The output
+#' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
 #'  can be directly used by the \code{\link{consume}} function.
 #' @note AzureML data types are different than, but related to, R types. You may specify
 #'  the R types \code{numeric, logical, integer,} and \code{character} and those will

@@ -33,7 +33,7 @@ in the web service}
 \item{version}{optional R version string for required packages (the version of R running in the AzureML Web Service)}
 }
 \value{
-A data.frame describing the new service endpoints, cf. \code{link{endpoints}}. The output
+A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
  can be directly used by the \code{\link{consume}} function.
 }
 \description{
