@@ -29,7 +29,7 @@
 #' @inheritParams refresh
 #' @param service_id optional web service id. If supplied, return the web service information for just
 #' the specified service id. Leave undefined to return a data.frame of all services.
-#' @param optional web service name. If supplied, return the web service information for services
+#' @param name optional web service name. If supplied, return the web service information for services
 #' with matching names. Leave undefined to return all services.
 #' @param uri the AzureML web services URI
 #' @return Returns a data.frame with variables:

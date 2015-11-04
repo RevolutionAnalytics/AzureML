@@ -47,7 +47,7 @@
 download.datasets = function(source, name, ...)
 {
   datasets = source
-  if(! missing(name) && is.Workspace(source)) datasets = datasets(soure)
+  if(! missing(name) && is.Workspace(source)) datasets = datasets(source)
   # Coerce to data.frame, if for example presented as a list.
   if(is.null(dim(datasets))) datasets = as.data.frame(datasets)
   if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets)))

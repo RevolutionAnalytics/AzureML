@@ -135,7 +135,7 @@ publishWebService = function(ws, fun, name,
   handle_setopt(h, .list=opts)
   r = curl_fetch_memory(publishURL, handle=h)
   result = rawToChar(r$content)
-  if(r$status_code >= 400) stop(r)
+  if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)
 
   # Use discovery functions to get endpoints for immediate use
