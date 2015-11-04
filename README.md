@@ -14,7 +14,7 @@ with:
 if(!require("devtools")) install.packages("devtools")
 devtools::install_github("RevolutionAnalytics/azureml")
 ```
-The package requires the `jsonlite, curl, miniCRAN,` and `uuid` packages.
+The package requires the `jsonlite, curl, miniCRAN, base64enc` and `uuid` packages.
 
 # Overview
 

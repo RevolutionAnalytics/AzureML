@@ -5,7 +5,7 @@ Description: Functions and datasets to support Azure ML.
 Version: 0.0.6
 Date: 2015-10-24
 Author: Microsoft
-Copyright: Microsoft
+Copyright: COPYRIGHT
 Maintainer: Andrie de Vries <adevries@microsoft.com>
 License: MIT + file LICENSE
 LazyData: TRUE
@@ -15,6 +15,7 @@ Imports:
     foreign,
     codetools,
     miniCRAN,
+    base64enc,
     uuid
 Suggests:
     testthat
