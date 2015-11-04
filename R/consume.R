@@ -7,15 +7,22 @@
 #'
 #' @inheritParams refresh
 #' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
-#' @param ... variable number of requests entered as lists in key-value format
+#' @param ... variable number of requests entered as lists in key-value format;
+#' optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
+#' @param output name of the output port to return usually 'output1' or 'output2';
+#'  set to NULL to return everything as raw results in JSON-encoded list form
 #' @return data frame containing results returned from web service call
+#' @note Set \code{...} to a list of key/value pairs corresponding to web service
+#' inputs. Optionally, set \code{...} to a single data frame with columns corresponding
+#' to web service variables. The data frame approach returns output from the evaluation
+#' of each row of the data frame (see the examples).
 #' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
-consumeLists = function(endpoint, ..., globalParam, retryDelay=10)
+consume = function(endpoint, ..., globalParam, retryDelay=10, output="output1")
 {
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
@@ -24,12 +31,16 @@ consumeLists = function(endpoint, ..., globalParam, retryDelay=10)
   }
   # Store variable number of lists entered as a list of lists
   requestsLists = list(...)
+  if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]]))
+  {
+    requestsLists = requestsLists[[1]]
+  }
   # Make API call with parameters
-  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
   # Access output by converting from JSON into list and indexing into Results
-  resultStored = fromJSON(result)
-  resultList = resultStored$Results$output1
-  data.frame(resultList)
+  if(output=="output1") return(data.frame(result$Results$output1))
+  if(output=="output2") return(fromJSON(result$Results$output2[[1]]))
+  result$Results
 }
 
 
@@ -93,7 +104,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 #' @param api_version AzureML API version
 #' @return List containing the request URL of the webservice, column names of the data, sample input as well as the input schema
 #'
-#' @seealso \code{\link{publishWebService}} \code{\link{consumeLists}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
+#' @seealso \code{\link{publishWebService}} \code{\link{consume}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
 #' @family discovery functions
 discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
 {

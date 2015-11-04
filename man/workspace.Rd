@@ -44,7 +44,7 @@ If the \code{id} and \code{auth} parameters are missing, the function attempts t
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 
-Other consumption functions: \code{\link{consumeLists}}
+Other consumption functions: \code{\link{consume}}
 
 Other dataset functions: \code{\link{datasets}};
   \code{\link{delete.datasets}};

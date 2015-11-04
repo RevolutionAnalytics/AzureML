@@ -3,7 +3,7 @@
 S3method(print,Datasets)
 S3method(print,Experiments)
 S3method(print,Workspace)
-export(consumeLists)
+export(consume)
 export(datasets)
 export(delete.datasets)
 export(discoverSchema)

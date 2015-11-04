@@ -17,7 +17,7 @@ azureSchema = function(argList) {
     type = argList[[arg]]
 
     if (type == "numeric" || type == "double") {
-      form[[ arg ]] = list("type"="number", "format"=type)
+      form[[ arg ]] = list("type"="number", "format"="double")
     }
     else if (type == "date-time" || type == "time-span") {
       form[[arg]] = list("type"="string", "format"=type)
@@ -68,7 +68,7 @@ azureSchema = function(argList) {
 #' @param packages optional character vector of R packages required by the function
 #' @param version optional R version string for required packages (the version of R running in the AzureML Web Service)
 #' @return A data.frame describing the new service endpoints, cf. \code{link{endpoints}}. The output
-#'  can be directly used by the \code{\link{consumeLists}} function.
+#'  can be directly used by the \code{\link{consume}} function.
 #' @note AzureML data types are different than, but related to, R types. You may specify
 #'  the R types \code{numeric, logical, integer,} and \code{character} and those will
 #'  be specified as AzureML types \code{double, boolean, int32, string}, respectively.
@@ -77,7 +77,7 @@ azureSchema = function(argList) {
 #' to a working environment in the AzureML machine, including objects accessed within the function
 #' using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that
 #' are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
-#' @seealso \code{\link{endpoints}} \code{\link{discoverSchema}} \code{\link{consumeLists}} \code{\link{services}}
+#' @seealso \code{\link{endpoints}} \code{\link{discoverSchema}} \code{\link{consume}} \code{\link{services}}
 #' @family publishing functions
 #'
 #' @example inst/examples/example_publish.R

@@ -30,13 +30,4 @@ functions in the package cover:
 This is a technology preview. The APIs used by the package are still subject to
 change. Please send any bugs or comments you have to the maintainers listed.
 
-## Getting Started
-
-To get started, please go [here](https://studio.azureml.net) and create a free
-account (not guest) or use your existing Azure ML account.  After logging in,
-under the "Settings" tab, copy and paste your Workspace ID from the "Name"
-sub-tab into your R console. From the "Authorization Tokens" sub-tab, copy your
-Primary Authorization Token into your R console. You will need this information
-to access all package functionality.
-
-
+See the package vignette and help documentation for examples and more information.

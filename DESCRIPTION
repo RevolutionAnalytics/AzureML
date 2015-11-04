@@ -9,6 +9,7 @@ Copyright: COPYRIGHT
 Maintainer: Andrie de Vries <adevries@microsoft.com>
 License: MIT + file LICENSE
 LazyData: TRUE
+VignetteBuilder: knitr
 Imports:
     jsonlite(>= 0.9.16), 
     curl(>= 0.8), 
@@ -18,4 +19,4 @@ Imports:
     base64enc,
     uuid
 Suggests:
-    testthat
+    testthat, knitr

@@ -23,7 +23,7 @@ List containing the request URL of the webservice, column names of the data, sam
 Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
 }
 \seealso{
-\code{\link{publishWebService}} \code{\link{consumeLists}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
+\code{\link{publishWebService}} \code{\link{consume}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
 
 Other discovery functions: \code{\link{endpointHelp}};
   \code{\link{endpoints}}, \code{\link{getEndpoints}};
