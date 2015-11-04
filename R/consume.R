@@ -5,6 +5,7 @@
 #'
 #' @export
 #'
+#' @inheritParams refresh
 #' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
 #' @param ... variable number of requests entered as lists in key-value format
 #' @param globalParam global parameters entered as a list, default value is an empty list
@@ -111,10 +112,10 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
   # Accesses the input schema in the swagger document
   inputSchema = swagger$definition$input1Item
   #Accesses the example in the swagger document and converts it to JSON
-  exampleJson = rjson::toJSON(swagger$definitions$ExecutionRequest$example)
+  exampleJson = toJSON(swagger$definitions$ExecutionRequest$example)
 
   #Accesses a single specific JSON object and formats it to be a request inputted as a list in R
-  inputExample = as.list((jsonlite::fromJSON((exampleJson)))$Inputs$input1)
+  inputExample = as.list((fromJSON((exampleJson)))$Inputs$input1)
 
   for(i in 1:length(inputExample)) {
     if(typeof(inputExample[[i]]) == "character") {

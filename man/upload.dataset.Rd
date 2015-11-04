@@ -9,6 +9,8 @@ upload.dataset(x, ws, name, description = "", family_id = "", ...)
 \arguments{
 \item{x}{An R data.frame object}
 
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
 \item{name}{A character name for the new AzureML dataset (may not match an existing dataset name)}
 
 \item{description}{An optional character description of the dataset}

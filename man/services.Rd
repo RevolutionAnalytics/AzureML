@@ -11,10 +11,15 @@ getWebServices(ws, service_id, name,
   uri = "https://management-tm.azureml.net")
 }
 \arguments{
-\item{service_id}{An optional web service id. If supplied, return the web service information for just
-that service id. Leave undefined to return a data.frame of all services.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{uri}{The AzureML web services URI}
+\item{service_id}{optional web service id. If supplied, return the web service information for just
+the specified service id. Leave undefined to return a data.frame of all services.}
+
+\item{uri}{the AzureML web services URI}
+
+\item{optional}{web service name. If supplied, return the web service information for services
+with matching names. Leave undefined to return all services.}
 }
 \value{
 Returns a data.frame with variables:

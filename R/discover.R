@@ -26,10 +26,12 @@
 #' Return a list of web services available to the specified Microsoft Azure Machine Learning workspace.
 #' The result is cached in the workspace environment similarly to datasets and experiments.
 #'
-#' @inheritParams datasets
-#' @param uri The AzureML web services URI
-#' @param service_id An optional web service id. If supplied, return the web service information for just
-#' that service id. Leave undefined to return a data.frame of all services.
+#' @inheritParams refresh
+#' @param service_id optional web service id. If supplied, return the web service information for just
+#' the specified service id. Leave undefined to return a data.frame of all services.
+#' @param optional web service name. If supplied, return the web service information for services
+#' with matching names. Leave undefined to return all services.
+#' @param uri the AzureML web services URI
 #' @return Returns a data.frame with variables:
 #' \itemize{
 #'   \item Id
@@ -85,7 +87,7 @@ getWebServices = services
 #'
 #' Return a list of web services endpoints for the specified web service id.
 #'
-#' @inheritParams datasets
+#' @inheritParams refresh
 #' @param uri The AzureML web services URI
 #' @param service_id A web service Id, for example returned by \code{\link{services}}.
 #' @param endpoint_id An optional endpoint id. If supplied, return the endpoint information for just

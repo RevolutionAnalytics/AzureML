@@ -8,6 +8,8 @@ download.intermediate.dataset(ws, experiment, node_id, port_name, data_type_id,
   ...)
 }
 \arguments{
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
 \item{experiment}{AzureML experiment ID obtained from "Generate Data Access Code"}
 
 \item{node_id}{Experiment node ID obtained from "Generate Data Access Code"}

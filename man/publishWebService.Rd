@@ -9,6 +9,8 @@ publishWebService(ws, fun, name, inputSchema, outputSchema,
   version = "3.1.0")
 }
 \arguments{
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
 \item{fun}{a function to publish; the function must have at least one argument}
 
 \item{name}{name of the new web service}

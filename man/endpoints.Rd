@@ -12,6 +12,8 @@ getEndpoints(ws, service_id, endpoint_id,
   uri = "https://management-tm.azureml.net")
 }
 \arguments{
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
 \item{service_id}{A web service Id, for example returned by \code{\link{services}}.}
 
 \item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just

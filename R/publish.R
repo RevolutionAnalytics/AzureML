@@ -53,6 +53,7 @@ azureSchema = function(argList) {
 #'
 #' @export
 #'
+#' @inheritParams refresh
 #' @param fun a function to publish; the function must have at least one argument
 #' @param name name of the new web service
 #' @param inputSchema a list of \code{fun} input parameters and their AzureML types

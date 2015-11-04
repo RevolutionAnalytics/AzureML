@@ -64,7 +64,7 @@ download.datasets = function(source, name, ...)
 
 #' Download a dataset from an AzureML experiment port.
 #'
-#' @inheritParams datasets
+#' @inheritParams refresh
 #' 
 #' @param experiment AzureML experiment ID obtained from "Generate Data Access Code"
 #' @param node_id Experiment node ID obtained from "Generate Data Access Code"
@@ -102,8 +102,7 @@ download.intermediate.dataset = function(ws, experiment, node_id, port_name, dat
 #'
 #' Upload any R data.frame to an AzureML workspace using the \code{GenericTSV} format.
 #' 
-#' @inheritParams datasets
-
+#' @inheritParams refresh
 #' @param x An R data.frame object
 #' @param name A character name for the new AzureML dataset (may not match an existing dataset name)
 #' @param description An optional character description of the dataset
