@@ -35,7 +35,7 @@ Conversion modules to convert data to a supported format.
 }
 \examples{
 \dontrun{
-  library(azureml)
+  library(AzureML)
   
   name <- "Blood donation data"
   

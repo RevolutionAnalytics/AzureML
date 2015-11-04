@@ -1,5 +1,5 @@
 \dontrun{
-  library(azureml)
+  library(AzureML)
   
   # Use the default config file ~/azureml/settings.json with format:
   #   {"workspace":{

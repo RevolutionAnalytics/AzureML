@@ -54,7 +54,7 @@ indirectly. Use the `workspace` function to create Workspace objects, either
 by explicitly specifying an AzureML workspace ID and authorization token:
 
 ```r
-library(azureml)
+library(AzureML)
 ws <- workspace(id="your workspace ID", auth="your authorization token")
 ```
 or alternatively create a file in `~/.azureml/settings.json` with the

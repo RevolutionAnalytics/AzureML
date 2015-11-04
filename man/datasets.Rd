@@ -23,7 +23,7 @@ an R data.frame, you can alternatively filter on any variable as desired.
 }
 \examples{
 \dontrun{
-  library(azureml)
+  library(AzureML)
   
   # Use the default config file ~/azureml/settings.json with format:
   #   {"workspace":{

@@ -31,9 +31,7 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
 }
 \examples{
 \dontrun{
-  library(azureml)
-  
-  dataset <- "New York weather"
+  library(AzureML)
   
   ws <- workspace()
   

@@ -1,4 +1,4 @@
-# azureml
+# AzureML
 An R interface to AzureML experiments, datasets, and web services.
 
 Use this package to upload and download datasets to and from AzureML,

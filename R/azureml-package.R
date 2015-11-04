@@ -47,8 +47,8 @@
 #' }
 #' 
 #' 
-#' @name azureml-package
-#' @aliases azureml
+#' @name AzureML-package
+#' @aliases AzureML
 #' @docType package
 #' @keywords package
 NULL

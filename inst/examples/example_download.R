@@ -1,5 +1,5 @@
 \dontrun{
-  library(azureml)
+  library(AzureML)
   
   name <- "Blood donation data"
   

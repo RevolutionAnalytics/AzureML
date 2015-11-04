@@ -1,7 +1,5 @@
 \dontrun{
-  library(azureml)
-  
-  dataset <- "New York weather"
+  library(AzureML)
   
   ws <- workspace()
   

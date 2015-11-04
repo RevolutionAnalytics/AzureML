@@ -1,9 +1,9 @@
-Package: azureml
+Package: AzureML
 Type: Package
-Title: Interface with Azure ML datasets
-Description: Functions and datasets to support Azure ML.
-Version: 0.0.6
-Date: 2015-10-24
+Title: Azure Machine Learning Workspace API Functions
+Description: API functions for interacting with Azure ML workspaces, experiments, datasets, and web services.
+Version: 0.0.7
+Date: 2015-11-03
 Author: Microsoft
 Copyright: COPYRIGHT
 Maintainer: Andrie de Vries <adevries@microsoft.com>
