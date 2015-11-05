@@ -32,7 +32,15 @@
 #' @param management_endpoint Optional AzureML management web service URI
 #' @param config Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.
 #'
-#' @note If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file, JSON formatted as shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
+#' @note If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
+#'  with JSON format: \preformatted{
+#'  {"workspace":{
+#'    "id":"test_id",
+#'    "authorization_token": "test_token",
+#'    "api_endpoint": "api_endpoint",
+#'    "management_endpoint": "management_endpoint"
+#'  }}
+#' } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 #' 
 #' @return An R environment of class "Workspace" containing at least the following objects:
 #' \describe{
@@ -44,6 +52,8 @@
 #' @family dataset functions
 #' @family experiment functions
 #' @family discovery functions
+#' @family consumption functions
+#' @family publishing functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
 workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                      management_endpoint="https://management.azureml.net",
@@ -55,8 +65,8 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
   {
     if(!file.exists(config))  stop("missing file ",config)
     s = fromJSON(file(config))
-    id = s$id
-    auth = s$authorization_token
+    id = s[[1]]$id
+    auth = s[[1]]$authorization_token
   }
   e$id = id
   e$.auth = auth
@@ -69,6 +79,7 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                     `x-ms-metaanalytics-authorizationtoken`=auth)
   delayedAssign("experiments", get_experiments(e), assign.env=e)
   delayedAssign("datasets", get_datasets(e), assign.env=e)
+  delayedAssign("services", services(e), assign.env=e)
   e
 }
 
@@ -82,11 +93,12 @@ workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
 #' @return NULL is invisibly returned--this function updates data in the \code{w} environment.
 #' @seealso \code{\link{workspace}}
 #' @export
-refresh = function(ws, what=c("everything", "datasets", "experiments"))
+refresh = function(ws, what=c("everything", "datasets", "experiments", "services"))
 {
   what = match.arg(what)
   if(what %in% c("everything", "experiments")) ws$experiments = get_experiments(ws)
   if(what %in% c("everything", "datasets")) ws$datasets    = get_datasets(ws)
+  if(what %in% c("everything", "services")) ws$services    = services(ws)
   invisible()
 }
 

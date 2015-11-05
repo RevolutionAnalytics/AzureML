@@ -4,7 +4,7 @@
 \alias{callAPI}
 \title{Framework for making an Azure ML web service API call.}
 \usage{
-callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay)
+callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay = 10)
 }
 \arguments{
 \item{apiKey}{primary API key}
@@ -21,7 +21,8 @@ callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay)
 result the response
 }
 \description{
-Helper function that constructs and send the API call to a Microsoft Azure Machine Learning web service, then receives and returns the response in JSON format.
+Helper function that constructs and send the API call to a Microsoft Azure
+Machine Learning web service, then receives and returns the response in JSON format.
 }
 \keyword{internal}
 

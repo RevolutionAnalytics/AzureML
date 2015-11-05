@@ -45,7 +45,13 @@ get_datasets = function(ws)
   handle_setheaders(h, .list=ws$.headers)
   r = curl(sprintf("%s/workspaces/%s/datasources", ws$.baseuri, ws$id), handle=h)
   on.exit(close(r))
-  x = fromJSON(readLines(r, warn=FALSE))
+  x = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=invisible)
+  if(is.null(x) || is.na(x$Name[1]))
+  {
+    x = data.frame()
+    class(x) = c("Datasets", "data.frame")
+    return(x)
+  }
   # Use strict variable name matching to look up data
   d = x[,"DownloadLocation"]
   x$DownloadLocation = paste(d[,"BaseUri"], d[,"Location"],
@@ -117,3 +123,44 @@ get_dataset = function(x, h, ...)
      stop("unsupported data type: '",x$DataTypeId,"'")
    )
 }
+
+
+#' Package a Function and Dependencies into an Environment
+#'
+#' @param exportenv R environment to package
+#' @param packages a character vector of required R package dependencies
+#' @param version optional R version
+#' @return A base64-encoded zip file containing the saved 'exportenv' environment
+#' @import codetools
+#' @importFrom base64enc base64encode
+#' @importFrom miniCRAN makeRepo pkgDep
+#' @keywords Internal
+packageEnv = function(exportenv, packages=NULL, version="3.1.0")
+{
+  if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
+  d = tempfile(pattern="dir")
+  on.exit(unlink(d, recursive=TRUE))
+  tryCatch(dir.create(d), warning=function(e) stop(e))
+  # zip, unfortunately a zip file is apparently an AzureML requirement.
+  cwd = getwd()
+  on.exit(setwd(cwd), add=TRUE)
+  setwd(d)
+  # save export environment to an RData file
+  save(exportenv, file="env.RData")
+
+  # Package up dependencies
+  if(!is.null(packages))
+  {
+    re = getOption("repos")
+    if(is.null(re)) re = c(CRAN="http://cran.revolutionanalytics.com")
+    p = paste(d,"packages",sep="/")
+    tryCatch(dir.create(p), warning=function(e) stop(e))
+    tryCatch(makeRepo(pkgDep(packages, repos=re), path=p, re, type="win.binary", Rversion=version),
+      error=function(e) stop(e))
+  }
+
+  zip(zipfile="export.zip", files=dir())
+  setwd(cwd)
+  base64encode(paste(d, "export.zip", sep="/"))
+}
+

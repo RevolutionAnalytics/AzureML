@@ -12,7 +12,9 @@ getEndpoints(ws, service_id, endpoint_id,
   uri = "https://management-tm.azureml.net")
 }
 \arguments{
-\item{service_id}{A web service id, for example returned by \code{\link{services}}.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
+\item{service_id}{A web service Id, for example returned by \code{\link{services}}.}
 
 \item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just
 that id. Leave undefined to return a data.frame of all end points associated with the service.}
@@ -57,13 +59,17 @@ ws <- workspace(
 s <- services(ws)
 endpoints(ws, s$Id[1])
 
+# Note that you can alternatively just use the entire row that
+# describes the service.
+endpoints(ws, s[1,])
+
 # Equivalent:
 getEndpoints(ws, s$Id[1])
 }
 }
 \seealso{
 Other discovery functions: \code{\link{discoverSchema}};
-  \code{\link{getWebServices}}, \code{\link{services}};
-  \code{\link{workspace}}
+  \code{\link{endpointHelp}}; \code{\link{getWebServices}},
+  \code{\link{services}}; \code{\link{workspace}}
 }
 

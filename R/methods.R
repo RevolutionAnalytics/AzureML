@@ -21,6 +21,9 @@
 # THE SOFTWARE.
 
 
+#' @title is.Workspace: Test if an object is an Azure ML workspace.
+#' @param x an R object
+#' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
 #' @export
 is.Workspace = function(x) "Workspace" %in% class(x)
 

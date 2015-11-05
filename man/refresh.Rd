@@ -4,7 +4,7 @@
 \alias{refresh}
 \title{Refresh data in an AzureML workspace object.}
 \usage{
-refresh(ws, what = c("everything", "datasets", "experiments"))
+refresh(ws, what = c("everything", "datasets", "experiments", "services"))
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}

@@ -5,10 +5,11 @@ Description: Functions and datasets to support Azure ML.
 Version: 0.0.7
 Date: 2015-11-02
 Author: Microsoft
-Copyright: Microsoft
+Copyright: COPYRIGHT
 Maintainer: Raymond Laghaeian <raymondl@microsoft.com>
 License: MIT + file LICENSE
 LazyData: TRUE
+VignetteBuilder: knitr
 Imports:
     jsonlite(>= 0.9.16), 
     curl(>= 0.8), 
@@ -18,4 +19,4 @@ Imports:
     base64enc,
     uuid
 Suggests:
-    testthat
+    testthat, knitr

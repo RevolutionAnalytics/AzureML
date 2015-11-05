@@ -9,6 +9,8 @@ upload.dataset(x, ws, name, description = "", family_id = "", ...)
 \arguments{
 \item{x}{An R data.frame object}
 
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
+
 \item{name}{A character name for the new AzureML dataset (may not match an existing dataset name)}
 
 \item{description}{An optional character description of the dataset}
@@ -29,15 +31,9 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
 }
 \examples{
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
-  
   library(AzureML)
   
-  # workspace_id <- ""
-  # authorization_token <- ""
-  dataset <- "New York weather"
-  
-  ws <- workspace(config = keyfile)
+  ws <- workspace()
   
   # Upload the R airquality data.frame to the workspace.
   upload.dataset(airquality, ws, "airquality")
@@ -46,7 +42,7 @@ The AzureML API does not support uploads for _replacing_ datasets with new data 
   head(datasets(ws))
 
   # Now delete what we've just uploaded
-  delete.dataset(ws, "airquality")
+  delete.datasets(ws, "airquality")
 }
 }
 \seealso{

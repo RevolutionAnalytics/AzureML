@@ -4,43 +4,117 @@
 \alias{publishWebService}
 \title{Publish a function to Microsoft Azure}
 \usage{
-publishWebService(functionName, serviceName, inputSchema, outputSchema, wkID,
-  authToken)
+publishWebService(ws, fun, name, inputSchema, outputSchema,
+  export = character(0), noexport = character(0), packages,
+  version = "3.1.0")
 }
 \arguments{
-\item{functionName}{function name as a string to be published}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{serviceName}{name of the new web service}
+\item{fun}{a function to publish; the function must have at least one argument}
 
-\item{inputSchema}{list of input parameters of format \code{list("arg1"="type", "arg2"="type", ...)}}
+\item{name}{name of the new web service}
 
-\item{outputSchema}{list of outputs of format \code{list("output1"="type", "output2"="type", ...)}}
+\item{inputSchema}{a list of \code{fun} input parameters and their AzureML types
+formatted as \code{list("arg1"="type", "arg2"="type", ...)}; see the note below
+for details}
 
-\item{wkID}{the workspace ID}
+\item{outputSchema}{list of \code{fun} outputs and AzureML types,
+formmated as \code{list("output1"="type", "output2"="type", ...)}}
 
-\item{authToken}{primary authorization token}
+\item{export}{optional character vector of variable names to explicitly export
+in the web service for use by the function. See the note below.}
+
+\item{noexport}{optional character vector of variable names to prevent from exporting
+in the web service}
+
+\item{packages}{optional character vector of R packages required by the function}
+
+\item{version}{optional R version string for required packages (the version of R running in the AzureML Web Service)}
 }
 \value{
-nested list, the first element is a list containing information about the new web service, the second element is a list of its endpoints
+A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
+ can be directly used by the \code{\link{consume}} function.
 }
 \description{
-Publish a function to Microsoft Azure Machine Learning as a web service. The web service created is a standard Azure ML web service, and can be utilized from any web or mobile platform. as long as the user has the API key and URL. The function to be published can use arbitrary objects and packages. Currently, the function to be published can only take in primitive data types as input, i.e. no data frames or lists, but support for those functions will be added in the future.
+Publish a function to Microsoft Azure Machine Learning as a web service. The
+web service created is a standard Azure ML web service, and can be utilized
+from any web or mobile platform. as long as the user has the API key and URL.
+The function to be published is limited to inputs/outputs consisting of
+lists of scalar values.
+}
+\note{
+AzureML data types are different than, but related to, R types. You may specify
+ the R types \code{numeric, logical, integer,} and \code{character} and those will
+ be specified as AzureML types \code{double, boolean, int32, string}, respectively.
+
+The \code{publishWebService} function automatically exports objects required by the function
+to a working environment in the AzureML machine, including objects accessed within the function
+using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that
+are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
 }
 \examples{
 \dontrun{
-add <- function(x,y) { return(x+y) }
-newService <- publishWebService("add", "add",
- list("x"="int","y"="int"), list("z"="int"), wsID, authToken)
-webserviceDetails <- newService[[1]]
-endpoints <- newService[[2]]
-helpURL <- endpoints[[1]]$HelpLocation
-pKey <- endpoints[[1]]$PrimaryKey
-apiURL <- endpoints[[1]]$ApiLocation
+# Use a default configuration in ~/.azureml, alternatively
+# see help for `workspace`.
+ws <- workspace()
+
+# Really simple example:
+add <- function(x,y) x + y
+endpoint <- publishWebService(ws, add, "add_service",
+              list(x="numeric", y="numeric"), list(ans="numeric"))
+consume(endpoint, list(x=pi, y=2))
+
+
+# A neat trick to evaluate any expression in the Azure ML virtual
+# machine R session and view its output:
+ep <- publishWebService(ws, fun=function(expr) {
+       paste(capture.output(eval(parse(text=expr))), collapse="\\n")},
+       name="commander", inputSchema=list(x="character"),
+       outputSchema=list(ans="character"))
+cat(consume(ep, list=(expr="getwd()"))$ans)
+cat(consume(ep, list=(expr=".packages(all=TRUE)"))$ans)
+
+
+# The following example illustrates scoping rules. Note that the function
+# refers to the variable y defined outside the function body. That value
+# will be exported with the service.
+y <- pi
+ep <- publishWebService(ws, fun=function(x) x + y, name="lexi",
+        inputSchema=list(x="numeric"), outputSchema=list(ans="numeric"))
+cat(consume(ep, list(x=2))$ans)
+
+
+# Example showing the use of consume to score all the rows of a data frame
+# at once. The columns of the data frame correspond to the input parameters
+# of the web service.
+f <- function(a,b,c,d) list(sum=a+b+c+d, prod=a*b*c*d)
+ep <-  publishWebService(ws, f, name="rowSums",
+         inputSchema=list(a="numeric", b="numeric", c="numeric", d="numeric"),
+         outputSchema=list(sum="numeric", prod="numeric"))
+x <- head(iris[,1:4])  # First four columns of iris
+
+# Note the following will FAIL because of a name mismatch in the arguments
+# (with an informative error):
+consume(ep, x, retryDelay=1)
+# We need the columns of the data frame to match the inputSchema:
+names(x) <- letters[1:4]
+# Now we can evaluate all the rows of the data frame in one call:
+consume(ep, x)
+# output should look like:
+#    sum    prod
+# 1 10.2   4.998
+# 2  9.5   4.116
+# 3  9.4  3.9104
+# 4  9.4   4.278
+# 5 10.2    5.04
+# 6 11.4 14.3208
+
 }
 }
 \seealso{
-\code{\link{getWSDetails}} \code{\link{getEndpoints}} \code{\link{discoverSchema}} \code{\link{consumeLists}}
+\code{\link{endpoints}} \code{\link{discoverSchema}} \code{\link{consume}} \code{\link{services}}
 
-Other publishing functions: \code{\link{updateWebService}}
+Other publishing functions: \code{\link{workspace}}
 }
 

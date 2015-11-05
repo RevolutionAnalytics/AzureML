@@ -5,15 +5,21 @@
 \alias{services}
 \title{List Available Web Services.}
 \usage{
-services(ws, service_id, uri = "https://management-tm.azureml.net")
+services(ws, service_id, name, uri = "https://management-tm.azureml.net")
 
-getWebServices(ws, service_id, uri = "https://management-tm.azureml.net")
+getWebServices(ws, service_id, name,
+  uri = "https://management-tm.azureml.net")
 }
 \arguments{
-\item{service_id}{An optional web service id. If supplied, return the web service information for just
-that service id. Leave undefined to return a data.frame of all services.}
+\item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{uri}{The AzureML web services URI}
+\item{service_id}{optional web service id. If supplied, return the web service information for just
+the specified service id. Leave undefined to return a data.frame of all services.}
+
+\item{name}{optional web service name. If supplied, return the web service information for services
+with matching names. Leave undefined to return all services.}
+
+\item{uri}{the AzureML web services URI}
 }
 \value{
 Returns a data.frame with variables:
@@ -29,6 +35,7 @@ Each row of the returned data.frame corresponds to a service.
 }
 \description{
 Return a list of web services available to the specified Microsoft Azure Machine Learning workspace.
+The result is cached in the workspace environment similarly to datasets and experiments.
 }
 \note{
 \code{getWebServices} is an alias for \code{services}.
@@ -50,7 +57,7 @@ getWebServices(ws)
 }
 \seealso{
 Other discovery functions: \code{\link{discoverSchema}};
-  \code{\link{endpoints}}, \code{\link{getEndpoints}};
-  \code{\link{workspace}}
+  \code{\link{endpointHelp}}; \code{\link{endpoints}},
+  \code{\link{getEndpoints}}; \code{\link{workspace}}
 }
 

@@ -1,13 +1,7 @@
 \dontrun{
-  keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
-  
   library(AzureML)
   
-  # workspace_id <- ""
-  # authorization_token <- ""
-  dataset <- "New York weather"
-  
-  ws <- workspace(config = keyfile)
+  ws <- workspace()
   
   # Upload the R airquality data.frame to the workspace.
   upload.dataset(airquality, ws, "airquality")
@@ -16,5 +10,5 @@
   head(datasets(ws))
 
   # Now delete what we've just uploaded
-  delete.dataset(ws, "airquality")
+  delete.datasets(ws, "airquality")
 }

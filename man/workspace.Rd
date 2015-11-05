@@ -31,10 +31,20 @@ Create a reference to an AzureML Studio workspace. Data corresponding to experim
 See \code{\link{refresh}} to update cached data.
 }
 \note{
-If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file, JSON formatted as shown in \url{https://github.com/RevolutionAnalytics/azureml/issues/13}.
+If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
+ with JSON format: \preformatted{
+ {"workspace":{
+   "id":"test_id",
+   "authorization_token": "test_token",
+   "api_endpoint": "api_endpoint",
+   "management_endpoint": "management_endpoint"
+ }}
+} (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 }
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
+
+Other consumption functions: \code{\link{consume}}
 
 Other dataset functions: \code{\link{datasets}};
   \code{\link{delete.datasets}};
@@ -42,10 +52,13 @@ Other dataset functions: \code{\link{datasets}};
   \code{\link{upload.dataset}}
 
 Other discovery functions: \code{\link{discoverSchema}};
-  \code{\link{endpoints}}, \code{\link{getEndpoints}};
-  \code{\link{getWebServices}}, \code{\link{services}}
+  \code{\link{endpointHelp}}; \code{\link{endpoints}},
+  \code{\link{getEndpoints}}; \code{\link{getWebServices}},
+  \code{\link{services}}
 
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}
+
+Other publishing functions: \code{\link{publishWebService}}
 }
 

@@ -14,7 +14,7 @@ discoverSchema(helpURL, scheme = "https",
 
 \item{host}{optional parameter that defaults to ussouthcentral.services.azureml.net}
 
-\item{api_version}{defaults to 2.0}
+\item{api_version}{AzureML API version}
 }
 \value{
 List containing the request URL of the webservice, column names of the data, sample input as well as the input schema
@@ -22,17 +22,12 @@ List containing the request URL of the webservice, column names of the data, sam
 \description{
 Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
 }
-\examples{
-\dontrun{
-endpoints <- getEndpoints("wsID", "wsAuth", "webserviceID")
-wsSchema <- discoverSchema(endpoints[[1]]$HelpLocation)
-}
-}
 \seealso{
-\code{\link{publishWebService}} \code{\link{consumeLists}}
+\code{\link{publishWebService}} \code{\link{consume}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
 
-Other discovery functions: \code{\link{endpoints}},
-  \code{\link{getEndpoints}}; \code{\link{getWebServices}},
-  \code{\link{services}}; \code{\link{workspace}}
+Other discovery functions: \code{\link{endpointHelp}};
+  \code{\link{endpoints}}, \code{\link{getEndpoints}};
+  \code{\link{getWebServices}}, \code{\link{services}};
+  \code{\link{workspace}}
 }
 
