@@ -6,8 +6,8 @@ if(keyfile == ""){
   message("No tests ran")
 } else {
   jsondata <- jsonlite::fromJSON(keyfile)
-  workspace_id <- jsondata$id
-  authorization_token <- jsondata$authorization_token
+  workspace_id <- jsondata$workspace$id
+  authorization_token <- jsondata$workspace$authorization_token
 
   #  ------------------------------------------------------------------------
   
@@ -20,7 +20,7 @@ if(keyfile == ""){
     ws <- workspace(workspace_id, authorization_token)
     
     expect_is(ws, c("Workspace"))
-    expect_equal(ls(ws), c("datasets", "experiments", "id"))
+    expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
     expect_equal(ws$id, workspace_id)
   })
   
@@ -31,7 +31,7 @@ if(keyfile == ""){
     ws <- workspace(config = keyfile)
     
     expect_is(ws, c("Workspace"))
-    expect_equal(ls(ws), c("datasets", "experiments", "id"))
+    expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
     expect_equal(ws$id, workspace_id)
   })
   

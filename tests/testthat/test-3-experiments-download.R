@@ -7,8 +7,8 @@ if(keyfile == ""){
 } else {
   
   keydata <- jsonlite::fromJSON(keyfile)
-  exp_id <- keydata$exp_id
-  node_id <- keydata$node_id
+  exp_id <- keydata$workspace$exp_id
+  node_id <- keydata$workspace$node_id
   
   context("Read dataset from experiment")
   
