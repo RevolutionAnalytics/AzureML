@@ -15,7 +15,6 @@ Imports:
     curl(>= 0.8), 
     foreign,
     codetools,
-    RCurl,
     base64enc,
     miniCRAN,
     uuid
