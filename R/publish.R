@@ -68,6 +68,8 @@ azureSchema = function(argList) {
 #' @param packages optional character vector of R packages required by the function
 #' @param version optional R version string for required packages (the version of R running in the AzureML Web Service)
 #' @param wsid optional Azure web service ID; use to update an existing service (see Note below)
+#' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in
+#' \code{\link{workspace}}.
 #' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
 #'  can be directly used by the \code{\link{consume}} function.
 #' @note AzureML data types are different than, but related to, R types. You may specify
@@ -96,13 +98,13 @@ azureSchema = function(argList) {
 publishWebService = function(ws, fun, name,
                              inputSchema, outputSchema,
                              export=character(0), noexport=character(0), packages,
-                             version="3.1.0", wsid)
+                             version="3.1.0", wsid, host = ws$.management_endpoint)
 {
   if(missing(wsid) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the wsid parameter is specified")
   if(missing(wsid)) wsid = gsub("-", "", UUIDgenerate(use.time=TRUE))
   publishURL = sprintf("%s/workspaces/%s/webservices/%s",
-                  ws$.management_endpoint, ws$id, wsid)
+                  host, ws$id, wsid)
   # Make sure schema inputted matches function signature
   if (length(formals(fun)) != length(inputSchema))
   {

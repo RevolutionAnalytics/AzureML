@@ -13,6 +13,10 @@ if(file.exists("~/.azureml/settings.json"))
     expect_true(timestamped_name %in% ds$Name)
   })
 
+  test_that("Can download dataset", {
+    expect_true(isTRUE(all.equal(download.datasets(ws, name=timestamped_name), airquality)))
+  })
+
   test_that("Can delete dataset from workspace", {
     ws <- workspace()
     delete.datasets(ws, timestamped_name)

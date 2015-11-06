@@ -7,11 +7,11 @@
 \usage{
 publishWebService(ws, fun, name, inputSchema, outputSchema,
   export = character(0), noexport = character(0), packages,
-  version = "3.1.0", wsid)
+  version = "3.1.0", wsid, host = ws$.management_endpoint)
 
 updateWebService(ws, fun, name, inputSchema, outputSchema,
   export = character(0), noexport = character(0), packages,
-  version = "3.1.0", wsid)
+  version = "3.1.0", wsid, host = ws$.management_endpoint)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
@@ -38,6 +38,9 @@ in the web service}
 \item{version}{optional R version string for required packages (the version of R running in the AzureML Web Service)}
 
 \item{wsid}{optional Azure web service ID; use to update an existing service (see Note below)}
+
+\item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in
+\code{\link{workspace}}.}
 }
 \value{
 A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
