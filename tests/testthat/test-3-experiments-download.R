@@ -1,20 +1,12 @@
 if(interactive()) library("testthat")
 
-keyfile <- system.file("tests/testthat/config.json", package = "AzureML")
-if(keyfile == ""){
-  message("To run tests, add a file tests/testthat/config.R containing AzureML keys")
-  message("No tests ran")
-} else {
-  
-  keydata <- jsonlite::fromJSON(keyfile)
-  exp_id <- keydata$workspace$exp_id
-  node_id <- keydata$workspace$node_id
-  
+if(file.exists("~/.azureml/settings.json"))
+{
   context("Read dataset from experiment")
   
   test_that("Can read dataset from workspace", {
     
-    ws <- workspace(config = keyfile)
+    ws <- workspace()
     
     we <- experiments(ws)
     expect_is(we, "Experiments")
@@ -41,4 +33,7 @@ if(keyfile == ""){
     expect_is(frame, "data.frame")
     expect_true(nrow(frame) > 0)
   })
+} else {
+  message("To run tests, add a file ~/.azureml/settings.json containing AzureML keys, see ?workspace for help")
+  message("No tests ran")
 }
