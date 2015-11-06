@@ -23,8 +23,11 @@
 
 #' Create a reference to an AzureML Studio workspace.
 #'
-#' Create a reference to an AzureML Studio workspace. Data corresponding to experiments and datasets in the workspace are cached in the result.
-#' See \code{\link{refresh}} to update cached data.
+#' Create a reference to an AzureML Studio workspace, returning a \code{Workspace}
+#' object that is an R environment containing details and data associated with the
+#' AzureML work space. Data corresponding to services, experiments, and datasets in
+#' the workspace are cached in the result object environment.
+#' See \code{\link{refresh}} about updating cached data.
 #' 
 #' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS
@@ -42,10 +45,11 @@
 #'  }}
 #' } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 #' 
-#' @return An R environment of class "Workspace" containing at least the following objects:
+#' @return An R environment of class \code{Workspace} containing at least the following objects:
 #' \describe{
-#'   \item{experiments}{Collection of experiments in the workspace represented as an "Experiments" data.frame}
-#'   \item{datasets}{Collection of datasets in the workspace represented as a "Datasets" data.frame}
+#'   \item{experiments}{Collection of experiments in the workspace represented as an \code{Experiments} data.frame}
+#'   \item{datasets}{Collection of datasets in the workspace represented as a \code{Datasets} data.frame}
+#'   \item{services}{Collection of web services in the workspace represented as a data.frame}
 #' }
 #' @importFrom jsonlite fromJSON
 #' @export
@@ -54,7 +58,8 @@
 #' @family discovery functions
 #' @family consumption functions
 #' @family publishing functions
-#' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
+#' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
+#'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
                      management_endpoint="https://management.azureml.net",
                      config="~/.azureml/settings.json")

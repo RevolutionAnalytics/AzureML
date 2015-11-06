@@ -28,24 +28,36 @@
 #' 
 #' @section Summary of functions:
 #'
-#' 1. Create a link to an Azure ML workspace
+#' 1. Create a reference to an Azure ML workspace
 #' 
 #' \itemize{
-#' \item Link to workspace: \code{\link{workspace}}
+#' \item Workspace: \code{\link{workspace}}
 #' }
 #'
 #' 2. Datasets
 #'
 #' \itemize{
-#'    \item Get datasets: \code{\link{datasets}}
+#'    \item List available datasets: \code{\link{datasets}}
+#'    \item Download datasets: \code{\link{download.datasets}}
+#'    \item Upload a dataset: \code{\link{upload.datasets}}
+#'    \item Delete datasets: \code{\link{delete.datasets}}
 #' }
 #'
 #' 3. Experiments
 #'
 #' \itemize{
 #'    \item Get experiments: \code{\link{experiments}}
+#'    \item Get data from an experiment port: \code{\link{download.intermediate.dataset}}
 #' }
+#'
+#' 4. Web Services
 #' 
+#' \itemize{
+#'    \item List available services: \code{\link{services}}
+#'    \item Consume a web service (run data through it and retrieve result): \code{\link{consume}}
+#'    \item Publish an R function as a web service: \code{\link{publishWebService}}
+#'    \item Update an existing web service: \code{\link{updateWebService}}
+#' }
 #' 
 #' @name AzureML-package
 #' @aliases AzureML

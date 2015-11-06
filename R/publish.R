@@ -46,8 +46,8 @@ azureSchema = function(argList) {
 #' Publish a function to Microsoft Azure
 #'
 #' Publish a function to Microsoft Azure Machine Learning as a web service. The
-#' web service created is a standard Azure ML web service, and can be utilized
-#' from any web or mobile platform. as long as the user has the API key and URL.
+#' web service created is a standard Azure ML web service, and can be used
+#' from any web or mobile platform as long as the user knows the API key and URL.
 #' The function to be published is limited to inputs/outputs consisting of
 #' lists of scalar values.
 #'
