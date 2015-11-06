@@ -81,7 +81,7 @@ azureSchema = function(argList) {
 #' and required R pacakges with new values. Although the API allows that the name,
 #' input and output schema to also be specified when updating it's not possible to
 #' change those values.
-#' The \code{\link{updateWebSerice}} function is nearly an alias for \code{\link{publishWebService}},
+#' The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}},
 #' differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
 #'
 #' The \code{publishWebService} function automatically exports objects required by the function

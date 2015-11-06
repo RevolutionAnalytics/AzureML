@@ -39,7 +39,7 @@
 #' \itemize{
 #'    \item List available datasets: \code{\link{datasets}}
 #'    \item Download datasets: \code{\link{download.datasets}}
-#'    \item Upload a dataset: \code{\link{upload.datasets}}
+#'    \item Upload a dataset: \code{\link{upload.dataset}}
 #'    \item Delete datasets: \code{\link{delete.datasets}}
 #' }
 #'
