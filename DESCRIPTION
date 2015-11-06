@@ -17,6 +17,7 @@ Imports:
     codetools,
     RCurl,
     base64enc,
+    miniCRAN,
     uuid
 Suggests:
     testthat, knitr
