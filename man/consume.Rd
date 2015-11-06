@@ -40,8 +40,7 @@ ws <- workspace()
 
 # Really simple example:
 add <- function(x,y) x + y
-endpoint <- publishWebService(ws, add, "add_service",
-              list(x="numeric", y="numeric"), list(ans="numeric"))
+endpoint <- publishWebService(ws, add, "addme", list(x="numeric", y="numeric"), list(ans="numeric"))
 consume(endpoint, list(x=pi, y=2))
 
 

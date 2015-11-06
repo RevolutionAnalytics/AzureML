@@ -20,15 +20,19 @@ workspace(id, auth, api_endpoint = "https://studio.azureml.net",
 \item{config}{Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.}
 }
 \value{
-An R environment of class "Workspace" containing at least the following objects:
+An R environment of class \code{Workspace} containing at least the following objects:
 \describe{
-  \item{experiments}{Collection of experiments in the workspace represented as an "Experiments" data.frame}
-  \item{datasets}{Collection of datasets in the workspace represented as a "Datasets" data.frame}
+  \item{experiments}{Collection of experiments in the workspace represented as an \code{Experiments} data.frame}
+  \item{datasets}{Collection of datasets in the workspace represented as a \code{Datasets} data.frame}
+  \item{services}{Collection of web services in the workspace represented as a data.frame}
 }
 }
 \description{
-Create a reference to an AzureML Studio workspace. Data corresponding to experiments and datasets in the workspace are cached in the result.
-See \code{\link{refresh}} to update cached data.
+Create a reference to an AzureML Studio workspace, returning a \code{Workspace}
+object that is an R environment containing details and data associated with the
+AzureML work space. Data corresponding to services, experiments, and datasets in
+the workspace are cached in the result object environment.
+See \code{\link{refresh}} about updating cached data.
 }
 \note{
 If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
@@ -42,7 +46,8 @@ If the \code{id} and \code{auth} parameters are missing, the function attempts t
 } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 }
 \seealso{
-\code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}}
+\code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
+         \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 
 Other consumption functions: \code{\link{consume}}
 
@@ -59,6 +64,7 @@ Other discovery functions: \code{\link{discoverSchema}};
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}
 
-Other publishing functions: \code{\link{publishWebService}}
+Other publishing functions: \code{\link{publishWebService}},
+  \code{\link{updateWebService}}
 }
 

@@ -57,6 +57,7 @@
 #'    \item Consume a web service (run data through it and retrieve result): \code{\link{consume}}
 #'    \item Publish an R function as a web service: \code{\link{publishWebService}}
 #'    \item Update an existing web service: \code{\link{updateWebService}}
+#'    \item List web service endpoints: \code{\link{endpoints}}
 #' }
 #' 
 #' @name AzureML-package
