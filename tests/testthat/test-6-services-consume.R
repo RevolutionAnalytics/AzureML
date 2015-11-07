@@ -1,15 +1,12 @@
-if(interactive()) library("testthat")
-
 context("Consume API")
 
 schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/f5e8e9bc4eed4034b78567449cfca779/webservices/d42667a354e34a3f98888ba86300fc2f/endpoints/b4caf0f0ebfd451bbc187741894e213b/score"
 
 schema <- discoverSchema(schemaUrl)
+
+schema
 schema$sampleInput$Gender <- "male"
 schema$sampleInput$PortEmbarkation <- "C"
-
-
-
 
 
 test_that("discoverSchema returns help page information", {
@@ -26,25 +23,19 @@ test_that("discoverSchema returns help page information", {
 })
 
 
-
-# test_that("consumeLists, non-R web function", {
-#   consume.df <- "qh1cUv695D29eQkRV+zor8VTOWcEoxVTjMZWA4H7X0o8NEAUHZM13CHjOoqRNRGzXgQPxHMw6607YKI0vbhRxA=="
-#   
-#   capture.output(response <- consumeLists(consume.df,
-#                            schema$requestUrl, schema$sampleInput))
-#   expect_equal(as.numeric(response[1,1]), 1)
-#   expect_equal(as.numeric(response[1,2]), 0.875)
-# })
+test_that("consume a list, non-R web function", {
+  key <- "qh1cUv695D29eQkRV+zor8VTOWcEoxVTjMZWA4H7X0o8NEAUHZM13CHjOoqRNRGzXgQPxHMw6607YKI0vbhRxA=="
+  capture.output(response <- consume(endpoint=list(PrimaryKey=key, ApiLocation=schema$requestUrl), schema$sampleInput))
+  expect_equal(as.numeric(response[1,1]), 1)
+  expect_equal(as.numeric(response[1,2]), 0.875)
+})
 
 
-
-# test_that("consumeDataframe, non-R web service", {
-#   df <- data.frame(Survived="1", PassengerClass="1", Gender="male", Age=1, 
-#                    SiblingSpouse=1, ParentChild=1, FarePrice=1, PortEmbarkation="C")
-#   
-#   consume.df <- "qh1cUv695D29eQkRV+zor8VTOWcEoxVTjMZWA4H7X0o8NEAUHZM13CHjOoqRNRGzXgQPxHMw6607YKI0vbhRxA=="
-#   capture.output(response <- consumeDataframe(consume.df,
-#                                schema$requestUrl, df))
-#   expect_that(as.numeric(response[1,1]), equals(1))
-#   expect_that(as.numeric(response[1,2]), equals(.875))
-# })
+test_that("consume a data frame, non-R web service", {
+  df <- data.frame(Survived="1", PassengerClass="1", Gender="male", Age=1, 
+                   SiblingSpouse=1, ParentChild=1, FarePrice=1, PortEmbarkation="C")
+  key <- "qh1cUv695D29eQkRV+zor8VTOWcEoxVTjMZWA4H7X0o8NEAUHZM13CHjOoqRNRGzXgQPxHMw6607YKI0vbhRxA=="
+  capture.output(response <- consume(endpoint=list(PrimaryKey=key, ApiLocation=schema$requestUrl), df))
+  expect_that(as.numeric(response[1,1]), equals(1))
+  expect_that(as.numeric(response[1,2]), equals(.875))
+})
