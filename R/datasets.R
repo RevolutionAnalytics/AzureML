@@ -1,4 +1,3 @@
-# Copyright (c) 2015 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
@@ -123,7 +122,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   # 1. Upload raw data, retrieving an ID.
   # 2. Construct a DataSource metadata JSON object describing the data and
   #    upload that.
-
+  
   # Step 1
   tsv = capture.output(write.table(x, file="", sep="\t", row.names=FALSE, ...))
   url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
@@ -139,22 +138,22 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
   # Parse the response
   step1 = fromJSON(rawToChar(step1$content))
-
+  
   # Step 2
-   metadata = toJSON(
-     list(
-       DataSource =
-         list(
-           Name =  name,
-           DataTypeId = "GenericTSV",
-           Description = description,
-           FamilyId = family_id,
-           Owner =  "R",
-           SourceOrigin = "FromResourceUpload"),
-        UploadId = step1$Id,                    # From Step 1
-        UploadedFromFileName = "",
-        ClientPoll =  TRUE), auto_unbox=TRUE)
-
+  metadata = toJSON(
+    list(
+      DataSource =
+        list(
+          Name =  name,
+          DataTypeId = "GenericTSV",
+          Description = description,
+          FamilyId = family_id,
+          Owner =  "R",
+          SourceOrigin = "FromResourceUpload"),
+      UploadId = step1$Id,                    # From Step 1
+      UploadedFromFileName = "",
+      ClientPoll =  TRUE), auto_unbox=TRUE)
+  
   url = sprintf("%s/workspaces/%s/datasources",
                 ws$.baseuri, curl_escape(ws$id))
   handle_reset(h)                               # Preserves connection, cookies
@@ -164,10 +163,10 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   step2 = curl_fetch_memory(url, handle=h)
   if(step2$status_code != 200) stop("HTTP ", step2$status_code, " ", rawToChar(step2$content))
   id = gsub("\\\"","",rawToChar(step2$content))
-
+  
   # Success, refresh datasets
   refresh(ws, "datasets")
-
+  
   # Return the row of ws$datasets corresponding to the uploaded data
   ws$datasets[ws$datasets$Id == id, ]
 }
@@ -207,7 +206,12 @@ delete.datasets = function(ws, name)
     }
     s
   }, 1, USE.NAMES=FALSE)
-  ans = data.frame(Name = datasets$Name, Deleted=status_code < 300, status_code=status_code)
+  ans = data.frame(
+    Name = datasets$Name, 
+    Deleted=status_code < 300, 
+    status_code=status_code,
+    stringsAsFactors = FALSE
+  )
   refresh(ws, "datasets")
   ans
 }
