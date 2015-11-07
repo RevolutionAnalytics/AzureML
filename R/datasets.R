@@ -183,6 +183,7 @@ delete.datasets = function(ws, name)
 {
   # https://studioapi.azureml.net/api/workspaces/<workspaceId>/datasources/family/<familyId> HTTP/1.1
   datasets = name
+  refresh(ws, "datasets")
   if(!inherits(datasets, "Datasets"))
   {
     datasets = datasets(ws)
@@ -195,9 +196,18 @@ delete.datasets = function(ws, name)
   {
     uri = sprintf("https://studioapi.azureml.net/api/workspaces/%s/datasources/family/%s",
                   curl_escape(ws$id), curl_escape(familyId))
-    curl_fetch_memory(uri, handle=h)$status_code
+    s = 400
+    try = 0
+    while(s >= 300 && try < 3)
+    {
+      s = curl_fetch_memory(uri, handle=h)$status_code
+      if(s < 300) break
+      try = try + 1
+      Sys.sleep(5)
+    }
+    s
   }, 1, USE.NAMES=FALSE)
   ans = data.frame(Name = datasets$Name, Deleted=status_code < 300, status_code=status_code)
-  if(any(ans$Deleted)) refresh(ws, "datasets")
+  refresh(ws, "datasets")
   ans
 }
