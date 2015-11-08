@@ -1,11 +1,10 @@
+if(interactive()) library(testthat)
+
 context("Consume API")
 
 schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/f5e8e9bc4eed4034b78567449cfca779/webservices/d42667a354e34a3f98888ba86300fc2f/endpoints/b4caf0f0ebfd451bbc187741894e213b/score"
 
-
-
 key <- "qh1cUv695D29eQkRV+zor8VTOWcEoxVTjMZWA4H7X0o8NEAUHZM13CHjOoqRNRGzXgQPxHMw6607YKI0vbhRxA=="
-
 
 test_that("discoverSchema returns help page information", {
   url <- "https://ussouthcentral.services.azureml.net/workspaces/f5e8e9bc4eed4034b78567449cfca779/services/b4caf0f0ebfd451bbc187741894e213b/execute?api-version=2.0&format=swagger"

@@ -72,8 +72,8 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     body = charToRaw(paste(toJSON(req, auto_unbox=TRUE),collapse="\n"))
     h = new_handle()
     headers = list(`User-Agent`="R",
-		   `Content-Type`="application/json",
-		   `Authorization`=sprintf("Bearer %s", apiKey))
+                   `Content-Type`="application/json",
+                   `Authorization`=sprintf("Bearer %s", apiKey))
     handle_setheaders(h, .list=headers)
     handle_setopt(h, .list=list(post=TRUE, postfieldsize=length(body), postfields=body))
     r = curl_fetch_memory(requestUrl, handle=h)
@@ -96,49 +96,54 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 #'
 #' Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
 #'
-#' @export
-#'
 #' @param helpURL URL of the help page of the web service
 #' @param scheme the URI scheme
 #' @param host optional parameter that defaults to ussouthcentral.services.azureml.net
 #' @param api_version AzureML API version
+#' 
 #' @return List containing the request URL of the webservice, column names of the data, sample input as well as the input schema
 #'
 #' @seealso \code{\link{publishWebService}} \code{\link{consume}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
+#' 
 #' @family discovery functions
+#' @export
 discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
 {
   endpointId = getDetailsFromUrl(helpURL)[[1]]
   workspaceId = getDetailsFromUrl(helpURL)[[2]]
   # Construct swagger document URL using parameters
   # Use paste method without separator
-  swaggerURL = paste(scheme,"://", host, "/workspaces/", workspaceId, "/services/", endpointId,"/swagger.json", sep = "")
-  print(swaggerURL)
-
+  swaggerURL = paste0(scheme,"://", host, 
+                      "/workspaces/", workspaceId, 
+                      "/services/", endpointId,
+                      "/swagger.json")
+  
   # parses the content and gets the swagger document
   r = curl(swaggerURL)
+  on.exit(close(r))
   swagger = fromJSON(readLines(r,warn=FALSE))
-  close(r)
-
+  
   # Accesses the input schema in the swagger document
   inputSchema = swagger$definition$input1Item
   #Accesses the example in the swagger document and converts it to JSON
   exampleJson = toJSON(swagger$definitions$ExecutionRequest$example)
-
+  
   #Accesses a single specific JSON object and formats it to be a request inputted as a list in R
   inputExample = as.list((fromJSON((exampleJson)))$Inputs$input1)
-
+  
   for(i in 1:length(inputExample)) {
     if(typeof(inputExample[[i]]) == "character") {
       inputExample[i] = "Please input valid String"
     }
   }
-  #Accesses the names of the columns in the example and stores it in a list of column names
+  # Accesses the names of the columns in the example
+  # and stores it in a list of column names
   columnNames = list()
   for(i in 1:length(inputExample)) {
     columnNames[[i]] = names(inputExample)[[i]]
   }
-  # Uses multiple nested loops to access the various paths in the swagger document and find the execution path
+  # Uses multiple nested loops to access the various paths in the 
+  # swagger document and find the execution path
   foundExecPath = FALSE
   pathNo = 0
   execPathNo= -1
@@ -146,9 +151,11 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
     pathNo = pathNo + 1
     for(operationpath in execPath) {
       for(operation in operationpath) {
-        #Goes through the characteristcs in every operation e.g. operationId
+        # Goes through the characteristcs in every operation e.g. operationId
         for(charac in operation) {
-          # Finds the path in which the operationId (characteristic of the path) = execute and sets the execution path number
+          # Finds the path in which the 
+          # operationId (characteristic of the path) == execute 
+          # and sets the execution path number
           if(charac[1] == "execute")
           {
             #Sets found execution path to true
@@ -160,33 +167,42 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
       }
     }
   }
-
-  #Stores the execution path
+  
+  # Stores the execution path
   if(foundExecPath) {
     executePath = names(swagger$paths)[[execPathNo]]
   } else{
     executePath = "Path not found"
   }
-  # Constructs the request URL with the parameters as well as execution path found. The separator is set to an empty string
-  requestUrl = paste(scheme,"://", host, "/workspaces/", workspaceId, "/services/", endpointId, executePath, sep = "")
-
+  # Constructs the request URL with the parameters as well as execution path found. 
+  # The separator is set to an empty string
+  requestUrl = paste0(scheme,"://", host, 
+                      "/workspaces/", workspaceId, 
+                      "/services/", endpointId, 
+                      executePath)
+  
   # Access the HTTP method type e.g. GET/ POST and constructs an example request
   httpMethod = toupper(names(swagger$paths[[2]]))
   httpRequest = paste(httpMethod,requestUrl)
   # Warns user of characters and urges them to enter valid strings for them
   firstWarning = TRUE
   for(i in 1:length(inputExample)) {
-    if(typeof(inputExample[[i]]) == "character") {
+    if(is.character(inputExample[[i]])) {
       if(firstWarning) {
-        cat("Warning! The sample input does not contain sample values for characters. Please input valid Strings for these fields", "\n")
+        cat("Warning! The sample input does not contain sample values for characters.",
+            "Please input valid strings for these fields", "\n")
       }
-      cat("   ", names(inputExample)[[i]],"\n")
+      cat("   ", names(inputExample)[[i]], "\n")
       firstWarning = FALSE
     }
   }
-
+  
   #Returns what was discovered in the form of a list
-  return (list("requestUrl" = requestUrl, "columnNames" = columnNames, "sampleInput" = inputExample, "inputSchema" = inputSchema))
+  list(requestUrl = requestUrl, 
+       columnNames = columnNames, 
+       sampleInput = inputExample, 
+       inputSchema = inputSchema
+  )
 }
 
 
@@ -200,7 +216,14 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
 #'
 #' @keywords internal
 getDetailsFromUrl = function(helpURL) {
-  #Uses a strong split to extract the endpoint ID and the workspace ID
-  return (list((strsplit(((strsplit(helpURL,"endpoints/"))[[1]][2]),"/")[[1]][[1]]),(strsplit(((strsplit(helpURL,"/workspaces/"))[[1]][2]),"/")[[1]][[1]])))
-
+  # Uses a strong split to extract the endpoint ID and the workspace ID
+  list(
+    strsplit(
+      (strsplit(helpURL,"endpoints/")[[1]][2]),
+      "/")[[1]][[1]],
+    strsplit(
+      strsplit(helpURL,"/workspaces/")[[1]][2],
+      "/")[[1]][[1]]
+  )
+  
 }
