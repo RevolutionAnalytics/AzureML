@@ -1,18 +1,23 @@
 if(interactive()) library("testthat")
 
-if(file.exists("~/.azureml/settings.json"))
+settingsFile <- "~/.azureml/settings.json" 
+if(file.exists(settingsFile))
 {
   context("Connect to workspace")
   
   test_that("Can connect to workspace with supplied id and auth", {
-    skip_on_cran()
-    skip_on_travis()
+    js <- jsonlite::fromJSON(settingsFile)
+    id <- js$workspace$id
+    auth <- js$workspace$authorization_token
     
-    ws <- workspace()
+    expect_true(!is.null(id))
+    expect_true(!is.null(auth))
+    
+    ws <- workspace(id, auth)
     
     expect_is(ws, c("Workspace"))
     expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
-    expect_equal(ws$id, workspace_id)
+    expect_equal(ws$id, id)
   })
   
   test_that("Can connect to workspace with config file", {
@@ -23,7 +28,6 @@ if(file.exists("~/.azureml/settings.json"))
     
     expect_is(ws, c("Workspace"))
     expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
-    expect_equal(ws$id, workspace_id)
   })
   
 } else {
