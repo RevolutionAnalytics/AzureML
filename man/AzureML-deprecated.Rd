@@ -4,6 +4,8 @@
 \alias{consumeDataframe}
 \alias{consumeFile}
 \alias{consumeLists}
+\alias{getEPDetails}
+\alias{getWSDetails}
 \title{Deprecated functions}
 \usage{
 consumeDataframe()
@@ -11,6 +13,10 @@ consumeDataframe()
 consumeFile()
 
 consumeLists()
+
+getEPDetails()
+
+getWSDetails()
 }
 \description{
 Deprecated functions

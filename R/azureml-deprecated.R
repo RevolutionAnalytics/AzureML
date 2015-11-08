@@ -14,3 +14,13 @@ consumeFile <- function(){
 consumeLists <- function(){
   .Deprecated("consume")
 }
+
+#' @rdname AzureML-deprecated
+getEPDetails <- function(){
+  .Deprecated("endpoints")
+}
+
+#' @rdname AzureML-deprecated
+getWSDetails <- function(){
+  .Deprecated("services")
+}
