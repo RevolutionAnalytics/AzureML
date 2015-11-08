@@ -1,7 +1,9 @@
 # This is the expression executed in the AzureML R environment.  The
 # publishWebService function sets up the environment 'exportenv' from which
 # this expression follows.
+
 wrapper = "inputDF <- maml.mapInputPort(1)\r\nload('src/env.RData')\r\n outputDF <- data.frame(matrix(NA, ncol=length(exportenv$..output_names), nrow=nrow(inputDF)))\r\n names(outputDF) <- exportenv$..output_names\r\n if(!is.null(exportenv$..packages))\r\n {\r\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\r\n}\r\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\n\nfor (i in 1:nrow(inputDF)){\r\n  outputDF[i,] <- do.call('..fun', as.list(inputDF[i,]))\r\n}\r\nmaml.mapOutputPort(\"outputDF\")"
+
 
 #' Convert input schema to API expected format.
 #'
@@ -15,7 +17,7 @@ azureSchema = function(argList) {
   form = list()
   for (arg in names(argList)) {
     type = argList[[arg]]
-
+    
     if (type == "numeric" || type == "double") {
       form[[ arg ]] = list("type"="number", "format"="double")
     }
@@ -70,24 +72,17 @@ azureSchema = function(argList) {
 #' @param wsid optional Azure web service ID; use to update an existing service (see Note below)
 #' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in
 #' \code{\link{workspace}}.
-#' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output
-#'  can be directly used by the \code{\link{consume}} function.
-#' @note AzureML data types are different than, but related to, R types. You may specify
-#'  the R types \code{numeric, logical, integer,} and \code{character} and those will
-#'  be specified as AzureML types \code{double, boolean, int32, string}, respectively.
+#' 
+#' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
+#'  
+#' @note AzureML data types are different than, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
 #'
-#' Leave the \code{wsid} parameter undefined to create a new AzureML web service, or
-#' specify the ID of an existing web service to update it, replacing the function
-#' and required R pacakges with new values. Although the API allows that the name,
-#' input and output schema to also be specified when updating it's not possible to
-#' change those values.
-#' The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}},
-#' differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
+#' Leave the \code{wsid} parameter undefined to create a new AzureML web service, or specify the ID of an existing web service to update it, replacing the function and required R pacakges with new values. Although the API allows that the name, input and output schema to also be specified when updating it's not possible to change those values.
+#' 
+#' The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
 #'
-#' The \code{publishWebService} function automatically exports objects required by the function
-#' to a working environment in the AzureML machine, including objects accessed within the function
-#' using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that
-#' are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
+#' The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
+#' 
 #' @seealso \code{\link{endpoints}} \code{\link{discoverSchema}} \code{\link{consume}} \code{\link{services}}
 #' @family publishing functions
 #'
@@ -104,7 +99,7 @@ publishWebService = function(ws, fun, name,
     stop("updateWebService requires that the wsid parameter is specified")
   if(missing(wsid)) wsid = gsub("-", "", UUIDgenerate(use.time=TRUE))
   publishURL = sprintf("%s/workspaces/%s/webservices/%s",
-                  host, ws$id, wsid)
+                       host, ws$id, wsid)
   # Make sure schema inputted matches function signature
   if (length(formals(fun)) != length(inputSchema))
   {
@@ -112,7 +107,7 @@ publishWebService = function(ws, fun, name,
   }
   inputSchema = azureSchema(inputSchema)
   outputSchema = azureSchema(outputSchema)
-
+  
   # Get and encode the dependencies
   if(missing(packages)) packages=NULL
   exportenv = new.env()
@@ -120,39 +115,45 @@ publishWebService = function(ws, fun, name,
   # Assign required objects in the export environment
   assign("..fun", fun, envir=exportenv)
   assign("..output_names", names(outputSchema), envir=exportenv)
-
+  
   zipString = packageEnv(exportenv, packages=packages, version=version)
-
+  
   # Build the body of the request
   req = list(
-    "Name" = name,
-    "Type" = "Code",
-    "CodeBundle" = list(
-      "InputSchema" = inputSchema,
-      "OutputSchema" = outputSchema,
-      "Language" = "R-3.1-64",
-      "SourceCode" = wrapper,
-      "ZipContents" = zipString
-     )
+    Name = name,
+    Type = "Code",
+    CodeBundle = list(
+      InputSchema = inputSchema,
+      OutputSchema = outputSchema,
+      Language = "R-3.1-64",
+      SourceCode = wrapper,
+      ZipContents = zipString
+    )
   )
-  body = charToRaw(paste(toJSON(req, auto_unbox=TRUE),collapse="\n"))
+  body = charToRaw(
+    paste(toJSON(req, auto_unbox=TRUE), collapse="\n")
+  )
   h = new_handle()
-  httpheader = list('Authorization'=paste('Bearer', ws$.auth, sep=' '),
-                    'Content-Type'='application/json',
-                    'Accept'='application/json')
-  opts = list('post'=TRUE,
-              'postfieldsize'=length(body),
-              'postfields'=body,
-              'customrequest'='PUT')
-  handle_setheaders(h, .list=httpheader)
-  handle_setopt(h, .list=opts)
-  r = curl_fetch_memory(publishURL, handle=h)
+  httpheader = list(
+    Authorization = paste('Bearer', ws$.auth, sep=' '),
+    `Content-Type` = 'application/json',
+    Accept = 'application/json'
+  )
+  opts = list(
+    post = TRUE,
+    postfieldsize = length(body),
+    postfields = body,
+    customrequest = 'PUT'
+  )
+  handle_setheaders(h, .list = httpheader)
+  handle_setopt(h, .list = opts)
+  r = curl_fetch_memory(publishURL, handle = h)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)
   # refresh the workspace cache
   refresh(ws, "services")
-
+  
   # Use discovery functions to get endpoints for immediate use
   endpoints(ws, newService["Id"])
 }
