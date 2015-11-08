@@ -125,6 +125,15 @@ get_dataset = function(x, h, ...)
 }
 
 
+# Checks if zip is available on system.
+# Required for packageEnv()
+zipAvailable <- function(){
+  z <- unname(Sys.which("zip"))
+  z != ""
+}
+
+zipNotAvailableMessage <- "Requires external zip utility. Please install zip and try again."
+
 #' Package a Function and Dependencies into an Environment
 #'
 #' @param exportenv R environment to package
@@ -137,6 +146,7 @@ get_dataset = function(x, h, ...)
 #' @keywords Internal
 packageEnv = function(exportenv, packages=NULL, version="3.1.0")
 {
+  if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
   d = tempfile(pattern="dir")
   on.exit(unlink(d, recursive=TRUE))
@@ -159,7 +169,10 @@ packageEnv = function(exportenv, packages=NULL, version="3.1.0")
       error=function(e) stop(e))
   }
 
-  zip(zipfile="export.zip", files=dir())
+  z <- try({
+    zip(zipfile="export.zip", files=dir())
+  })
+  if(inherits(z, "error") || z > 0) stop("Unable to create zip file")
   setwd(cwd)
   base64encode(paste(d, "export.zip", sep="/"))
 }

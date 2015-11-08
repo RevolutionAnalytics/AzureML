@@ -95,6 +95,8 @@ publishWebService = function(ws, fun, name,
                              export=character(0), noexport=character(0), packages,
                              version="3.1.0", wsid, host = ws$.management_endpoint)
 {
+  if(!is.Workspace(ws)) stop("ws must be a workspace object")
+  if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(missing(wsid) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the wsid parameter is specified")
   if(missing(wsid)) wsid = gsub("-", "", UUIDgenerate(use.time=TRUE))
