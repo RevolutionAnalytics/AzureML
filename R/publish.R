@@ -5,6 +5,99 @@ wrapper <- "inputDF <- maml.mapInputPort(1)\r\noutputDF <- matrix(ncol = %s, nro
 
 # Functions ---------------------------------------------------------------
 
+#' Publishes an R model as a prediction web service.
+#' 
+#' Takes an R model as parameter, wraps it in a prediction function, determines its signature,
+#' and publishes it as a webservice on AzureML.
+#' @export
+#' @param my_model A fitted model (e.g., lm, rpart, randomForest, nnet)
+#' @param wkID identifier of AzureML workspace where service will be established.
+#' @param authToken authorization token for AzureML workspace.
+#' @parem wsID Webservice identifier; Leave NULL for new webservice. If you provide an existing webservice ID it will be updated.
+#' usage:  response <- publish_model_as_web_service(test_fit, workspace_id, auth_token)
+publish_model_as_web_service <- function (my_model, wkID, authToken, wsID=NULL) {
+  library(AzureML)
+  library(dplyr)
+  
+  get_dataClasses <- function(fit) UseMethod("get_dataClasses")
+  get_dataClasses.default <- function(fit) attr(fit$terms, "dataClasses")  # nnet, rpart, randomForest.formula
+  get_dataClasses.gbm     <- function(fit) attr(fit$Terms, "dataClasses")
+  get_dataClasses.lm      <- function(fit) attr(attr(fit$model, "terms"), "dataClasses")
+  
+  translate_types <- function(t){
+    translation <- c(factor="string", character="string", integer="int", numeric="float")
+    tt <- translation[t]
+    names(tt) <- names(t)
+    tt
+  }
+  
+  getFunctionString2 <- function(x)
+        gsub("\n", "\r\n", gsub("\"", "\\\"", getAnywhere(x)[[2]][1]))
+  
+  data_types <- my_model %>% get_dataClasses %>% translate_types %>% as.list
+  
+  modelName <- as.character(substitute(my_model))
+  functionName <- paste0(modelName, "_predict")
+  serviceName <- paste0(functionName, "webservice")
+  inputSchema <- data_types[-1]
+  outputSchema <- data_types[1]
+    
+  export_prediction_function <- function(export_environment=parent.frame()){
+    prediction_function_template <- paste("%s <- function(%s){",
+                                          "  fit <- %s;",
+                                          "  predictor <- switch(class(fit)[1],",
+                                          "    rpart = function(dataframe) predict(fit, dataframe, type='class'),",
+                                          "    function(dataframe) predict(fit, dataframe)",
+                                          "  );",
+                                          "  res <- predictor(data.frame(%s, stringsAsFactors=F));",
+                                          "  if (class(res)=='factor') levels(res)[res] else res}",
+                                          collapse="\n")
+
+    var_text <- paste(names(inputSchema), collapse=", ")
+    
+    func_text <- sprintf(prediction_function_template, 
+                         functionName, var_text, modelName, var_text)
+    
+    eval(parse(text=func_text), envir=export_environment)
+  }
+
+  export_prediction_function(parent.frame())
+  
+  if (length(formals(functionName)) != length(inputSchema)) {
+    stop(sprintf("Input schema does not contain the proper input. Expected %s inputs and %s were provided", 
+                 length(inputSchema), length(formals(functionName))), 
+         call. = TRUE)
+  }
+  inputSchema <- publishPreprocess(inputSchema)
+  outputSchema <- publishPreprocess(outputSchema)
+  
+  options(RCurlOptions = list(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
+  zipString = packDependencies(functionName)
+  req = list(Name = serviceName, Type = "Code", 
+             CodeBundle = list(InputSchema = inputSchema, 
+                                OutputSchema = outputSchema, Language = "r-3.1-64", 
+                                SourceCode = sprintf(wrapper, length(outputSchema), 
+                                                     paste(sprintf("\"%s\"", names(outputSchema)), 
+                                                           collapse = ","), zipString[[1]], zipString[[1]], 
+                                                     paste(getFunctionString2(functionName)))))
+  if (zipString[[2]] != "") req$CodeBundle$ZipContents <- zipString[[2]]
+  
+  body = rjson::toJSON(req)
+  h = RCurl::basicTextGatherer()
+  h$reset()
+  
+  if (is.null(wsID)) wsID <- gsub("-", "", uuid::UUIDgenerate(use.time = TRUE))
+  
+  RCurl::httpPUT(url = sprintf(publishURL, wkID, wsID), httpheader = c(Authorization = paste("Bearer", 
+                                                                                             authToken, sep = " "), `Content-Type` = "application/json", 
+                                                                       Accept = "application/json"), content = body, writefunction = h$update)
+  newService <- rjson::fromJSON(h$value())
+  print(newService)
+  endpoints <- getEndpoints(wkID, authToken, newService["Id"])
+  return(list(serviceDetails = newService, endpoints = endpoints))
+}
+
+
 #' Get function source code
 #'
 #' Returns the source code of a function as a string
