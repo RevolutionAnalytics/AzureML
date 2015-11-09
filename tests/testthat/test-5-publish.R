@@ -29,6 +29,7 @@ test_that(".getexports finds function and creates zip string", {
 
 
 test_that("publishWebService works with simple function", {
+  ws <- workspace()
   add <- function(x,y) x + y
   endpoint <- publishWebService(ws, 
                                 fun = add, 
