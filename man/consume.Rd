@@ -9,15 +9,13 @@ consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 \arguments{
 \item{endpoint}{AzureML Web Service endpoint returned by \code{\link{endpoints}}}
 
-\item{...}{variable number of requests entered as lists in key-value format;
-optionally a single data frame argument.}
+\item{...}{variable number of requests entered as lists in key-value format; optionally a single data frame argument.}
 
 \item{globalParam}{global parameters entered as a list, default value is an empty list}
 
 \item{retryDelay}{the time in seconds to delay before retrying in case of a server error}
 
-\item{output}{name of the output port to return usually 'output1' or 'output2';
-set to NULL to return everything as raw results in JSON-encoded list form}
+\item{output}{name of the output port to return usually 'output1' or 'output2'; set to NULL to return everything as raw results in JSON-encoded list form}
 }
 \value{
 data frame containing results returned from web service call
@@ -27,67 +25,87 @@ Score data represented as lists where each list key represents
 a parameter of the web service.
 }
 \note{
-Set \code{...} to a list of key/value pairs corresponding to web service
-inputs. Optionally, set \code{...} to a single data frame with columns corresponding
-to web service variables. The data frame approach returns output from the evaluation
-of each row of the data frame (see the examples).
+Set \code{...} to a list of key/value pairs corresponding to web service inputs. Optionally, set \code{...} to a single data frame with columns corresponding to web service variables. The data frame approach returns output from the evaluation of each row of the data frame (see the examples).
 }
 \examples{
 \dontrun{
-# Use a default configuration in ~/.azureml, alternatively
-# see help for `workspace`.
-ws <- workspace()
-
-# Really simple example:
-add <- function(x,y) x + y
-endpoint <- publishWebService(ws, add, "addme", list(x="numeric", y="numeric"), list(ans="numeric"))
-consume(endpoint, list(x=pi, y=2))
-
-
-# A neat trick to evaluate any expression in the Azure ML virtual
-# machine R session and view its output:
-ep <- publishWebService(ws, fun=function(expr) {
-       paste(capture.output(eval(parse(text=expr))), collapse="\\n")},
-       name="commander", inputSchema=list(x="character"),
-       outputSchema=list(ans="character"))
-cat(consume(ep, list=(expr="getwd()"))$ans)
-cat(consume(ep, list=(expr=".packages(all=TRUE)"))$ans)
-
-
-# The following example illustrates scoping rules. Note that the function
-# refers to the variable y defined outside the function body. That value
-# will be exported with the service.
-y <- pi
-ep <- publishWebService(ws, fun=function(x) x + y, name="lexi",
-        inputSchema=list(x="numeric"), outputSchema=list(ans="numeric"))
-cat(consume(ep, list(x=2))$ans)
-
-
-# Example showing the use of consume to score all the rows of a data frame
-# at once. The columns of the data frame correspond to the input parameters
-# of the web service.
-f <- function(a,b,c,d) list(sum=a+b+c+d, prod=a*b*c*d)
-ep <-  publishWebService(ws, f, name="rowSums",
-         inputSchema=list(a="numeric", b="numeric", c="numeric", d="numeric"),
-         outputSchema=list(sum="numeric", prod="numeric"))
-x <- head(iris[,1:4])  # First four columns of iris
-
-# Note the following will FAIL because of a name mismatch in the arguments
-# (with an informative error):
-consume(ep, x, retryDelay=1)
-# We need the columns of the data frame to match the inputSchema:
-names(x) <- letters[1:4]
-# Now we can evaluate all the rows of the data frame in one call:
-consume(ep, x)
-# output should look like:
-#    sum    prod
-# 1 10.2   4.998
-# 2  9.5   4.116
-# 3  9.4  3.9104
-# 4  9.4   4.278
-# 5 10.2    5.04
-# 6 11.4 14.3208
-
+  # Use a default configuration in ~/.azureml, alternatively
+  # see help for `workspace`.
+  ws <- workspace()
+  
+  # Really simple example:
+  add <- function(x,y) x + y
+  endpoint <- publishWebService(ws, 
+                                fun = add, 
+                                name = "addme", 
+                                inputSchema = list(x="numeric", 
+                                                   y="numeric"), 
+                                outputSchema = list(ans="numeric"))
+  consume(endpoint, list(x=pi, y=2))
+  
+  
+  # A neat trick to evaluate any expression in the Azure ML virtual
+  # machine R session and view its output:
+  ep <- publishWebService(ws, 
+                          fun = function(expr) {
+                            paste(capture.output(
+                              eval(parse(text=expr))), collapse="\\n")
+                          },
+                          name="commander", 
+                          inputSchema = list(x = "character"),
+                          outputSchema = list(ans = "character"))
+  cat(consume(ep, list(x = "getwd()"))$ans)
+  cat(consume(ep, list(x = ".packages(all=TRUE)"))$ans)
+  cat(consume(ep, list(x = "R.Version()"))$ans)
+  
+  
+  # The following example illustrates scoping rules. Note that the function
+  # refers to the variable y defined outside the function body. That value
+  # will be exported with the service.
+  y <- pi
+  ep <- publishWebService(ws, 
+                          fun = function(x) x + y, 
+                          name = "lexi",
+                          inputSchema = list(x = "numeric"), 
+                          outputSchema = list(ans = "numeric"))
+  cat(consume(ep, list(x=2))$ans)
+  
+  
+  # Example showing the use of consume to score all the rows of a data frame
+  # at once. The columns of the data frame correspond to the input parameters
+  # of the web service.
+  f <- function(a,b,c,d) list(sum = a+b+c+d, prod = a*b*c*d)
+  ep <-  publishWebService(ws, 
+                           f, 
+                           name = "rowSums",
+                           inputSchema = list(
+                             a="numeric", 
+                             b="numeric", 
+                             c="numeric", 
+                             d="numeric"
+                           ),
+                           outputSchema = list(
+                             sum ="numeric", 
+                             prod = "numeric")
+  )
+  x <- head(iris[,1:4])  # First four columns of iris
+  
+  # Note the following will FAIL because of a name mismatch in the arguments
+  # (with an informative error):
+  consume(ep, x, retryDelay=1)
+  # We need the columns of the data frame to match the inputSchema:
+  names(x) <- letters[1:4]
+  # Now we can evaluate all the rows of the data frame in one call:
+  consume(ep, x)
+  # output should look like:
+  #    sum    prod
+  # 1 10.2   4.998
+  # 2  9.5   4.116
+  # 3  9.4  3.9104
+  # 4  9.4   4.278
+  # 5 10.2    5.04
+  # 6 11.4 14.3208
+  
 }
 }
 \seealso{

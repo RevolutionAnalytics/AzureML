@@ -13,11 +13,9 @@ getWebServices(ws, service_id, name,
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{service_id}{optional web service id. If supplied, return the web service information for just
-the specified service id. Leave undefined to return a data.frame of all services.}
+\item{service_id}{optional web service id. If supplied, return the web service information for just the specified service id. Leave undefined to return a data.frame of all services.}
 
-\item{name}{optional web service name. If supplied, return the web service information for services
-with matching names. Leave undefined to return all services.}
+\item{name}{optional web service name. If supplied, return the web service information for services with matching names. Leave undefined to return all services.}
 
 \item{uri}{the AzureML web services URI}
 }
@@ -43,7 +41,7 @@ The result is cached in the workspace environment similarly to datasets and expe
 \examples{
 \dontrun{
 workspace_id <- ""          # Your AzureML workspace id
-authorization_token <- ""   # Your AsureML authorization token
+authorization_token <- ""   # Your AzureML authorization token
 
 ws <- workspace(
   id = workspace_id,

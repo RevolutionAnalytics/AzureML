@@ -16,8 +16,7 @@ getEndpoints(ws, service_id, endpoint_id,
 
 \item{service_id}{A web service Id, for example returned by \code{\link{services}}.}
 
-\item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just
-that id. Leave undefined to return a data.frame of all end points associated with the service.}
+\item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.}
 
 \item{uri}{The AzureML web services URI}
 }
