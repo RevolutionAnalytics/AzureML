@@ -7,22 +7,20 @@
 #'
 #' @inheritParams refresh
 #' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
-#' @param ... variable number of requests entered as lists in key-value format;
-#' optionally a single data frame argument.
+#' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
-#' @param output name of the output port to return usually 'output1' or 'output2';
-#'  set to NULL to return everything as raw results in JSON-encoded list form
+#' @param output name of the output port to return usually 'output1' or 'output2'; set to NULL to return everything as raw results in JSON-encoded list form
+#' 
 #' @return data frame containing results returned from web service call
-#' @note Set \code{...} to a list of key/value pairs corresponding to web service
-#' inputs. Optionally, set \code{...} to a single data frame with columns corresponding
-#' to web service variables. The data frame approach returns output from the evaluation
-#' of each row of the data frame (see the examples).
+#' 
+#' @note Set \code{...} to a list of key/value pairs corresponding to web service inputs. Optionally, set \code{...} to a single data frame with columns corresponding to web service variables. The data frame approach returns output from the evaluation of each row of the data frame (see the examples).
+#' 
 #' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
-consume = function(endpoint, ..., globalParam, retryDelay=10, output="output1")
+consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
@@ -38,8 +36,10 @@ consume = function(endpoint, ..., globalParam, retryDelay=10, output="output1")
   # Make API call with parameters
   result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
   # Access output by converting from JSON into list and indexing into Results
-  if(output=="output1") return(data.frame(result$Results$output1))
-  if(output=="output2") return(fromJSON(result$Results$output2[[1]]))
+  if(!is.null(output) && output == "output1") 
+    return(data.frame(result$Results$output1))
+  if(!is.null(output) && output == "output2") 
+    return(fromJSON(result$Results$output2[[1]]))
   result$Results
 }
 
@@ -68,21 +68,30 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
   while(tries < 3) # Limit number of API calls to 3
   {
     # Construct request payload
-    req = list(Inputs=list(input1=keyvalues), GlobalParameters=globalParam)
-    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE),collapse="\n"))
+    req = list(
+      Inputs = list(input1 = keyvalues), 
+      GlobalParameters = globalParam
+    )
+    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE), collapse = "\n"))
     h = new_handle()
     headers = list(`User-Agent`="R",
                    `Content-Type`="application/json",
                    `Authorization`=sprintf("Bearer %s", apiKey))
     handle_setheaders(h, .list=headers)
-    handle_setopt(h, .list=list(post=TRUE, postfieldsize=length(body), postfields=body))
+    handle_setopt(h, .list = list(
+      post=TRUE, 
+      postfieldsize=length(body), 
+      postfields=body)
+    )
     r = curl_fetch_memory(requestUrl, handle=h)
     # Get HTTP status to decide whether to throw bad request or retry, or return etc.
     httpStatus = r$status_code
     result = rawToChar(r$content)
     if(httpStatus == 200) break
     if(tries==0)
-      warning(sprintf("Request failed with status %s. Retrying request...", httpStatus), immediate.=TRUE)
+      warning(sprintf("Request failed with status %s. Retrying request...", 
+                      httpStatus), 
+              immediate. = TRUE)
     Sys.sleep(retryDelay)
     tries = tries + 1
   }
