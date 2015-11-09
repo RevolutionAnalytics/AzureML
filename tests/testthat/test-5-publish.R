@@ -36,12 +36,16 @@ test_that("publishWebService works with simple function", {
                                 inputSchema = list(x="numeric", 
                                                    y="numeric"), 
                                 outputSchema = list(ans="numeric"))
+  
+  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
   Sys.sleep(15)
+  
   expect_is(endpoint, "data.frame")
   expect_is(endpoint$WorkspaceId, "character")
   expect_is(endpoint$WebServiceId, "character")
   expect_equal(ws$id, endpoint$WorkspaceId)
   
+  # Now test if we can consume the service we just published
   res <- consume(endpoint, list(x=pi, y=2))
   expect_is(res, "data.frame")
   expect_equal(as.numeric(res$ans), pi + 2, tolerance = 1e-5)
