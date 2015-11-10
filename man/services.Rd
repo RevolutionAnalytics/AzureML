@@ -5,10 +5,9 @@
 \alias{services}
 \title{List Available Web Services.}
 \usage{
-services(ws, service_id, name, uri = "https://management-tm.azureml.net")
+services(ws, service_id, name, host = ws$.management_endpoint)
 
-getWebServices(ws, service_id, name,
-  uri = "https://management-tm.azureml.net")
+getWebServices(ws, service_id, name, host = ws$.management_endpoint)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
@@ -17,7 +16,7 @@ getWebServices(ws, service_id, name,
 
 \item{name}{optional web service name. If supplied, return the web service information for services with matching names. Leave undefined to return all services.}
 
-\item{uri}{the AzureML web services URI}
+\item{host}{the AzureML web services URI}
 }
 \value{
 Returns a data.frame with variables:

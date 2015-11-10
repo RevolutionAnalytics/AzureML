@@ -29,7 +29,7 @@
 #' @inheritParams refresh
 #' @param service_id optional web service id. If supplied, return the web service information for just the specified service id. Leave undefined to return a data.frame of all services.
 #' @param name optional web service name. If supplied, return the web service information for services with matching names. Leave undefined to return all services.
-#' @param uri the AzureML web services URI
+#' @param host the AzureML web services URI
 #' 
 #' @return Returns a data.frame with variables:
 #' \itemize{
@@ -58,7 +58,7 @@
 #' getWebServices(ws)
 #' }
 #' @export
-services = function(ws, service_id, name, uri="https://management-tm.azureml.net")
+services = function(ws, service_id, name, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
   h = new_handle()
@@ -70,7 +70,7 @@ services = function(ws, service_id, name, uri="https://management-tm.azureml.net
   if(missing(service_id)) service_id = ""
   else service_id = sprintf("/%s", service_id)
   r = curl(
-    sprintf("%s/workspaces/%s/webservices%s", uri, ws$id, service_id), 
+    sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
     handle=h
     )
   on.exit(close(r))
@@ -78,6 +78,9 @@ services = function(ws, service_id, name, uri="https://management-tm.azureml.net
   # Cache the result in the workspace
   if(service_id == "") ws$services = ans
   if(!missing(name)) return(ans[ans$Name == name,])
+  if(is.null(ans)){
+    warning("No service returned. The service_id may be invalid.", immediate. = TRUE)
+  }
   ans
 }
 
@@ -92,7 +95,7 @@ getWebServices = services
 #' Return a list of web services endpoints for the specified web service id.
 #'
 #' @inheritParams refresh
-#' @param uri The AzureML web services URI
+#' @param host The AzureML web services URI
 #' @param service_id A web service Id, for example returned by \code{\link{services}}.
 #' @param endpoint_id An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.
 #' 
@@ -136,7 +139,7 @@ getWebServices = services
 #' getEndpoints(ws, s$Id[1])
 #' }
 #' @export
-endpoints = function(ws, service_id, endpoint_id, uri="https://management-tm.azureml.net")
+endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
   h = new_handle()
@@ -150,7 +153,7 @@ endpoints = function(ws, service_id, endpoint_id, uri="https://management-tm.azu
   if(is.list(service_id)) service_id = service_id$Id[1]
   r = curl(
     sprintf("%s/workspaces/%s/webservices/%s/endpoints%s", 
-            uri, 
+            host, 
             ws$id, 
             service_id, 
             endpoint_id

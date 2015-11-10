@@ -27,12 +27,8 @@ A data.frame.
 Download a dataset from an AzureML experiment port.
 }
 \note{
-TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE}
-by default (independently of the global \code{stringsAsFactors} option).
-
-This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId"
-of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
-Conversion modules to convert data to a supported format.
+TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
+This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId" of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
 }
 \seealso{
 \code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}}

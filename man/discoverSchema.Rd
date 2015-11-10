@@ -4,8 +4,8 @@
 \alias{discoverSchema}
 \title{Discover web service schema}
 \usage{
-discoverSchema(helpURL, scheme = "https",
-  host = "ussouthcentral.services.azureml.net", api_version = "2.0")
+discoverSchema(helpURL, scheme = "https", host = ws$.management_endpoint,
+  api_version = "2.0")
 }
 \arguments{
 \item{helpURL}{URL of the help page of the web service}

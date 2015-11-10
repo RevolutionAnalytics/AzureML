@@ -3,6 +3,47 @@ if(interactive()) library(testthat)
 settingsFile <- "~/.azureml/settings.json" 
 if(file.exists(settingsFile))
 {
+  test_that("discoverSchema returns help page information", {
+    schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/f5e8e9bc4eed4034b78567449cfca779/webservices/d42667a354e34a3f98888ba86300fc2f/endpoints/b4caf0f0ebfd451bbc187741894e213b/score"
+    
+    expect_equal(
+      getDetailsFromUrl(schemaUrl),
+      c("b4caf0f0ebfd451bbc187741894e213b", "f5e8e9bc4eed4034b78567449cfca779")
+    )
+    
+    url <- "https://ussouthcentral.services.azureml.net/workspaces/f5e8e9bc4eed4034b78567449cfca779/services/b4caf0f0ebfd451bbc187741894e213b/execute?api-version=2.0&format=swagger"
+    expect_error(
+      getDetailsFromUrl(url)
+    )
+    
+    capture.output(schema <- discoverSchema(schemaUrl))
+    schema$sampleInput$Gender <- "male"
+    schema$sampleInput$PortEmbarkation <- "C"
+    
+    expect_equal(length(schema), 4)
+    expect_equivalent(schema$requestUrl, url)
+    expect_equivalent(schema$columnNames, 
+                      list("Survived", 
+                           "PassengerClass", 
+                           "Gender", 
+                           "Age", 
+                           "SiblingSpouse", 
+                           "ParentChild", 
+                           "FarePrice", 
+                           "PortEmbarkation")
+    )
+    expect_equivalent(schema$sampleInput, 
+                      list(Survived = 1, 
+                           PassengerClass = 1, 
+                           Gender = "male", 
+                           Age = 1, 
+                           SiblingSpouse = 1, 
+                           ParentChild = 1, 
+                           FarePrice = 1, 
+                           PortEmbarkation = "C"))
+  })
+  
+  
   test_that("Can discover endpoints starting from workspace ID", {
     
     ws <- workspace()
@@ -43,8 +84,10 @@ if(file.exists(settingsFile))
   
   
   test_that("Discovery function handles error correctly", {
-    expect_error(services(ws, "foo-does-not-exist"), 
-                 "InvalidWorkspaceIdInvalid workspace ID provided.")
+    ws <- workspace()
+    expect_warning(
+      services(ws, "foo-does-not-exist") 
+    )
   })
   
 } else
