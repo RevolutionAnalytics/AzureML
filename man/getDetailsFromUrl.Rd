@@ -4,10 +4,10 @@
 \alias{getDetailsFromUrl}
 \title{Helper function to extract information from a help page URL}
 \usage{
-getDetailsFromUrl(helpURL)
+getDetailsFromUrl(url)
 }
 \arguments{
-\item{helpURL}{the URL of a help page}
+\item{url}{the URL of a help page}
 }
 \value{
 a list containing the endpoint ID and the workspace ID
