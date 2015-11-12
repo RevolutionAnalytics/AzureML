@@ -5,11 +5,9 @@
 \alias{getEndpoints}
 \title{List AzureML Web Service Endpoints}
 \usage{
-endpoints(ws, service_id, endpoint_id,
-  uri = "https://management-tm.azureml.net")
+endpoints(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 
-getEndpoints(ws, service_id, endpoint_id,
-  uri = "https://management-tm.azureml.net")
+getEndpoints(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
@@ -18,7 +16,7 @@ getEndpoints(ws, service_id, endpoint_id,
 
 \item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.}
 
-\item{uri}{The AzureML web services URI}
+\item{host}{The AzureML web services URI}
 }
 \value{
 Returns a data.frame with variables:

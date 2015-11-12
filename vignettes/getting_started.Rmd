@@ -10,31 +10,39 @@ vignette: >
 
 # Getting Started with AzureML
 
-Use this package to upload and download datasets to and from AzureML,
-to interrogate experiments, to publish new R-based web services, and
-to run R data through existing web services and retrieve the output.
+Use this package to upload and download datasets to and from AzureML, to
+interrogate experiments, to publish R functions as AzureML web services, and to
+run R data through existing web services and retrieve the output.
 
 # Installation instructions
 
-Install the development version of the package directly from GitHub
-with:
+Install the development version of the package directly from GitHub with:
+
 ```r
 # Install devtools
 if(!require("devtools")) install.packages("devtools")
 devtools::install_github("RevolutionAnalytics/azureml")
 ```
-The package requires the `jsonlite, curl, miniCRAN, base64enc` and `uuid` packages.
+The package depends on:
+
+- `jsonlite`
+- `curl`
+- `miniCRAN`
+- `base64enc`
+- `uuid`
+
 
 # Overview
 
 AzureML provides an interface to publish web services on Microsoft Azure
-Machine Learning (Azure ML) from your local R environment. The main
-functions in the package cover:
+Machine Learning (Azure ML) from your local R environment. The main functions
+in the package cover the following topics:
 
 - Workspace: connect to and manage AzureML workspaces
 - Datasets: upload and download datasets to and from AzureML workspaces
-- Publish: define a custom function or train a model and publish it as an Azure Web Service
-- Consume: use available web services from R in a variety of convenient formats
+- Publish: publish R functions as AzureML web services, and update or delete
+   existing services
+- Consume: apply any AzureML web service to your R data
 
 This is a technology preview. The APIs used by the package are still subject to
 change. Please send any bugs or comments you have to the maintainers listed.
@@ -42,7 +50,7 @@ change. Please send any bugs or comments you have to the maintainers listed.
 ## Getting Started
 
 To get started, please go [here](https://studio.azureml.net) and create a free
-account (not guest) or use your existing Azure ML account.  After logging in,
+account (not guest) or use your existing AzureML account.  After logging in,
 under the "Settings" tab, copy and paste your Workspace ID from the "Name"
 sub-tab into your R console. From the "Authorization Tokens" sub-tab, copy your
 Primary Authorization Token into your R console. You will need this information
@@ -50,53 +58,170 @@ to access all package functionality.
 
 The package defines a `Workspace` class that represents an AzureML work space.
 Most of the functions in the package refer to a Workspace object directly or
-indirectly. Use the `workspace` function to create Workspace objects, either
-by explicitly specifying an AzureML workspace ID and authorization token:
+indirectly. Use the `workspace` function to create Workspace objects, either by
+explicitly specifying an AzureML workspace ID and authorization token.
 
-```r
+## Obtaining AzureML Credentials
+
+Before using the package, it is necessary to first obtain the security
+credentials to your Azure Machine Learning workspace. You can find this be
+logging in at [https://studio.azureml.net](Azure ML web site). If you do not
+have an account, you can create a free account (not guest) to use these APIs.
+
+Once logged in, you will be brought to the Studio landing page. Using the
+left-hand menu, navigate to the 'Settings' tab to find your Workspace ID. Note
+this, or copy it into your R session and store it is a variable, e.g. myWsID.
+
+<img src="workspaceID.png" width="80%">
+
+Next, within the 'Settings' tab, use the overhead menu to navigate to the
+'Authorization Tokens' tab and similarly note your Primary Authorization Token.
+
+<img src="authToken.png" width="80%">
+
+```{r, eval=FALSE}
 library(AzureML)
-ws <- workspace(id="your workspace ID", auth="your authorization token")
+ws <- workspace(
+  id = "your workspace ID",
+  auth = "your authorization token"
+)
 ```
-or alternatively create a file in `~/.azureml/settings.json` with the
-JSON structure (`api_endpoint` and `management_endpoint` are optional):
-```
+
+or alternatively create a file in `~/.azureml/settings.json` with the JSON
+structure (`api_endpoint` and `management_endpoint` are optional):
+
+```json
 {"workspace": {
-   "id":"test_id",
-   "authorization_token": "test_token",
-   "api_endpoint": "api_endpoint",
-   "management_endpoint": "management_endpoint"
+   "id"                  : "test_id",
+   "authorization_token" : "test_token",
+   "api_endpoint"        : "api_endpoint",
+   "management_endpoint" : "management_endpoint"
 }}
 ```
-See `?worspace` for more details.
+
+See `?workspace` for more details.
 
 ## Examining workspace datasets, experiments and services
 
-The `datasets`, `experiments`, and `services` function return data frames that
-contain information about those objects available in the workspace. The package
-caches the objects in the workspace environment, and that cache can be
-refreshed at any time with the `refresh` function. Dataframes make it
-relatively easy to sort and filter the datasets, experiments, and servies in
-arbitrary ways.  The functions also include filtering options for specific and
-common filters, like looking up something by name.
+The `datasets`, `experiments`, and `services` functions return data
+frames that contain information about those objects available in the workspace.
 
-Use the `download.datasets` and `upload.dataset` to download or upload data
-between R and your Azure workspace. The `download.intermediate.dataset`
-function can download ephemeral data from a port in an experiment that is not
-explicitly stored in your Azure workspace. Use `delete.datasets` to remove
-and delete datasets from the workspace.
+The package caches R data frames describing available datasets, experiments and
+services in the workspace environment. That cache can be refreshed at any time
+with the `refresh` function. Data frames make it relatively easy to sort and
+filter the datasets, experiments, and servies in arbitrary ways.  The functions
+also include filtering options for specific and common filters, like looking up
+something by name.
 
-The `endpoints` function describes Azure web service endpoints, and works
-with supporting help functions like `discoverSchema` and `endpointHelp`.
+Use the `download.datasets` and `upload.dataset` functions to download or
+upload data between R and your Azure workspace. The
+`download.intermediate.dataset` function can download ephemeral data from a
+port in an experiment that is not explicitly stored in your Azure workspace.
+Use `delete.datasets` to remove and delete datasets from the workspace.
+
+The `endpoints` function describes Azure web service endpoints, and works with
+supporting help functions like `discoverSchema` and `endpointHelp`.
 
 The `publishWebService` function publishes a custom R function as an AzureML
-web service, available for use by any client.
+web service, available for use by any client. The `updateWebService` and
+`deleteWebServce` update or delete existing web services, respectively.
 
-Use the `comsume` function to evaluate an Azure ML web service with uploaded
-R data.
+Use the `consume` function to evaluate an Azure ML web service with uploaded R
+data.
+
+# Examples
+
+Work with the AzureML package begins by defining a workspace object. The
+example below uses the configured workspace ID and authorization token in the
+`~/.azureml/settings.json` file.  Alternatively specify these settings
+explicitly in the `workspace` function as outlined above. All of the examples
+require this step.
+
+```{r}
+library(AzureML)
+ws <- workspace()
+ws
+```
+
+## Datasets
+
+AzureML 'datasets' correspond more or less to R data frames. The AzureML
+package defines four basic dataset operations: list, upload, download, and
+delete.
+
+### List available datasets
+
+The following example illustrates listing available datasets in your workspace.
+
+```{r}
+head(datasets(ws))
+
+# Or, equivalently:
+head(ws$datasets)
+```
+The list of datasets is presented as an a R data frame with class `Datasets`.
+Its print method shows a summary of the datasets, along with all of the
+available variables. Use any normal R data frame operation to manipulate
+the datasets. For example, to see the "Owner" value of each dataset:
+
+```{r}
+ws$datasets$Owner
+```
+
+### Downloading datasets
+
+The next example illustrates downloading a specific dataset named "Airport
+Codes Dataset" from AzureML to your R session. This dataset is presented by
+AzureML as a "Generic CSV" dataset, and will be parsed by R's `read.table`
+function. (Other formats are parsed by an appropriate parser, for example
+`read.arff`.) The example illustrates passing additional arguments to the
+`read.table` function used to parse the data from AzureML in this case.
+```{r}
+airports <- download.datasets(ws, name = "Airport Codes Dataset", quote="\"")
+head(airports)
+```
+You can use `download.datasets` to download more than one dataset as a time,
+returning the results in a list of data frames.
+
+### Uploading R data frames as AzureML datasets and deleting datasets
+
+Use the `upload.dataset` function to upload R data frames to AzureML.
+```{r}
+upload.dataset(airquality, ws, name="Air quality")
+
+# Let's see what we've got:
+head(download.datasets(ws, name = "Air quality"))
+```
+
+Delete one or more AzureML datasets with `delete.datasets`:
+```{r}
+delete.dataset(ws, name="Air quality")
+```
 
 
+## Experiments
 
-## Detailed Example
+Use the `experiments` function or simply use the `ws$experiments` data frame
+directly to list details about experiments in your AzureML workspace. The
+`experiments` function optionally filters experiments by ownership.
+```{r}
+e <- experiments(ws, filter = "samples")
+head(e)
+```
+The `ws$experiments` object is just an R data frame with class `Experiments`.
+Its print method shows a summary of the avilable experiments, but it can
+otherwise be manipulated like a normal R data frame.
+
+The list of experiments in your workspace is cached in the workspace
+environment.  Use the `refresh` function to explicitly update the cache at any
+time, for example:
+```{r}
+refresh(ws, "experiments")
+```
 
 
-WRITE ME
+## Web Services
+
+The AzureML package helps you to publish R functions as AzureML web services
+that can be consumed anywhere. You can also use the AzureML package to
+run R data through an existing web service and collect the output.

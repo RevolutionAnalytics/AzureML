@@ -72,16 +72,16 @@ download.datasets = function(source, name, ...)
 #' @param ... Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.
 #' 
 #' @return A data.frame.
-#' @note TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE}
-#' by default (independently of the global \code{stringsAsFactors} option).
-#'
-#' This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId"
-#' of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
-#' Conversion modules to convert data to a supported format.
+#' 
+#' @note TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
+#' This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId" of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
+#' 
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}}
 #' \code{\link{download.datasets}}
+#' 
 #' @importFrom curl curl_escape new_handle handle_setheaders
 #' @importFrom jsonlite toJSON
+#' 
 #' @export
 #' @family dataset functions
 #' @family experiment functions
@@ -175,10 +175,11 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
 #'
 #' @inheritParams refresh
 #' @param name Either one or more \code{Dataset} objects (rows from the workspace \code{datasets} data.frame), or a character vector of dataset names to delete.
+#' @param host AzureML delete service endpoint
 #' @return A data.frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 #' @family dataset functions
 #' @export
-delete.datasets = function(ws, name)
+delete.datasets = function(ws, name, host="https://studioapi.azureml.net/api")
 {
   # https://studioapi.azureml.net/api/workspaces/<workspaceId>/datasources/family/<familyId> HTTP/1.1
   datasets = name
@@ -189,11 +190,11 @@ delete.datasets = function(ws, name)
     datasets = datasets[datasets$Name %in% name, ]
   }
   h = new_handle()
-  handle_setheaders(h, .list = ws$.headers)
-  handle_setopt(h, customrequest = "DELETE")
+  handle_setheaders(h, .list=ws$.headers)
+  handle_setopt(h, customrequest="DELETE")
   status_code = vapply(datasets$FamilyId, function(familyId)
   {
-    uri = sprintf("https://studioapi.azureml.net/api/workspaces/%s/datasources/family/%s",
+    uri = sprintf("%s/workspaces/%s/datasources/family/%s", host,
                   curl_escape(ws$id), curl_escape(familyId))
     s = 400
     try = 0

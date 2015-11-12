@@ -4,8 +4,12 @@ add <- function(x,y) {
 }
 
 ## ----publish, eval=FALSE-------------------------------------------------
-#  response <- publishWebService("add", "addOnline",
-#                                list("x"="float", "y"="float"), list("z"="float"), myWsID, myAuth)
+#  response <- publishWebService(ws,
+#                                fun = "add",
+#                                inputSchema = list("x"="float",
+#                                                   "y"="float"),
+#                                outputSchema = list("z"="float")
+#  )
 
 ## ----access, eval=FALSE--------------------------------------------------
 #  webservice <- response[[1]]
@@ -22,7 +26,7 @@ add <- function(x,y) {
 #    return(x)
 #  }
 #  response <- updateWebService("add1", "addOnline", webservice$Id,
-#                                list("x"="float"), list("z"="float"), myWsID, myAuth)
+#                               list("x"="float"), list("z"="float"), myWsID, myAuth)
 
 ## ----webservice, eval=FALSE----------------------------------------------
 #  webservices <- getWebServices(myWsId, myAuth)

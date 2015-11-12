@@ -64,7 +64,8 @@ Other discovery functions: \code{\link{discoverSchema}};
 Other experiment functions: \code{\link{download.intermediate.dataset}};
   \code{\link{experiments}}
 
-Other publishing functions: \code{\link{publishWebService}},
+Other publishing functions: \code{\link{deleteWebService}};
+  \code{\link{publishWebService}},
   \code{\link{updateWebService}}
 }
 
