@@ -1,5 +1,5 @@
-# This is the expression executed in the AzureML R environment.  The
-# publishWebService function sets up the environment 'exportenv' from which
+# `wrapper` is the expression executed in the AzureML R environment.  The
+# publishWebService function sets up the environment "exportenv" from which
 # this expression follows.
 
 wrapper = "inputDF <- maml.mapInputPort(1)\r\nload('src/env.RData')\r\n outputDF <- data.frame(matrix(NA, ncol=length(exportenv$..output_names), nrow=nrow(inputDF)))\r\n names(outputDF) <- exportenv$..output_names\r\n if(!is.null(exportenv$..packages))\r\n {\r\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\r\n}\r\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\n\nfor (i in 1:nrow(inputDF)){\r\n  outputDF[i,] <- do.call('..fun', as.list(inputDF[i,]))\r\n}\r\nmaml.mapOutputPort(\"outputDF\")"
@@ -45,7 +45,7 @@ azureSchema = function(argList) {
 
 
 
-#' Publish a function to Microsoft Azure
+#' Publish a function as a Microsoft Azure Web Service
 #'
 #' Publish a function to Microsoft Azure Machine Learning as a web service. The
 #' web service created is a standard Azure ML web service, and can be used
@@ -137,15 +137,15 @@ publishWebService = function(ws, fun, name,
   )
   h = new_handle()
   httpheader = list(
-    Authorization = paste('Bearer', ws$.auth, sep=' '),
-    `Content-Type` = 'application/json',
-    Accept = 'application/json'
+    Authorization = paste("Bearer", ws$.auth, sep=' '),
+    `Content-Type` = "application/json",
+    Accept = "application/json"
   )
   opts = list(
     post = TRUE,
     postfieldsize = length(body),
     postfields = body,
-    customrequest = 'PUT'
+    customrequest = "PUT"
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
@@ -164,3 +164,39 @@ publishWebService = function(ws, fun, name,
 #' @rdname publishWebService
 #' @export
 updateWebService = publishWebService
+
+
+#' Delete a Microsoft Azure Web Service
+#'
+#' Delete a Microsoft Azure Machine Learning  web service from your workspace.
+#'
+#' @export
+#'
+#' @inheritParams refresh
+#' @param name Either one row from the workspace \code{services} data.frame corresponding to a service to delete, or simply a service name character string.
+#' @note If more than one service matches the supplied \code{name}, the first listed service will be deleted.
+#' @return The updated data.frame of workspace services is invisibly returned.
+#' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}
+#' @family publishing functions
+#' @example inst/examples/example_publish.R
+deleteWebService = function(ws, name)
+{
+#DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
+  if(is.data.frame(name) || is.list(name))
+  {
+    name = name$Id[1]
+  } else
+  {
+    name = ws$services[ws$services$Name == name, "Id"][1]
+    if(is.na(name)) stop("service not found")
+  }
+  h = new_handle()
+  handle_setheaders(h, `Authorization`=sprintf("Bearer %s",ws$.auth), .list=ws$.headers)
+  handle_setopt(h, customrequest="DELETE")
+  uri = sprintf("%s/workspaces/%s/webservices/%s", 
+                ws$.management_endpoint, ws$id, name)
+  s = curl_fetch_memory(uri, handle=h)$status_code
+  if(s > 299) stop("HTTP error ",s)
+  refresh(ws, "services")
+  invisible(ws$services)
+}

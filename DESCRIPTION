@@ -4,10 +4,14 @@ Title: Interface with Azure ML datasets
 Description: Functions and datasets to support Azure ML.
 Version: 0.2.0
 Date: 2015-11-09
-Author: Microsoft
-Copyright: COPYRIGHT
-Maintainer: Raymond Laghaeian <raymondl@microsoft.com>
+Authors@R: c(
+      person("Raymond", "Laghaeian", role=c("aut", "cre"), email="raymondl@microsoft.com"),
+      person(family="Revolution Analytics", role="cph", comment="Code adapted from the foreach package")
+    )
+Copyright: COPYRIGHTS
 License: MIT + file LICENSE
+URL: https://github.com/RevolutionAnalytics/azureml
+BugReports: https://github.com/RevolutionAnalytics/azureml/issues
 LazyData: TRUE
 VignetteBuilder: knitr
 Imports:

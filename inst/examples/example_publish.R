@@ -12,6 +12,9 @@
                                                    y="numeric"), 
                                 outputSchema = list(ans="numeric"))
   consume(endpoint, list(x=pi, y=2))
+
+  # Now remove the web service named "addme" that we just published
+  removeWebService(ws, "addme")
   
   
   # A neat trick to evaluate any expression in the Azure ML virtual
@@ -27,7 +30,9 @@
   cat(consume(ep, list(x = "getwd()"))$ans)
   cat(consume(ep, list(x = ".packages(all=TRUE)"))$ans)
   cat(consume(ep, list(x = "R.Version()"))$ans)
-  
+
+  # Remove the service we just published
+  removeWebService(ws, "commander")
   
   # The following example illustrates scoping rules. Note that the function
   # refers to the variable y defined outside the function body. That value
@@ -35,11 +40,13 @@
   y <- pi
   ep <- publishWebService(ws, 
                           fun = function(x) x + y, 
-                          name = "lexi",
+                          name = "lexical scope",
                           inputSchema = list(x = "numeric"), 
                           outputSchema = list(ans = "numeric"))
   cat(consume(ep, list(x=2))$ans)
   
+  # Remove the service we just published
+  removeWebService(ws, "lexical scope")
   
   # Example showing the use of consume to score all the rows of a data frame
   # at once. The columns of the data frame correspond to the input parameters
@@ -76,4 +83,6 @@
   # 5 10.2    5.04
   # 6 11.4 14.3208
   
+  # Remove the service we just published
+  removeWebService(ws, "rowSums")
 }
