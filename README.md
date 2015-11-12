@@ -1,4 +1,5 @@
 # AzureML
+
 An R interface to AzureML experiments, datasets, and web services.
 
 Use this package to upload and download datasets to and from AzureML,
@@ -9,12 +10,22 @@ to run R data through existing web services and retrieve the output.
 
 Install the development version of the package directly from GitHub
 with:
+
 ```r
 # Install devtools
 if(!require("devtools")) install.packages("devtools")
 devtools::install_github("RevolutionAnalytics/azureml")
 ```
-The package requires the `jsonlite, curl, miniCRAN, base64enc` and `uuid` packages.
+
+The package has dependencies on the following R packages:
+
+- `jsonlite`
+- `curl`
+- `miniCRAN`
+- `base64enc`
+- `uuid`
+
+In addition, you need a zip utility installed and your path must include the location of this zip utility.  On Linux machines this is usually included by default.  However, on Windows, you may have to install this yourself, e.g. by installing RTools and editing your path to include the RTools location.
 
 # Overview
 
