@@ -2,7 +2,7 @@
 # publishWebService function sets up the environment "exportenv" from which
 # this expression follows.
 
-wrapper = "inputDF <- maml.mapInputPort(1)\r\nload('src/env.RData')\r\n outputDF <- data.frame(matrix(NA, ncol=length(exportenv$..output_names), nrow=nrow(inputDF)))\r\n names(outputDF) <- exportenv$..output_names\r\n if(!is.null(exportenv$..packages))\r\n {\r\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\r\n}\r\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\n\nfor (i in 1:nrow(inputDF)){\r\n  outputDF[i,] <- do.call('..fun', as.list(inputDF[i,]))\r\n}\r\nmaml.mapOutputPort(\"outputDF\")"
+wrapper = "inputDF <- maml.mapInputPort(1)\r\nload('src/env.RData')\r\n if(!is.null(exportenv$..packages))\r\n {\r\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\r\n}\r\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\n\noutputDF <- data.frame(Reduce(rbind, lapply(1:nrow(inputDF), function(i) do.call('..fun', as.list(inputDF[i,])))), row.names=c(), stringsAsFactors=FALSE)\r\nnames(outputDF) <- exportenv$..output_names\r\nmaml.mapOutputPort(\"outputDF\")"
 
 
 #' Convert input schema to API expected format.

@@ -78,9 +78,6 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
   # Cache the result in the workspace
   if(service_id == "") ws$services = ans
   if(!missing(name)) return(ans[ans$Name == name,])
-  if(is.null(ans)){
-    warning("No service returned. The service_id may be invalid.", immediate. = TRUE)
-  }
   ans
 }
 
