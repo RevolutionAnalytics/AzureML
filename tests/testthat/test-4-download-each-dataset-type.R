@@ -4,7 +4,7 @@ settingsFile <- "~/.azureml/settings.json"
 if(file.exists(settingsFile))
 {
   context("Download one file of every type")
-
+  
   ws <- workspace()
   ds <- datasets(ws, filter = "samples")
   unique(ds$DataTypeId)
@@ -19,16 +19,22 @@ if(file.exists(settingsFile))
     )
   )
   
+  zip <- oneOfEach[oneOfEach$DataTypeId %in% c("Zip"), ]
   oneOfEach <- oneOfEach[!oneOfEach$DataTypeId %in% c("Zip"), ]
   oneOfEach$DataTypeId
   
   for(type in oneOfEach$DataTypeId){
-  test_that(sprintf("Can download dataset of type %s", type), {
-    dl <- download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
-    expect_is(dl, "data.frame")
-    expect_true(nrow(dl) > 0)
-  })
+    test_that(sprintf("Can download dataset of type %s", type), {
+      dl <- download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
+      expect_is(dl, "data.frame")
+      expect_true(nrow(dl) > 0)
+    })
   }
+  test_that("Throws error if trying to download Zip", {
+    expect_error(
+      download.datasets(ws, zip)
+    )
+  })
   
 } else
 {

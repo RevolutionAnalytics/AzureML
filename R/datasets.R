@@ -55,7 +55,9 @@ download.datasets = function(source, name, ...)
   }
   # check for dataset name filter
   if(!missing(name)) datasets = datasets[datasets$Name %in% name, ]
-  ans = lapply(1:nrow(datasets), function(j) get_dataset(datasets[j,], ...))
+  ans = lapply(1:nrow(datasets), 
+               function(j) get_dataset(datasets[j,], ...)
+  )
   if(length(ans)==1) return(ans[[1]])
   names(ans) = datasets$Name
   ans
