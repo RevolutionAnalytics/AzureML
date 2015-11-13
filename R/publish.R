@@ -81,7 +81,7 @@ azureSchema = function(argList) {
 #' 
 #' The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
 #'
-#' The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
+#' The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitly prevent objects from being exported.
 #' 
 #' @seealso \code{\link{endpoints}} \code{\link{discoverSchema}} \code{\link{consume}} \code{\link{services}}
 #' @family publishing functions
@@ -95,8 +95,12 @@ publishWebService = function(ws, fun, name,
                              export=character(0), noexport=character(0), packages,
                              version="3.1.0", wsid, host = ws$.management_endpoint)
 {
+  # Perform validation on inputs
   if(!is.Workspace(ws)) stop("ws must be a workspace object")
   if(!zipAvailable()) stop(zipNotAvailableMessage)
+  if(is.character(fun)) stop("You must specify 'fun' as a function, not a character")
+  if(!is.function(fun)) stop("The argument 'fun' must be a function.")
+  
   if(missing(wsid) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the wsid parameter is specified")
   if(missing(wsid)) wsid = gsub("-", "", UUIDgenerate(use.time=TRUE))

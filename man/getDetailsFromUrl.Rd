@@ -10,7 +10,7 @@ getDetailsFromUrl(url)
 \item{url}{the URL of a help page}
 }
 \value{
-a list containing the endpoint ID and the workspace ID
+a vector containing the workspace ID, webservices ID and endpoint ID
 }
 \description{
 Given a Microsoft Azure Machine Learning web service endpoint, extracts the endpoint ID and the workspace ID

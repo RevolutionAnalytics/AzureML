@@ -53,13 +53,13 @@ The function to be published is limited to inputs/outputs consisting of
 lists of scalar values.
 }
 \note{
-AzureML data types are different than, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
+AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
 
 Leave the \code{wsid} parameter undefined to create a new AzureML web service, or specify the ID of an existing web service to update it, replacing the function and required R pacakges with new values. Although the API allows that the name, input and output schema to also be specified when updating it's not possible to change those values.
 
 The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
 
-The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
+The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitly prevent objects from being exported.
 }
 \examples{
 \dontrun{

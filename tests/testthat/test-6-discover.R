@@ -4,11 +4,22 @@ settingsFile <- "~/.azureml/settings.json"
 if(file.exists(settingsFile))
 {
   test_that("discoverSchema returns help page information", {
+    
+    schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/5abf96d700af4af3a4bf44160b6d3064/endpoints/9c09b5f4d6224afcbfef7368e98a7676"
+    expect_equal(
+      getDetailsFromUrl(schemaUrl),
+      c("dd01c7e4a424432c9a9f83142d5cfec4", 
+        "5abf96d700af4af3a4bf44160b6d3064",
+        "9c09b5f4d6224afcbfef7368e98a7676")
+    )
+    
     schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/f5e8e9bc4eed4034b78567449cfca779/webservices/d42667a354e34a3f98888ba86300fc2f/endpoints/b4caf0f0ebfd451bbc187741894e213b/score"
     
     expect_equal(
       getDetailsFromUrl(schemaUrl),
-      c("b4caf0f0ebfd451bbc187741894e213b", "f5e8e9bc4eed4034b78567449cfca779")
+      c("f5e8e9bc4eed4034b78567449cfca779", 
+        "d42667a354e34a3f98888ba86300fc2f",
+        "b4caf0f0ebfd451bbc187741894e213b")
     )
     
     url <- "https://ussouthcentral.services.azureml.net/workspaces/f5e8e9bc4eed4034b78567449cfca779/services/b4caf0f0ebfd451bbc187741894e213b/execute?api-version=2.0&format=swagger"

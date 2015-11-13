@@ -2,25 +2,25 @@
 #' 
 #' @rdname AzureML-deprecated
 consumeDataframe <- function(){
-  .Deprecated("consume")
+  .Defunct("consume")
 }
 
 #' @rdname AzureML-deprecated
 consumeFile <- function(){
-  .Deprecated("consume")
+  .Defunct("consume")
 }
 
 #' @rdname AzureML-deprecated
 consumeLists <- function(){
-  .Deprecated("consume")
+  .Defunct("consume")
 }
 
 #' @rdname AzureML-deprecated
 getEPDetails <- function(){
-  .Deprecated("endpoints")
+  .Defunct("endpoints")
 }
 
 #' @rdname AzureML-deprecated
 getWSDetails <- function(){
-  .Deprecated("services")
+  .Defunct("services")
 }
