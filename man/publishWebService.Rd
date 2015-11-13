@@ -59,7 +59,7 @@ Leave the \code{wsid} parameter undefined to create a new AzureML web service, o
 
 The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
 
-The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitlt prevent objects from being exported.
+The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitly prevent objects from being exported.
 }
 \examples{
 \dontrun{
