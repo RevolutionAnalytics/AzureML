@@ -44,7 +44,7 @@ Set \code{...} to a list of key/value pairs corresponding to web service inputs.
   consume(endpoint, list(x=pi, y=2))
 
   # Now remove the web service named "addme" that we just published
-  removeWebService(ws, "addme")
+deleteWebService(ws, "addme")
   
   
   # A neat trick to evaluate any expression in the Azure ML virtual
@@ -62,7 +62,7 @@ Set \code{...} to a list of key/value pairs corresponding to web service inputs.
   cat(consume(ep, list(x = "R.Version()"))$ans)
 
   # Remove the service we just published
-  removeWebService(ws, "commander")
+  deleteWebService(ws, "commander")
   
   # The following example illustrates scoping rules. Note that the function
   # refers to the variable y defined outside the function body. That value
@@ -76,7 +76,7 @@ Set \code{...} to a list of key/value pairs corresponding to web service inputs.
   cat(consume(ep, list(x=2))$ans)
   
   # Remove the service we just published
-  removeWebService(ws, "lexical scope")
+  deleteWebService(ws, "lexical scope")
   
   # Example showing the use of consume to score all the rows of a data frame
   # at once. The columns of the data frame correspond to the input parameters
@@ -114,7 +114,7 @@ Set \code{...} to a list of key/value pairs corresponding to web service inputs.
   # 6 11.4 14.3208
   
   # Remove the service we just published
-  removeWebService(ws, "rowSums")
+  deleteWebService(ws, "rowSums")
 }
 }
 \seealso{

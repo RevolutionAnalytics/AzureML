@@ -180,6 +180,119 @@ refresh(ws, "experiments")
 ```
 
 
-## Web Services
+# Web Services
 
 The AzureML package helps you to publish R functions as AzureML web services that can be consumed anywhere. You can also use the AzureML package to run R data through an existing web service and collect the output.
+
+## Publishing a Web Service
+
+The publishing functionality of this package allows you to publish a function or a trained model defined in R as an Azure ML web service.
+
+Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. `ints`, `strings`, etc. This means the function to be published cannot take in dataframes, lists, etc.
+
+As an example, consider this simple R function:
+
+```{r train}
+add <- function(x, y) {
+  x + y
+}
+```
+
+To publish this as a web service use the function `publishWebService()`:
+
+```{r publish}
+ws <- workspace()
+api <- publishWebService(
+  ws,
+  fun = add, 
+  name = "add",
+  inputSchema = list(
+    x = "numeric", 
+    y = "numeric"
+  ), 
+  outputSchema = list(
+    ans = "numeric"
+  )
+)
+```
+
+
+The result of `publishWebService()` is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:
+
+```{r access}
+class(api)
+names(api)
+```
+
+The web service created is identical to a web service published through the Azure Machine Learning Studio. From the response, you can get the Web Service's URL, API Key and Help Page URL, as shown above. The first two are needed to make calls to the web service. The latter has the sample code, sample request and other information for consuming the API from client apps such as mobile and web applications.
+
+The new web service will show up on the 'Web Services' tab of the Studio interface, and the service will have a help page for each endpoint, e.g.
+
+```{r help}
+helpPageUrl <- api$HelpLocation
+helpPageUrl
+```
+
+Once published, you can update a web service using the `updateWebService()` function.  However, note that `updateWebService()` really is just an alias for `publishWebService()`, except that the argument `wsid` is compulsory
+
+
+
+```{r update}
+api <- updateWebService(
+  ws,
+  fun = add, 
+  name = "add",
+  inputSchema = list(
+    x = "numeric", 
+    y = "numeric"
+  ), 
+  outputSchema = list(
+    ans = "numeric"
+  ),
+  wsid = api$WorkspaceId   # <<-- Note you must add wsid to update!
+)
+```
+
+## Discovering Web Service
+
+The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:
+
+```{r webservice}
+webservices <- services(ws, name = "add")
+```
+
+Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:
+
+```{r endpoints}
+ep <- endpoints(ws, webservices[1, ]$Id)
+class(ep)
+names(ep)
+```
+
+The `endpoints` object contains all the information needed to consume a web service.
+
+Alternatively, you can use the `discoverSchema()` function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:
+
+```{r discover}
+discoverSchema(ep$HelpLocation)
+```
+
+## Consuming Web Services
+
+To send data to your newly published web service API for scoring, use the function `consume()`:
+
+
+```{r df}
+df <- data.frame(
+  x = 1:5,
+  y = 6:10
+)
+s <- services(ws, name = "add")
+s <- tail(s, 1) # use the last published function, in case of duplicate function names
+ep <- endpoints(ws, s$Id)
+consume(ep, df)
+```
+
+
+Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.
+
