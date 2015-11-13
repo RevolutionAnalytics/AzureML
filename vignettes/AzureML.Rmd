@@ -28,18 +28,18 @@ add <- function(x, y) {
 
 To publish this as a web service use the function `publishWebService()`:
 
-```{r publish, eval=FALSE}
+```{r publish}
 ws <- workspace()
 api <- publishWebService(
   ws,
-  fun = "add", 
+  fun = add, 
   name = "add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
   ), 
   outputSchema = list(
-    z = "numeric"
+    ans = "numeric"
   )
 )
 ```
@@ -47,7 +47,7 @@ api <- publishWebService(
 
 The result of `publishWebService()` is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:
 
-```{r access, eval=FALSE}
+```{r access}
 class(api)
 names(api)
 ```
@@ -56,7 +56,7 @@ The web service created is identical to a web service published through the Azur
 
 The new web service will show up on the 'Web Services' tab of the Studio interface, and the service will have a help page for each endpoint, e.g.
 
-```{r help, eval=FALSE}
+```{r help}
 helpPageUrl <- api$HelpLocation
 helpPageUrl
 ```
@@ -65,18 +65,18 @@ Once published, you can update a web service using the `updateWebService()` func
 
 
 
-```{r update, eval=FALSE}
-api <- updatehWebService(
+```{r update}
+api <- updateWebService(
   ws,
-  fun = "add", 
+  fun = add, 
   name = "add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
   ), 
   outputSchema = list(
-    z = "numeric"
-  )
+    ans = "numeric"
+  ),
   wsid = api$WorkspaceId   # <<-- Note you must add wsid to update!
 )
 ```
@@ -85,13 +85,13 @@ api <- updatehWebService(
 
 The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:
 
-```{r webservice, eval=FALSE}
+```{r webservice}
 webservices <- services(ws, name = "add")
 ```
 
 Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:
 
-```{r endpoints, eval=FALSE}
+```{r endpoints}
 ep <- endpoints(ws, webservices[1, ]$Id)
 class(ep)
 names(ep)
@@ -101,34 +101,25 @@ The `endpoints` object contains all the information needed to consume a web serv
 
 Alternatively, you can use the `discoverSchema()` function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:
 
-```{r discover, eval=FALSE}
+```{r discover}
 discoverSchema(ep$HelpLocation)
 ```
 
 ## Consuming Web Services
 
-This package provides a number of ways to pass in inputs to use a web service. Web services can be passed a file (csv):
+To send data to your newly published web service API for scoring, use the function `consume()`:
 
-```{r file, eval=FALSE}
-response <- consumeFile(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, "data.csv")
-response <- consumeFile(endpoints[[1]]$PrimaryKey, schema[[1]]$requestUrl, "data.csv")
+
+```{r df}
+df <- data.frame(
+  x = 1:5,
+  y = 6:10
+)
+s <- services(ws, name = "add")
+s <- tail(s, 1) # use the last published function, in case of duplicate function names
+ep <- endpoints(ws, s$Id)
+consume(ep, df)
 ```
 
-or a dataframe:
-
-```{r df, eval=FALSE}
-df <- data.frame("x"=c(1,2), "y"=c(3,4))
-response <- consumeDataframe(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, df)
-response <- consumeDataframe(endpoints[[1]]$PrimaryKey, schema$requestUrl, df)
-```
-
-or lists of key-value pairs:
-
-```{r lists, eval=FALSE}
-response <- consumeLists(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, 
-                         list("x"=1, "y"=2), list("x"=3, "y"=4))
-response <- consumeLists(endpoints[[1]]$PrimaryKey, schema$requestUrl, 
-                         schema$sampleInput)
-```
 
 Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.

@@ -79,35 +79,43 @@ img {
 <pre class="r"><code>ws &lt;- workspace()
 api &lt;- publishWebService(
   ws,
-  fun = &quot;add&quot;, 
+  fun = add, 
   name = &quot;add&quot;,
   inputSchema = list(
     x = &quot;numeric&quot;, 
     y = &quot;numeric&quot;
   ), 
   outputSchema = list(
-    z = &quot;numeric&quot;
+    ans = &quot;numeric&quot;
   )
 )</code></pre>
 <p>The result of <code>publishWebService()</code> is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
-<pre class="r"><code>class(api)
-names(api)</code></pre>
+<pre class="r"><code>class(api)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>names(api)</code></pre>
+<pre><code>##  [1] &quot;Name&quot;                  &quot;Description&quot;          
+##  [3] &quot;CreationTime&quot;          &quot;WorkspaceId&quot;          
+##  [5] &quot;WebServiceId&quot;          &quot;HelpLocation&quot;         
+##  [7] &quot;PrimaryKey&quot;            &quot;SecondaryKey&quot;         
+##  [9] &quot;ApiLocation&quot;           &quot;MaxConcurrentCalls&quot;   
+## [11] &quot;DiagnosticsTraceLevel&quot; &quot;ThrottleLevel&quot;</code></pre>
 <p>The web service created is identical to a web service published through the Azure Machine Learning Studio. From the response, you can get the Web Service’s URL, API Key and Help Page URL, as shown above. The first two are needed to make calls to the web service. The latter has the sample code, sample request and other information for consuming the API from client apps such as mobile and web applications.</p>
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
 <pre class="r"><code>helpPageUrl &lt;- api$HelpLocation
 helpPageUrl</code></pre>
+<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/2f5236b489aa11e585909105ee954862/endpoints/a274364fe4c94b9595e8f74ee3e0c07f&quot;</code></pre>
 <p>Once published, you can update a web service using the <code>updateWebService()</code> function. However, note that <code>updateWebService()</code> really is just an alias for <code>publishWebService()</code>, except that the argument <code>wsid</code> is compulsory</p>
-<pre class="r"><code>api &lt;- updatehWebService(
+<pre class="r"><code>api &lt;- updateWebService(
   ws,
-  fun = &quot;add&quot;, 
+  fun = add, 
   name = &quot;add&quot;,
   inputSchema = list(
     x = &quot;numeric&quot;, 
     y = &quot;numeric&quot;
   ), 
   outputSchema = list(
-    z = &quot;numeric&quot;
-  )
+    ans = &quot;numeric&quot;
+  ),
   wsid = api$WorkspaceId   # &lt;&lt;-- Note you must add wsid to update!
 )</code></pre>
 </div>
@@ -117,26 +125,74 @@ helpPageUrl</code></pre>
 <pre class="r"><code>webservices &lt;- services(ws, name = &quot;add&quot;)</code></pre>
 <p>Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:</p>
 <pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ]$Id)
-class(ep)
-names(ep)</code></pre>
+class(ep)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>names(ep)</code></pre>
+<pre><code>##  [1] &quot;Name&quot;                  &quot;Description&quot;          
+##  [3] &quot;CreationTime&quot;          &quot;WorkspaceId&quot;          
+##  [5] &quot;WebServiceId&quot;          &quot;HelpLocation&quot;         
+##  [7] &quot;PrimaryKey&quot;            &quot;SecondaryKey&quot;         
+##  [9] &quot;ApiLocation&quot;           &quot;MaxConcurrentCalls&quot;   
+## [11] &quot;DiagnosticsTraceLevel&quot; &quot;ThrottleLevel&quot;</code></pre>
 <p>The <code>endpoints</code> object contains all the information needed to consume a web service.</p>
 <p>Alternatively, you can use the <code>discoverSchema()</code> function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:</p>
 <pre class="r"><code>discoverSchema(ep$HelpLocation)</code></pre>
+<pre><code>## $requestUrl
+## [1] &quot;https://ussouthcentral.services.azureml.net/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/services/0cd2a92378744de39d0ef3848186189d/execute?api-version=2.0&amp;format=swagger&quot;
+## 
+## $columnNames
+## $columnNames[[1]]
+## [1] &quot;x&quot;
+## 
+## $columnNames[[2]]
+## [1] &quot;y&quot;
+## 
+## 
+## $sampleInput
+## $sampleInput$x
+## [1] 1
+## 
+## $sampleInput$y
+## [1] 1
+## 
+## 
+## $inputSchema
+## $inputSchema$required
+## [1] &quot;x&quot; &quot;y&quot;
+## 
+## $inputSchema$properties
+## $inputSchema$properties$x
+## $inputSchema$properties$x$type
+## [1] &quot;number&quot;
+## 
+## $inputSchema$properties$x$format
+## [1] &quot;double&quot;
+## 
+## 
+## $inputSchema$properties$y
+## $inputSchema$properties$y$type
+## [1] &quot;number&quot;
+## 
+## $inputSchema$properties$y$format
+## [1] &quot;double&quot;</code></pre>
 </div>
 <div id="consuming-web-services" class="section level2">
 <h2>Consuming Web Services</h2>
-<p>This package provides a number of ways to pass in inputs to use a web service. Web services can be passed a file (csv):</p>
-<pre class="r"><code>response &lt;- consumeFile(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, &quot;data.csv&quot;)
-response &lt;- consumeFile(endpoints[[1]]$PrimaryKey, schema[[1]]$requestUrl, &quot;data.csv&quot;)</code></pre>
-<p>or a dataframe:</p>
-<pre class="r"><code>df &lt;- data.frame(&quot;x&quot;=c(1,2), &quot;y&quot;=c(3,4))
-response &lt;- consumeDataframe(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, df)
-response &lt;- consumeDataframe(endpoints[[1]]$PrimaryKey, schema$requestUrl, df)</code></pre>
-<p>or lists of key-value pairs:</p>
-<pre class="r"><code>response &lt;- consumeLists(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, 
-                         list(&quot;x&quot;=1, &quot;y&quot;=2), list(&quot;x&quot;=3, &quot;y&quot;=4))
-response &lt;- consumeLists(endpoints[[1]]$PrimaryKey, schema$requestUrl, 
-                         schema$sampleInput)</code></pre>
+<p>To send data to your newly published web service API for scoring, use the function <code>consume()</code>:</p>
+<pre class="r"><code>df &lt;- data.frame(
+  x = 1:5,
+  y = 6:10
+)
+s &lt;- services(ws, name = &quot;add&quot;)
+s &lt;- tail(s, 1) # use the last published function, in case of duplicate function names
+ep &lt;- endpoints(ws, s$Id)
+consume(ep, df)</code></pre>
+<pre><code>##   ans
+## 1   7
+## 2   9
+## 3  11
+## 4  13
+## 5  15</code></pre>
 <p>Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.</p>
 </div>
 
