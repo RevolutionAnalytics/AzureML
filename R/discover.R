@@ -93,7 +93,7 @@ getWebServices = services
 #'
 #' @inheritParams refresh
 #' @param host The AzureML web services URI
-#' @param service_id A web service Id, for example returned by \code{\link{services}}.
+#' @param service_id A web service Id, for example returned by \code{\link{services}}; alternatively a row from the services data frame identifying the service.
 #' @param endpoint_id An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.
 #' 
 #' @return Returns a data.frame with variables:
@@ -139,6 +139,7 @@ getWebServices = services
 endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
+  if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
   h = new_handle()
   headers = list(`User-Agent`="R",
                  `Content-Type`="application/json;charset=UTF8",
@@ -175,13 +176,13 @@ getEndpoints = endpoints
 
 #' Display AzureML Web Service Endpoint Help Screens
 #'
-#' Download and display help for the specified AzureML web service endpoint.
-#' The result is displayed as text using the pager.
+#' Download and return help for the specified AzureML web service endpoint.
 #'
 #' @param e an AzureML web service endpoint from the \code{\link{endpoints}} function.
 #' @param type the type of help to display.
 #' 
-#' @return The help text is invisibly returned.
+#' @return The help text is returned. If \code{type="apidocument"}, then the help
+#' is returned as a list from a parsed JSON document describing the service.
 #' @family discovery functions
 #' @examples
 #' \dontrun{
@@ -199,7 +200,7 @@ getEndpoints = endpoints
 #' 
 #' }
 #' @export
-endpointHelp = function(e, type = c("r-snippet","score","jobs","update"))
+endpointHelp = function(e, type = c("apidocument", "r-snippet","score","jobs","update"))
 {
   type = match.arg(type)
   rsnip = FALSE
@@ -208,13 +209,18 @@ endpointHelp = function(e, type = c("r-snippet","score","jobs","update"))
     type = "score"
     rsnip = TRUE
   }
+  uri = e$HelpLocation[1]
+# XXX This is totally nuts, and not documented, but help hosts vary depending on type.
+# Arrghhh...
+  if(type == "apidocument")
+    uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
   pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
   text = paste(
     gsub(
       "&.?quot;", "'", 
       gsub(pattern, "\\1", 
            readLines(
-             curl(paste(e$HelpLocation[1], type, sep="/")), warn = FALSE)
+             curl(paste(uri, type, sep="/")), warn = FALSE)
       )
     ), 
     collapse="\n"
@@ -225,9 +231,6 @@ endpointHelp = function(e, type = c("r-snippet","score","jobs","update"))
                   grepRaw("code-snippet-r",text)+nchar("code-snippet-r")+2,nchar(text)
     )
   }
-  f = tempfile()
-  writeLines(text, con = f)
-  file.show(f)
-  unlink(f)
-  invisible(text)
+  if(type == "apidocument") text = fromJSON(text)
+  text
 }
