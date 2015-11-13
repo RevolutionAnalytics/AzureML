@@ -215,16 +215,17 @@ endpointHelp = function(e, type = c("apidocument", "r-snippet","score","jobs","u
   if(type == "apidocument")
     uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
   pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
+  con = curl(paste(uri, type, sep="/"))
   text = paste(
     gsub(
       "&.?quot;", "'", 
       gsub(pattern, "\\1", 
-           readLines(
-             curl(paste(uri, type, sep="/")), warn = FALSE)
+           readLines(con, warn = FALSE)
       )
-    ), 
+    ),
     collapse="\n"
   )
+  close(con)
   if(rsnip)
   {
     text = substr(text, 

@@ -24,6 +24,7 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
 {
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
+  
   if(missing(globalParam)) {
     globalParam = setNames(list(), character(0))
   }
@@ -37,7 +38,13 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
   result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
   # Access output by converting from JSON into list and indexing into Results
   if(!is.null(output) && output == "output1") 
-    return(data.frame(result$Results$output1))
+  {
+    help = endpointHelp(endpoint)$definitions$output1Item
+    nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    ans = data.frame(result$Results$output1)
+    if(length(nums) > 0) for(j in nums) ans[,j] = as.numeric(ans[,j])
+    return(ans)
+  }
   if(!is.null(output) && output == "output2") 
     return(fromJSON(result$Results$output2[[1]]))
   result$Results
