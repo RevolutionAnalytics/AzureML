@@ -1,8 +1,7 @@
 ---
 title: "Publishing R functions as API endpoints in the AzureML service"
 date: "`r Sys.Date()`"
-output:
-  html_document
+output: html_document
 vignette: >
   %\VignetteIndexEntry{Getting Started with the AzureML package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -17,53 +16,40 @@ The **AzureML** R package provides an interface with Microsoft Azure Machine Lea
 
 The publishing functionality of this package allows you to publish a function or a trained model defined in R as an Azure ML web service.
 
-Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. ints, strings, etc., meaning the function to be published cannot take in dataframes, lists, etc.
+Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. `ints`, `strings`, etc. This means the function to be published cannot take in dataframes, lists, etc.
 
 As an example, consider this simple R function:
 
 ```{r train}
-add <- function(x,y) {
-  return(x+y)
+add <- function(x, y) {
+  x + y
 }
 ```
 
-We want to publish this as a web service. We can do by calling the function publishWebService():
+To publish this as a web service use the function `publishWebService()`:
 
 ```{r publish, eval=FALSE}
-response <- publishWebService(ws,
-                              fun = "add", 
-                              inputSchema = list("x"="float", 
-                                                 "y"="float"), 
-                              outputSchema = list("z"="float")
+ws <- workspace()
+api <- publishWebService(
+  ws,
+  fun = "add", 
+  name = "add",
+  inputSchema = list(
+    x = "numeric", 
+    y = "numeric"
+  ), 
+  outputSchema = list(
+    z = "numeric"
+  )
 )
 ```
 
-We will describe the parameters.
 
-- First, we pass in the name of the function to be published, as a string
-- Next, we pass the name of the new web service as it will appear on Azure, again as a string
-- Third and fourth, we pass the input and output schema. These are named lists of the format: `<parameter name> = <type>`.
-  - For the *input schema*, this should match the signature of the function to be published, so the list length should equal the number of parameter the function takes in.
-  - For the *output schema*, the names of the parameters can vary, but should also match the number of expected outputs. The output schema names will be the names of the columns returned when the web service is consumed. For both schemas, the following types are supported:
-
-    - `float`, `double`
-    - `date-time`
-    - `string`
-    - `time-span`
-    - `uint16`, `int16`, `uint32`, `int32`, `uint64`, `int64`
-    - `int`
-    - `bool`
-
-- Last, we pass in our authorization credentials that we had stored previously
-
-publishWebService() will return a list containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:
+The result of `publishWebService()` is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:
 
 ```{r access, eval=FALSE}
-webservice <- response[[1]]
-endpoints <- response[[2]]
-webServiceURL <- endpoints[[1]]$ApiLocation
-webServiceKey <- endpoints[[1]]$PrimaryKey
-webPageHelpURL <- endpoints[[1]]$HelpLocation
+class(api)
+names(api)
 ```
 
 The web service created is identical to a web service published through the Azure Machine Learning Studio. From the response, you can get the Web Service's URL, API Key and Help Page URL, as shown above. The first two are needed to make calls to the web service. The latter has the sample code, sample request and other information for consuming the API from client apps such as mobile and web applications.
@@ -71,17 +57,28 @@ The web service created is identical to a web service published through the Azur
 The new web service will show up on the 'Web Services' tab of the Studio interface, and the service will have a help page for each endpoint, e.g.
 
 ```{r help, eval=FALSE}
-helpPageUrl <- endpoints[[1]]$HelpLocation
+helpPageUrl <- api$HelpLocation
+helpPageUrl
 ```
 
-Once published, a web service can be updated using the updateWebService() function:
+Once published, you can update a web service using the `updateWebService()` function.  However, note that `updateWebService()` really is just an alias for `publishWebService()`, except that the argument `wsid` is compulsory
+
+
 
 ```{r update, eval=FALSE}
-add1 <- function(x) {
-  return(x)
-}
-response <- updateWebService("add1", "addOnline", webservice$Id,
-                             list("x"="float"), list("z"="float"), myWsID, myAuth)
+api <- updatehWebService(
+  ws,
+  fun = "add", 
+  name = "add",
+  inputSchema = list(
+    x = "numeric", 
+    y = "numeric"
+  ), 
+  outputSchema = list(
+    z = "numeric"
+  )
+  wsid = api$WorkspaceId   # <<-- Note you must add wsid to update!
+)
 ```
 
 ## Discovering Web Service
@@ -89,20 +86,23 @@ response <- updateWebService("add1", "addOnline", webservice$Id,
 The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:
 
 ```{r webservice, eval=FALSE}
-webservices <- getWebServices(myWsId, myAuth)
+webservices <- services(ws, name = "add")
 ```
 
 Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:
 
 ```{r endpoints, eval=FALSE}
-endpoints <- getEndpoints(myWsId, myAuth, webservices[[1]]$Id)
+ep <- endpoints(ws, webservices[1, ]$Id)
+class(ep)
+names(ep)
 ```
 
-From here, the user has all the information needed to consume any web service from any of its endpoints, as described next.
-Alternatively, the discoverSchema() function can also be used to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:
+The `endpoints` object contains all the information needed to consume a web service.
+
+Alternatively, you can use the `discoverSchema()` function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:
 
 ```{r discover, eval=FALSE}
-schema <- discoverSchema(endpoints[[1]]$HelpLocation)
+discoverSchema(ep$HelpLocation)
 ```
 
 ## Consuming Web Services

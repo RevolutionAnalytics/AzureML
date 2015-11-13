@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-11-11" />
+<meta name="date" content="2015-11-12" />
 
 <title>Getting Started with the AzureML Package</title>
 
@@ -62,21 +62,18 @@ img {
 
 <div id="header">
 <h1 class="title">Getting Started with the AzureML Package</h1>
-<h4 class="date"><em>2015-11-11</em></h4>
+<h4 class="date"><em>2015-11-12</em></h4>
 </div>
 
 
-<div id="getting-started-with-azureml" class="section level1">
-<h1>Getting Started with AzureML</h1>
-<p>Use this package to upload and download datasets to and from AzureML, to interrogate experiments, to publish new R-based web services, and to run R data through existing web services and retrieve the output.</p>
-</div>
+<p>Use this package to upload and download datasets to and from AzureML, to interrogate experiments, to publish R functions as AzureML web services, and to run R data through existing web services and retrieve the output.</p>
 <div id="installation-instructions" class="section level1">
 <h1>Installation instructions</h1>
 <p>Install the development version of the package directly from GitHub with:</p>
 <pre class="r"><code># Install devtools
 if(!require(&quot;devtools&quot;)) install.packages(&quot;devtools&quot;)
 devtools::install_github(&quot;RevolutionAnalytics/azureml&quot;)</code></pre>
-<p>The package has dependencies on:</p>
+<p>The package depends on:</p>
 <ul>
 <li><code>jsonlite</code></li>
 <li><code>curl</code></li>
@@ -84,22 +81,20 @@ devtools::install_github(&quot;RevolutionAnalytics/azureml&quot;)</code></pre>
 <li><code>base64enc</code></li>
 <li><code>uuid</code></li>
 </ul>
-<p>Ensure you have these packages installed first.</p>
 </div>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p>AzureML provides an interface to publish web services on Microsoft Azure Machine Learning (Azure ML) from your local R environment. The main functions in the package cover:</p>
+<p>AzureML provides an interface to publish web services on Microsoft Azure Machine Learning (Azure ML) from your local R environment. The main functions in the package cover the following topics:</p>
 <ul>
 <li>Workspace: connect to and manage AzureML workspaces</li>
 <li>Datasets: upload and download datasets to and from AzureML workspaces</li>
-<li>Publish: define a custom function or train a model and publish it as an Azure Web Service</li>
-<li>Consume: use available web services from R in a variety of convenient formats</li>
+<li>Publish: publish R functions as AzureML web services, and update or delete existing services</li>
+<li>Consume: apply any AzureML web service to your R data</li>
 </ul>
-<p>This is a technology preview. The APIs used by the package are still subject to change. Please send any bugs or comments you have to the maintainers listed.</p>
 <div id="getting-started" class="section level2">
 <h2>Getting Started</h2>
-<p>To get started, please go <a href="https://studio.azureml.net">here</a> and create a free account (not guest) or use your existing AzureML account. After logging in, under the “Settings” tab, copy and paste your Workspace ID from the “Name” sub-tab into your R console. From the “Authorization Tokens” sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.</p>
-<p>The package defines a <code>Workspace</code> class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the <code>workspace</code> function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token:</p>
+<p>To get st arted, please go <a href="https://studio.azureml.net">here</a> and create a free account (not guest) or use your existing AzureML account. After logging in, under the “Settings” tab, copy and paste your Workspace ID from the “Name” sub-tab into your R console. From the “Authorization Tokens” sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.</p>
+<p>The package defines a <code>Workspace</code> class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the <code>workspace</code> function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token.</p>
 </div>
 <div id="obtaining-azureml-credentials" class="section level2">
 <h2>Obtaining AzureML Credentials</h2>
@@ -125,28 +120,29 @@ ws &lt;- workspace(
 <div id="examining-workspace-datasets-experiments-and-services" class="section level2">
 <h2>Examining workspace datasets, experiments and services</h2>
 <p>The <code>datasets()</code>, <code>experiments()</code>, and <code>services()</code> functions return data frames that contain information about those objects available in the workspace.</p>
-<p>The package caches the objects in the workspace environment, and that cache can be refreshed at any time with the <code>refresh()</code> function. Dataframes make it relatively easy to sort and filter the datasets, experiments, and servies in arbitrary ways. The functions also include filtering options for specific and common filters, like looking up something by name.</p>
-<p>Use the <code>download.datasets()</code> and <code>upload.dataset</code>() functions to download or upload data between R and your Azure workspace. The <code>download.intermediate.dataset</code> function can download ephemeral data from a port in an experiment that is not explicitly stored in your Azure workspace. Use <code>delete.datasets</code> to remove and delete datasets from the workspace.</p>
+<p>The package caches R data frames describing available datasets, experiments and services in the workspace environment. That cache can be refreshed at any time with the <code>refresh</code> function. Data frames make it relatively easy to sort and filter the datasets, experiments, and servies in arbitrary ways. The functions also include filtering options for specific and common filters, like looking up something by name.</p>
+<p>Use the <code>download.datasets</code> and <code>upload.dataset</code> functions to download or upload data between R and your Azure workspace. The <code>download.intermediate.dataset</code> function can download ephemeral data from a port in an experiment that is not explicitly stored in your Azure workspace.</p>
+<p>Use <code>delete.datasets</code> to remove and delete datasets from the workspace.</p>
 <p>The <code>endpoints</code> function describes Azure web service endpoints, and works with supporting help functions like <code>discoverSchema</code> and <code>endpointHelp</code>.</p>
-<p>The <code>publishWebService</code> function publishes a custom R function as an AzureML web service, available for use by any client.</p>
+<p>The <code>publishWebService</code> function publishes a custom R function as an AzureML web service, available for use by any client. The <code>updateWebService</code> and <code>deleteWebServce</code> update or delete existing web services, respectively.</p>
 <p>Use the <code>consume</code> function to evaluate an Azure ML web service with uploaded R data.</p>
 </div>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
-<div id="working-with-datasets-and-experiments" class="section level2">
-<h2>Working with datasets and experiments</h2>
-<p>First define a workspace object.</p>
+<p>Work with the AzureML package begins by defining a workspace object. The example below uses the configured workspace ID and authorization token in the <code>~/.azureml/settings.json</code> file. Alternatively specify these settings explicitly in the <code>workspace</code> function as outlined above. All of the examples require this step.</p>
 <pre class="r"><code>library(AzureML)
 ws &lt;- workspace()
 ws</code></pre>
 <pre><code>## AzureML Workspace
 ## Workspace ID:  dd01c7e4a424432c9a9f83142d5cfec4</code></pre>
-<div id="list-and-download-a-dataset" class="section level3">
-<h3>List and download a dataset</h3>
-<p>Next, get a list of datasets in the workspace:</p>
-<pre class="r"><code>d &lt;- datasets(ws)
-head(d)</code></pre>
+<div id="datasets" class="section level2">
+<h2>Datasets</h2>
+<p>AzureML ‘datasets’ correspond more or less to R data frames. The AzureML package defines four basic dataset operations: list, upload, download, and delete.</p>
+<div id="list-available-datasets" class="section level3">
+<h3>List available datasets</h3>
+<p>The following example illustrates listing available datasets in your workspace.</p>
+<pre class="r"><code>head(datasets(ws))</code></pre>
 <pre><code>##                                               Name DataTypeId      Size
 ## 1 Flight_On_Time_Performance_July_October_2013.csv GenericCSV 100506313
 ## 2                                 TestReadFromBlob    Dataset      8102
@@ -172,7 +168,61 @@ head(d)</code></pre>
 ## [19] &quot;IsLatest&quot;             &quot;Category&quot;             &quot;DownloadLocation&quot;    
 ## [22] &quot;IsDeprecated&quot;         &quot;Culture&quot;              &quot;Batch&quot;               
 ## [25] &quot;CreatedDateTicks&quot;</code></pre>
-<p>To extract a specific dataset:</p>
+<pre class="r"><code># Or, equivalently:
+head(ws$datasets)</code></pre>
+<pre><code>##                                               Name DataTypeId      Size
+## 1 Flight_On_Time_Performance_July_October_2013.csv GenericCSV 100506313
+## 2                                 TestReadFromBlob    Dataset      8102
+## 3                                 New York weather GenericCSV    116989
+## 4                                       airquality GenericTSV      2901
+## 5                           text.preprocessing.zip        Zip      2782
+## 6                            fraudTemplateUtil.zip        Zip      3471
+##   ...
+## 1 ...
+## 2 ...
+## 3 ...
+## 4 ...
+## 5 ...
+## 6 ...
+## ----------------------------------------------
+## AzureML datasets data.frame variables include:
+##  [1] &quot;VisualizeEndPoint&quot;    &quot;SchemaEndPoint&quot;       &quot;SchemaStatus&quot;        
+##  [4] &quot;Id&quot;                   &quot;DataTypeId&quot;           &quot;Name&quot;                
+##  [7] &quot;Description&quot;          &quot;FamilyId&quot;             &quot;ResourceUploadId&quot;    
+## [10] &quot;SourceOrigin&quot;         &quot;Size&quot;                 &quot;CreatedDate&quot;         
+## [13] &quot;Owner&quot;                &quot;ExperimentId&quot;         &quot;ClientVersion&quot;       
+## [16] &quot;PromotedFrom&quot;         &quot;UploadedFromFilename&quot; &quot;ServiceVersion&quot;      
+## [19] &quot;IsLatest&quot;             &quot;Category&quot;             &quot;DownloadLocation&quot;    
+## [22] &quot;IsDeprecated&quot;         &quot;Culture&quot;              &quot;Batch&quot;               
+## [25] &quot;CreatedDateTicks&quot;</code></pre>
+<p>The list of datasets is presented as an a R data frame with class <code>datasets()</code>. Its print method shows a summary of the datasets, along with all of the available variables. Use any normal R data frame operation to manipulate the datasets. For example, to see the “Owner” value of each dataset:</p>
+<pre class="r"><code>ws$datasets$Owner</code></pre>
+<pre><code>##  [1] &quot;apdevries&quot;             &quot;apdevries&quot;            
+##  [3] &quot;apdevries&quot;             &quot;R&quot;                    
+##  [5] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+##  [7] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+##  [9] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [11] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [13] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [15] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [17] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [19] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [21] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [23] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [25] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [27] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [29] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [31] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [33] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [35] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [37] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [39] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [41] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [43] &quot;Microsoft Corporation&quot;</code></pre>
+</div>
+<div id="downloading-datasets" class="section level3">
+<h3>Downloading datasets</h3>
+<p>The next example illustrates downloading a specific dataset named “Airport Codes Dataset” from AzureML to your R session. This dataset is presented by AzureML as a “Generic CSV” dataset, and will be parsed by R’s <code>read.table()</code> function. (Other formats are parsed by an appropriate parser, for example <code>read.arff()</code>.) The example illustrates passing additional arguments to the <code>read.table()</code> function used to parse the data from AzureML in this case.</p>
 <pre class="r"><code>airports &lt;- download.datasets(ws, name = &quot;Airport Codes Dataset&quot;, quote=&quot;\&quot;&quot;)
 head(airports)</code></pre>
 <pre><code>##   airport_id        city state                                 name
@@ -182,10 +232,43 @@ head(airports)</code></pre>
 ## 4      10754      Barrow    AK      Wiley Post/Will Rogers Memorial
 ## 5      10551      Bethel    AK                       Bethel Airport
 ## 6      10926     Cordova    AK                Merle K Mudhole Smith</code></pre>
+<p>You can use <code>download.datasets()</code> to download more than one dataset as a time, returning the results in a list of data frames.</p>
 </div>
-<div id="list-the-experiments" class="section level3">
-<h3>List the experiments</h3>
-<p>You can also list the experiments in a workspace:</p>
+<div id="uploading-r-data-frames-as-azureml-datasets-and-deleting-datasets" class="section level3">
+<h3>Uploading R data frames as AzureML datasets and deleting datasets</h3>
+<p>Use the <code>upload.dataset()</code> function to upload R data frames to AzureML.</p>
+<pre class="r"><code>upload.dataset(airquality, ws, name = &quot;Air quality&quot;)</code></pre>
+<pre><code>##          Name DataTypeId Size ...
+## 1 Air quality GenericTSV 2901 ...
+## ----------------------------------------------
+## AzureML datasets data.frame variables include:
+##  [1] &quot;VisualizeEndPoint&quot;    &quot;SchemaEndPoint&quot;       &quot;SchemaStatus&quot;        
+##  [4] &quot;Id&quot;                   &quot;DataTypeId&quot;           &quot;Name&quot;                
+##  [7] &quot;Description&quot;          &quot;FamilyId&quot;             &quot;ResourceUploadId&quot;    
+## [10] &quot;SourceOrigin&quot;         &quot;Size&quot;                 &quot;CreatedDate&quot;         
+## [13] &quot;Owner&quot;                &quot;ExperimentId&quot;         &quot;ClientVersion&quot;       
+## [16] &quot;PromotedFrom&quot;         &quot;UploadedFromFilename&quot; &quot;ServiceVersion&quot;      
+## [19] &quot;IsLatest&quot;             &quot;Category&quot;             &quot;DownloadLocation&quot;    
+## [22] &quot;IsDeprecated&quot;         &quot;Culture&quot;              &quot;Batch&quot;               
+## [25] &quot;CreatedDateTicks&quot;</code></pre>
+<pre class="r"><code># Let's see what we've got:
+head(download.datasets(ws, name = &quot;Air quality&quot;))</code></pre>
+<pre><code>##   Ozone Solar.R Wind Temp Month Day
+## 1    41     190  7.4   67     5   1
+## 2    36     118  8.0   72     5   2
+## 3    12     149 12.6   74     5   3
+## 4    18     313 11.5   62     5   4
+## 5    NA      NA 14.3   56     5   5
+## 6    28      NA 14.9   66     5   6</code></pre>
+<p>Delete one or more AzureML datasets with <code>delete.datasets()</code>:</p>
+<pre class="r"><code>delete.datasets(ws, name=&quot;Air quality&quot;)</code></pre>
+<pre><code>##          Name Deleted status_code
+## 1 Air quality    TRUE         204</code></pre>
+</div>
+</div>
+<div id="experiments" class="section level2">
+<h2>Experiments</h2>
+<p>Use the <code>experiments()</code> function or simply use the <code>ws$experiments</code> data frame directly to list details about experiments in your AzureML workspace. The <code>experiments()</code> function optionally filters experiments by ownership.</p>
 <pre class="r"><code>e &lt;- experiments(ws, filter = &quot;samples&quot;)
 head(e)</code></pre>
 <pre><code>##                                        Description        CreationTime ...
@@ -215,7 +298,13 @@ head(e)</code></pre>
 ## [16] &quot;StartTime&quot;                          
 ## [17] &quot;EndTime&quot;                            
 ## [18] &quot;Metadata&quot;</code></pre>
+<p>The <code>ws$experiments</code> object is just an R data frame with class <code>experiments()</code>. Its print method shows a summary of the avilable experiments, but it can otherwise be manipulated like a normal R data frame.</p>
+<p>The list of experiments in your workspace is cached in the workspace environment. Use the <code>refresh</code> function to explicitly update the cache at any time, for example:</p>
+<pre class="r"><code>refresh(ws, &quot;experiments&quot;)</code></pre>
 </div>
+<div id="web-services" class="section level2">
+<h2>Web Services</h2>
+<p>The AzureML package helps you to publish R functions as AzureML web services that can be consumed anywhere. You can also use the AzureML package to run R data through an existing web service and collect the output.</p>
 </div>
 </div>
 

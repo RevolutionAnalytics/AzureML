@@ -1,41 +1,56 @@
 ## ----train---------------------------------------------------------------
-add <- function(x,y) {
-  return(x+y)
+add <- function(x, y) {
+  x + y
 }
 
 ## ----publish, eval=FALSE-------------------------------------------------
-#  response <- publishWebService(ws,
-#                                fun = "add",
-#                                inputSchema = list("x"="float",
-#                                                   "y"="float"),
-#                                outputSchema = list("z"="float")
+#  ws <- workspace()
+#  api <- publishWebService(
+#    ws,
+#    fun = "add",
+#    name = "add",
+#    inputSchema = list(
+#      x = "numeric",
+#      y = "numeric"
+#    ),
+#    outputSchema = list(
+#      z = "numeric"
+#    )
 #  )
 
 ## ----access, eval=FALSE--------------------------------------------------
-#  webservice <- response[[1]]
-#  endpoints <- response[[2]]
-#  webServiceURL <- endpoints[[1]]$ApiLocation
-#  webServiceKey <- endpoints[[1]]$PrimaryKey
-#  webPageHelpURL <- endpoints[[1]]$HelpLocation
+#  class(api)
+#  names(api)
 
 ## ----help, eval=FALSE----------------------------------------------------
-#  helpPageUrl <- endpoints[[1]]$HelpLocation
+#  helpPageUrl <- api$HelpLocation
+#  helpPageUrl
 
 ## ----update, eval=FALSE--------------------------------------------------
-#  add1 <- function(x) {
-#    return(x)
-#  }
-#  response <- updateWebService("add1", "addOnline", webservice$Id,
-#                               list("x"="float"), list("z"="float"), myWsID, myAuth)
+#  api <- updatehWebService(
+#    ws,
+#    fun = "add",
+#    name = "add",
+#    inputSchema = list(
+#      x = "numeric",
+#      y = "numeric"
+#    ),
+#    outputSchema = list(
+#      z = "numeric"
+#    )
+#    wsid = api$WorkspaceId   # <<-- Note you must add wsid to update!
+#  )
 
 ## ----webservice, eval=FALSE----------------------------------------------
-#  webservices <- getWebServices(myWsId, myAuth)
+#  webservices <- services(ws, name = "add")
 
 ## ----endpoints, eval=FALSE-----------------------------------------------
-#  endpoints <- getEndpoints(myWsId, myAuth, webservices[[1]]$Id)
+#  ep <- endpoints(ws, webservices[1, ]$Id)
+#  class(ep)
+#  names(ep)
 
 ## ----discover, eval=FALSE------------------------------------------------
-#  schema <- discoverSchema(endpoints[[1]]$HelpLocation)
+#  discoverSchema(ep$HelpLocation)
 
 ## ----file, eval=FALSE----------------------------------------------------
 #  response <- consumeFile(endpoints[[1]]$PrimaryKey, endpoints[[1]]$ApiLocation, "data.csv")

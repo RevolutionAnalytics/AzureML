@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-11-11" />
+<meta name="date" content="2015-11-12" />
 
 <title>Publishing R functions as API endpoints in the AzureML service</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Publishing R functions as API endpoints in the AzureML service</h1>
-<h4 class="date"><em>2015-11-11</em></h4>
+<h4 class="date"><em>2015-11-12</em></h4>
 </div>
 
 
@@ -70,60 +70,58 @@ img {
 <div id="publishing-a-web-service" class="section level2">
 <h2>Publishing a Web Service</h2>
 <p>The publishing functionality of this package allows you to publish a function or a trained model defined in R as an Azure ML web service.</p>
-<p>Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. ints, strings, etc., meaning the function to be published cannot take in dataframes, lists, etc.</p>
+<p>Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. <code>ints</code>, <code>strings</code>, etc. This means the function to be published cannot take in dataframes, lists, etc.</p>
 <p>As an example, consider this simple R function:</p>
-<pre class="r"><code>add &lt;- function(x,y) {
-  return(x+y)
+<pre class="r"><code>add &lt;- function(x, y) {
+  x + y
 }</code></pre>
-<p>We want to publish this as a web service. We can do by calling the function publishWebService():</p>
-<pre class="r"><code>response &lt;- publishWebService(ws,
-                              fun = &quot;add&quot;, 
-                              inputSchema = list(&quot;x&quot;=&quot;float&quot;, 
-                                                 &quot;y&quot;=&quot;float&quot;), 
-                              outputSchema = list(&quot;z&quot;=&quot;float&quot;)
+<p>To publish this as a web service use the function <code>publishWebService()</code>:</p>
+<pre class="r"><code>ws &lt;- workspace()
+api &lt;- publishWebService(
+  ws,
+  fun = &quot;add&quot;, 
+  name = &quot;add&quot;,
+  inputSchema = list(
+    x = &quot;numeric&quot;, 
+    y = &quot;numeric&quot;
+  ), 
+  outputSchema = list(
+    z = &quot;numeric&quot;
+  )
 )</code></pre>
-<p>We will describe the parameters.</p>
-<ul>
-<li>First, we pass in the name of the function to be published, as a string</li>
-<li>Next, we pass the name of the new web service as it will appear on Azure, again as a string</li>
-<li>Third and fourth, we pass the input and output schema. These are named lists of the format: <code>&lt;parameter name&gt; = &lt;type&gt;</code>.</li>
-<li>For the <em>input schema</em>, this should match the signature of the function to be published, so the list length should equal the number of parameter the function takes in.</li>
-<li><p>For the <em>output schema</em>, the names of the parameters can vary, but should also match the number of expected outputs. The output schema names will be the names of the columns returned when the web service is consumed. For both schemas, the following types are supported:</p>
-<ul>
-<li><code>float</code>, <code>double</code></li>
-<li><code>date-time</code></li>
-<li><code>string</code></li>
-<li><code>time-span</code></li>
-<li><code>uint16</code>, <code>int16</code>, <code>uint32</code>, <code>int32</code>, <code>uint64</code>, <code>int64</code></li>
-<li><code>int</code></li>
-<li><code>bool</code></li>
-</ul></li>
-<li><p>Last, we pass in our authorization credentials that we had stored previously</p></li>
-</ul>
-<p>publishWebService() will return a list containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
-<pre class="r"><code>webservice &lt;- response[[1]]
-endpoints &lt;- response[[2]]
-webServiceURL &lt;- endpoints[[1]]$ApiLocation
-webServiceKey &lt;- endpoints[[1]]$PrimaryKey
-webPageHelpURL &lt;- endpoints[[1]]$HelpLocation</code></pre>
+<p>The result of <code>publishWebService()</code> is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
+<pre class="r"><code>class(api)
+names(api)</code></pre>
 <p>The web service created is identical to a web service published through the Azure Machine Learning Studio. From the response, you can get the Web Service’s URL, API Key and Help Page URL, as shown above. The first two are needed to make calls to the web service. The latter has the sample code, sample request and other information for consuming the API from client apps such as mobile and web applications.</p>
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
-<pre class="r"><code>helpPageUrl &lt;- endpoints[[1]]$HelpLocation</code></pre>
-<p>Once published, a web service can be updated using the updateWebService() function:</p>
-<pre class="r"><code>add1 &lt;- function(x) {
-  return(x)
-}
-response &lt;- updateWebService(&quot;add1&quot;, &quot;addOnline&quot;, webservice$Id,
-                             list(&quot;x&quot;=&quot;float&quot;), list(&quot;z&quot;=&quot;float&quot;), myWsID, myAuth)</code></pre>
+<pre class="r"><code>helpPageUrl &lt;- api$HelpLocation
+helpPageUrl</code></pre>
+<p>Once published, you can update a web service using the <code>updateWebService()</code> function. However, note that <code>updateWebService()</code> really is just an alias for <code>publishWebService()</code>, except that the argument <code>wsid</code> is compulsory</p>
+<pre class="r"><code>api &lt;- updatehWebService(
+  ws,
+  fun = &quot;add&quot;, 
+  name = &quot;add&quot;,
+  inputSchema = list(
+    x = &quot;numeric&quot;, 
+    y = &quot;numeric&quot;
+  ), 
+  outputSchema = list(
+    z = &quot;numeric&quot;
+  )
+  wsid = api$WorkspaceId   # &lt;&lt;-- Note you must add wsid to update!
+)</code></pre>
 </div>
 <div id="discovering-web-service" class="section level2">
 <h2>Discovering Web Service</h2>
 <p>The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:</p>
-<pre class="r"><code>webservices &lt;- getWebServices(myWsId, myAuth)</code></pre>
+<pre class="r"><code>webservices &lt;- services(ws, name = &quot;add&quot;)</code></pre>
 <p>Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:</p>
-<pre class="r"><code>endpoints &lt;- getEndpoints(myWsId, myAuth, webservices[[1]]$Id)</code></pre>
-<p>From here, the user has all the information needed to consume any web service from any of its endpoints, as described next. Alternatively, the discoverSchema() function can also be used to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:</p>
-<pre class="r"><code>schema &lt;- discoverSchema(endpoints[[1]]$HelpLocation)</code></pre>
+<pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ]$Id)
+class(ep)
+names(ep)</code></pre>
+<p>The <code>endpoints</code> object contains all the information needed to consume a web service.</p>
+<p>Alternatively, you can use the <code>discoverSchema()</code> function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:</p>
+<pre class="r"><code>discoverSchema(ep$HelpLocation)</code></pre>
 </div>
 <div id="consuming-web-services" class="section level2">
 <h2>Consuming Web Services</h2>
