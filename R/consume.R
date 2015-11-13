@@ -88,14 +88,18 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     httpStatus = r$status_code
     result = rawToChar(r$content)
     if(httpStatus == 200) break
-    if(tries==0)
+    if(tries == 0)
       warning(sprintf("Request failed with status %s. Retrying request...", 
                       httpStatus), 
-              immediate. = TRUE)
+              immediate. = TRUE,
+              call. = FALSE)
     Sys.sleep(retryDelay)
     tries = tries + 1
   }
-  if(httpStatus >= 400) stop(result)
+  if(httpStatus >= 400){
+    print(str(fromJSON(result)))
+    stop()
+  }
   result
 }
 
