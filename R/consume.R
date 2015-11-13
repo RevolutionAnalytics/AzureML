@@ -15,7 +15,7 @@
 #' @return data frame containing results returned from web service call
 #' 
 #' @note Set \code{...} to a list of key/value pairs corresponding to web service inputs. Optionally, set \code{...} to a single data frame with columns corresponding to web service variables. The data frame approach returns output from the evaluation of each row of the data frame (see the examples).
-#' 
+#'
 #' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
@@ -33,6 +33,9 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
   if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]]))
   {
     requestsLists = requestsLists[[1]]
+  } else
+  {
+    if(!is.list(requestsLists[[1]])) requestsLists = list(requestsLists)
   }
   # Make API call with parameters
   result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
@@ -40,9 +43,11 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
   if(!is.null(output) && output == "output1") 
   {
     help = endpointHelp(endpoint)$definitions$output1Item
-    nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
     ans = data.frame(result$Results$output1)
+    nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    logi = which("boolean" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
     if(length(nums) > 0) for(j in nums) ans[,j] = as.numeric(ans[,j])
+    if(length(logi) > 0) for(j in logi) ans[,j] = as.logical(ans[,j])
     return(ans)
   }
   if(!is.null(output) && output == "output2") 

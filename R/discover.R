@@ -197,6 +197,10 @@ getEndpoints = endpoints
 #' s <- services(ws)
 #' e <- endpoints(ws, s[1,])
 #' endpointHelp(e[1,])
+#'
+#' Particularly useful way to see expected service input and output:
+#' endpointHelp(e[1,])$definitions
+#' 
 #' 
 #' }
 #' @export
