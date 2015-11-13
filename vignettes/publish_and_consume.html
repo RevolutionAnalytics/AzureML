@@ -103,7 +103,7 @@ api &lt;- publishWebService(
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
 <pre class="r"><code>helpPageUrl &lt;- api$HelpLocation
 helpPageUrl</code></pre>
-<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/2f5236b489aa11e585909105ee954862/endpoints/a274364fe4c94b9595e8f74ee3e0c07f&quot;</code></pre>
+<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/9240c13c89aa11e58a3f3f0ac7f391ed/endpoints/9fc2e5269d4e43a59db37cda988c17fe&quot;</code></pre>
 <p>Once published, you can update a web service using the <code>updateWebService()</code> function. However, note that <code>updateWebService()</code> really is just an alias for <code>publishWebService()</code>, except that the argument <code>wsid</code> is compulsory</p>
 <pre class="r"><code>api &lt;- updateWebService(
   ws,
@@ -187,6 +187,7 @@ s &lt;- services(ws, name = &quot;add&quot;)
 s &lt;- tail(s, 1) # use the last published function, in case of duplicate function names
 ep &lt;- endpoints(ws, s$Id)
 consume(ep, df)</code></pre>
+<pre><code>## Warning: Request failed with status 500. Retrying request...</code></pre>
 <pre><code>##   ans
 ## 1   7
 ## 2   9
