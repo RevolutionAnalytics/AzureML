@@ -72,7 +72,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
       Inputs = list(input1 = keyvalues), 
       GlobalParameters = globalParam
     )
-    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE), collapse = "\n"))
+    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
     h = new_handle()
     headers = list(`User-Agent`="R",
                    `Content-Type`="application/json",
