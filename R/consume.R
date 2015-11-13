@@ -118,8 +118,8 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 #' @export
 discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
 {
-  endpointId = getDetailsFromUrl(helpURL)[1]
-  workspaceId = getDetailsFromUrl(helpURL)[2]
+  workspaceId = getDetailsFromUrl(helpURL)[1]
+  endpointId = getDetailsFromUrl(helpURL)[3]
   # Construct swagger document URL using parameters
   # Use paste method without separator
   swaggerURL = paste0(scheme,"://", host, 
@@ -221,14 +221,16 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
 #' Given a Microsoft Azure Machine Learning web service endpoint, extracts the endpoint ID and the workspace ID
 #'
 #' @param url the URL of a help page
-#' @return a list containing the endpoint ID and the workspace ID
+#' @return a vector containing the workspace ID, webservices ID and endpoint ID
 #'
 #' @keywords internal
 getDetailsFromUrl = function(url) {
-  ptn <- ".*?/workspaces/(.*?)/.*/endpoints/(.*?)/.*"
+  ptn <- ".*?/workspaces/([[:alnum:]]*)/webservices/([[:alnum:]]*)/endpoints/([[:alnum:]]*)/*.*$"
   if(!grepl(ptn, url)) stop("Invalid url")
   c(
+    gsub(ptn, "\\1", url),
     gsub(ptn, "\\2", url),
-    gsub(ptn, "\\1", url)
+    gsub(ptn, "\\3", url)
+    
   )
 }
