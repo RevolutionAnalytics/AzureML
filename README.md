@@ -1,6 +1,6 @@
 # AzureML
 
-An R interface to AzureML experiments, datasets, and web services.
+An R interface to [AzureML](https://studio.azureml.net/) experiments, datasets, and web services.
 
 Use this package to upload and download datasets to and from AzureML, to interrogate experiments, to publish new R-based web services, and to run R data through existing web services and retrieve the output.
 
@@ -41,4 +41,7 @@ This is a technology preview. The APIs used by the package are still subject to 
 
 See the package vignette and help documentation for examples and more information.
 
-You can also view the vignette [directly](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/getting_started.html).
+You can also view the vignettes at:
+
+- [Getting Started with the AzureML Package](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/getting_started.html).
+- [Publishing R functions as API endpoints in the AzureML service](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/publish_and_consume.html).
