@@ -4,7 +4,7 @@
 \alias{deleteWebService}
 \title{Delete a Microsoft Azure Web Service}
 \usage{
-deleteWebService(ws, name)
+deleteWebService(ws, name, refresh = TRUE)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}

@@ -183,7 +183,7 @@ updateWebService = publishWebService
 #' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}
 #' @family publishing functions
 #' @example inst/examples/example_publish.R
-deleteWebService = function(ws, name)
+deleteWebService = function(ws, name, refresh = TRUE)
 {
 #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
   if(is.data.frame(name) || is.list(name))
@@ -201,6 +201,6 @@ deleteWebService = function(ws, name)
                 ws$.management_endpoint, ws$id, name)
   s = curl_fetch_memory(uri, handle=h)$status_code
   if(s > 299) stop("HTTP error ",s)
-  refresh(ws, "services")
+  if(refresh) refresh(ws, "services")
   invisible(ws$services)
 }
