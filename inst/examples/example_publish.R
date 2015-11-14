@@ -14,7 +14,21 @@
   consume(endpoint, list(x=pi, y=2))
 
   # Now remove the web service named "addme" that we just published
-deleteWebService(ws, "addme")
+  deleteWebService(ws, "addme")
+
+  # The publishWebService uses `miniCRAN` to include dependencies on
+  # packages required by your function. The next example uses the
+  # `digest` function from the digest package:
+  ep <- publishWebService(ws, fun=function(x) digest::digest(x), name="digest",
+                          inputSchema=list(x="character"),
+                          outputSchema=list(ans="character"),
+                          packages="digest")
+
+  md5 <- consume(ep, list(x="test"))
+
+  # Compare, and then remove the web service:
+  cat(md5$ans, "\t", digest::digest("test"), "\n")
+  deleteWebService(ws, "digest")
   
   
   # A neat trick to evaluate any expression in the Azure ML virtual
@@ -49,8 +63,9 @@ deleteWebService(ws, "addme")
   deleteWebService(ws, "lexical scope")
   
   # Example showing the use of consume to score all the rows of a data frame
-  # at once. The columns of the data frame correspond to the input parameters
-  # of the web service.
+  # at once, and other invocations for evaluating multiple sets of input
+  # values. The columns of the data frame correspond to the input parameters
+  # of the web service in this example:
   f <- function(a,b,c,d) list(sum = a+b+c+d, prod = a*b*c*d)
   ep <-  publishWebService(ws, 
                            f, 
@@ -82,6 +97,19 @@ deleteWebService(ws, "addme")
   # 4  9.4   4.278
   # 5 10.2    5.04
   # 6 11.4 14.3208
+
+  # You can use consume to evaluate just a single set of input values with this
+  # form:
+  consume(ep, a=1, b=2, c=3, d=4)
+
+  # or, equivalently,
+  consume(ep, list(a=1, b=2, c=3, d=4))
+
+  # You can evaluate multiple sets of input values with a data frame input:
+  consume(ep, data.frame(a=1:2, b=3:4, c=5:6, d=7:8))
+
+  # or, equivalently, with multiple lists:
+  consume(ep, list(a=1, b=3, c=5, d=7), list(a=2, b=4, c=6, d=8))
   
   # Remove the service we just published
   deleteWebService(ws, "rowSums")

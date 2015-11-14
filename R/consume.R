@@ -109,8 +109,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     tries = tries + 1
   }
   if(httpStatus >= 400){
-    print(str(fromJSON(result)))
-    stop()
+    warning(result)
   }
   result
 }
