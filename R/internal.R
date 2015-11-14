@@ -109,7 +109,7 @@ get_dataset = function(x, h, ...)
   opts = options(stringsAsFactors=FALSE)
   on.exit(options(opts))
   if(missing(h)) h = new_handle()
-  uri = curl(x$DownloadLocation, handle=h)
+  uri = curl(x$DownloadLocation, handle=h, open="rb")
   on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
 
    # Existence of DataTypeId, DowloadLocation guaranteed by caller
@@ -120,6 +120,7 @@ get_dataset = function(x, h, ...)
      generictsv = read.table(uri, sep="\t", header=TRUE, ...),
      genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
      genericcsv = read.table(uri, sep=",", header=TRUE, ...),
+     zip = readBin(uri, what="raw", n=x$Size, ...),
      stop("unsupported data type: '",x$DataTypeId,"'")
    )
 }
