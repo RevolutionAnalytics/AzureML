@@ -116,20 +116,19 @@
                           inputSchema=lapply(airquality, typeof),
                           outputSchema=list(ans="numeric"),
                           data.frame=TRUE)
-  ans = consume(ep, sleepstudy)$ans
+  ans = consume(ep, airquality)$ans
   plot(ans, airquality$Ozone)
   deleteWebService(ws, "Ozone")
 
   # The publishWebService function uses `miniCRAN` to include dependencies on
   # packages required by your function. The next example uses the `lmer`
   # function from the lme4 package, and also shows how to publish a function
-  # that consumes a data frame by setting data.frame=TRUE.
-  # Note! This example depends on a lot of packages and may take some time
-  # to upload to Azure.
+  # that consumes a data frame by setting data.frame=TRUE.  Note! This example
+  # depends on a lot of packages and may take some time to upload to Azure.
   library(lme4)
   # Build a sample mixed effects model on just a subset of the sleepstudy data...
   set.seed(1)
-  m <- lmer(Reaction ~ Days + (Days || Subject), data=sleepstudy[sample(nrow(sleepstudy), 120),])
+  m <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy[sample(nrow(sleepstudy), 120),])
   # Deine a prediction function to publish based on the model:
   fun <- function(newdata)
   {
