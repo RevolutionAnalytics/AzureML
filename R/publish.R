@@ -10,8 +10,6 @@ wrapper = "inputDF <- maml.mapInputPort(1)\nload('src/env.RData')\n if(!is.null(
 #' @param fun a function to test
 #' @param output_names character vector of function output names
 #' @param data.frame i/o format
-#' @example
-#' test_wrapper(data.frame(x=c(1,2,3),y=2:4), AzureML:::wrapper, fun=function(x,y) list(sum=x+y, prod=x*y), c("sum","prod"))
 test_wrapper = function(inputDF, wrapper, fun, output_names, `data.frame`)
 {
   exportenv = new.env()

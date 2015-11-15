@@ -12,7 +12,7 @@ getEndpoints(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{service_id}{A web service Id, for example returned by \code{\link{services}}.}
+\item{service_id}{A web service Id, for example returned by \code{\link{services}}; alternatively a row from the services data frame identifying the service.}
 
 \item{endpoint_id}{An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.}
 

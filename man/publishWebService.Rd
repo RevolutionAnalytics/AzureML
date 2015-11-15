@@ -6,10 +6,10 @@
 \title{Publish a function as a Microsoft Azure Web Service}
 \usage{
 publishWebService(ws, fun, name, inputSchema, outputSchema,
-  export = character(0), noexport = character(0), packages,
-  version = "3.1.0", wsid, host = ws$.management_endpoint)
+  data.frame = FALSE, export = character(0), noexport = character(0),
+  packages, version = "3.1.0", wsid, host = ws$.management_endpoint)
 
-updateWebService(ws, fun, name, inputSchema, outputSchema,
+updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
   export = character(0), noexport = character(0), packages,
   version = "3.1.0", wsid, host = ws$.management_endpoint)
 }
@@ -27,6 +27,10 @@ for details}
 \item{outputSchema}{list of \code{fun} outputs and AzureML types,
 formmated as \code{list("output1"="type", "output2"="type", ...)}}
 
+\item{data.frame}{\code{TRUE} indicates that the function \code{fun} accepts a data frame as input
+  and returns a data frame output.
+\code{\link{workspace}}.}
+
 \item{export}{optional character vector of variable names to explicitly export
 in the web service for use by the function. See the note below.}
 
@@ -39,8 +43,7 @@ in the web service}
 
 \item{wsid}{optional Azure web service ID; use to update an existing service (see Note below)}
 
-\item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in
-\code{\link{workspace}}.}
+\item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in}
 }
 \value{
 A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
@@ -50,10 +53,19 @@ Publish a function to Microsoft Azure Machine Learning as a web service. The
 web service created is a standard Azure ML web service, and can be used
 from any web or mobile platform as long as the user knows the API key and URL.
 The function to be published is limited to inputs/outputs consisting of
-lists of scalar values.
+lists of scalar values or single data frames (see the notes below and examples).
 }
 \note{
 AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
+
+Function input must be:
+\begin{enumerate}
+\item named scalar arguments with names and types specified in \code{inputSchema}
+\item one or more lists of named scalar values
+\item a single data frame when \code{data.frame=TRUE} is specified; the column names and types are specified in \code{inputSchema}
+\end{enumerate}
+Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
+See the examples for example use of all three I/O options.
 
 Leave the \code{wsid} parameter undefined to create a new AzureML web service, or specify the ID of an existing web service to update it, replacing the function and required R pacakges with new values. Although the API allows that the name, input and output schema to also be specified when updating it's not possible to change those values.
 
@@ -78,8 +90,8 @@ The \code{publishWebService} function automatically exports objects required by 
   consume(endpoint, list(x=pi, y=2))
 
   # Now remove the web service named "addme" that we just published
-deleteWebService(ws, "addme")
-  
+  deleteWebService(ws, "addme")
+
   
   # A neat trick to evaluate any expression in the Azure ML virtual
   # machine R session and view its output:
@@ -113,8 +125,9 @@ deleteWebService(ws, "addme")
   deleteWebService(ws, "lexical scope")
   
   # Example showing the use of consume to score all the rows of a data frame
-  # at once. The columns of the data frame correspond to the input parameters
-  # of the web service.
+  # at once, and other invocations for evaluating multiple sets of input
+  # values. The columns of the data frame correspond to the input parameters
+  # of the web service in this example:
   f <- function(a,b,c,d) list(sum = a+b+c+d, prod = a*b*c*d)
   ep <-  publishWebService(ws, 
                            f, 
@@ -146,9 +159,69 @@ deleteWebService(ws, "addme")
   # 4  9.4   4.278
   # 5 10.2    5.04
   # 6 11.4 14.3208
+
+  # You can use consume to evaluate just a single set of input values with this
+  # form:
+  consume(ep, a=1, b=2, c=3, d=4)
+
+  # or, equivalently,
+  consume(ep, list(a=1, b=2, c=3, d=4))
+
+  # You can evaluate multiple sets of input values with a data frame input:
+  consume(ep, data.frame(a=1:2, b=3:4, c=5:6, d=7:8))
+
+  # or, equivalently, with multiple lists:
+  consume(ep, list(a=1, b=3, c=5, d=7), list(a=2, b=4, c=6, d=8))
   
   # Remove the service we just published
   deleteWebService(ws, "rowSums")
+
+  # If your function can consume a whole data frame at once, you can also
+  # supply data in that form, resulting in more efficient computation.
+  # The following example builds a simple linear model on a subset of the
+  # airquality data and publishes a prediction function based on the model.
+  set.seed(1)
+  m <- lm(Ozone ~ ., data=airquality[sample(nrow(airquality), 100),])
+  # Define a prediction function based on the model:
+  fun <- function(newdata)
+  {
+    predict(m, newdata=newdata)
+  }
+  # Note the definition of inputSchema and use of the data.frame argument.
+  ep <- publishWebService(ws, fun=fun, name="Ozone",
+                          inputSchema=lapply(airquality, typeof),
+                          outputSchema=list(ans="numeric"),
+                          data.frame=TRUE)
+  ans = consume(ep, airquality)$ans
+  plot(ans, airquality$Ozone)
+  deleteWebService(ws, "Ozone")
+
+  # The publishWebService function uses `miniCRAN` to include dependencies on
+  # packages required by your function. The next example uses the `lmer`
+  # function from the lme4 package, and also shows how to publish a function
+  # that consumes a data frame by setting data.frame=TRUE.  Note! This example
+  # depends on a lot of packages and may take some time to upload to Azure.
+  library(lme4)
+  # Build a sample mixed effects model on just a subset of the sleepstudy data...
+  set.seed(1)
+  m <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy[sample(nrow(sleepstudy), 120),])
+  # Deine a prediction function to publish based on the model:
+  fun <- function(newdata)
+  {
+    predict(m, newdata=newdata)
+  }
+  ep <- publishWebService(ws, fun=fun, name="sleepy lmer",
+                          inputSchema=lapply(sleepstudy, typeof),  # Note
+                          outputSchema=list(ans="numeric"),
+                          packages="lme4",                         # Note
+                          data.frame=TRUE)                         # Note
+
+  # OK, try this out, and compare with raw data
+  ans = consume(ep, sleepstudy)$ans
+  plot(ans, sleepstudy$Reaction)
+  
+  # Remove the service
+  deleteWebService(ws, "sleepy lmer")
 }
 }
 \seealso{
