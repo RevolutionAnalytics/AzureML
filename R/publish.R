@@ -2,16 +2,17 @@
 # publishWebService function sets up the environment "exportenv" from which
 # this expression follows.
 
-wrapper = "inputDF <- maml.mapInputPort(1)\nload('src/env.RData')\n if(!is.null(exportenv$..packages))\n {\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\n}\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\noutputDF <- matrix(nrow=nrow(inputDF), ncol=length(exportenv$..output_names)); colnames(outputDF) <- exportenv$..output_names; outputDF <- data.frame(outputDF); for(j in 1:nrow(inputDF)){outputDF[j, ] <- do.call('..fun', as.list(inputDF[j,]))}\nmaml.mapOutputPort(\"outputDF\")"
+wrapper = "inputDF <- maml.mapInputPort(1)\nload('src/env.RData')\n if(!is.null(exportenv$..packages))\n {\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\n}\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\nif(..data.frame){outputDF <- data.frame(..fun(inputDF)); colnames(outputDF) <- ..output_names} else{outputDF <- matrix(nrow=nrow(inputDF), ncol=length(..output_names)); colnames(outputDF) <- ..output_names; outputDF <- data.frame(outputDF); for(j in 1:nrow(inputDF)){outputDF[j, ] <- do.call('..fun', as.list(inputDF[j,]))}}\nmaml.mapOutputPort(\"outputDF\")"
 
 #' Test the AzureML wrapper locally
 #' @param inputDF data frame
 #' @param wrapper the AzureML R wrapper code
 #' @param fun a function to test
 #' @param output_names character vector of function output names
+#' @param data.frame i/o format
 #' @example
 #' test_wrapper(data.frame(x=c(1,2,3),y=2:4), AzureML:::wrapper, fun=function(x,y) list(sum=x+y, prod=x*y), c("sum","prod"))
-test_wrapper = function(inputDF, wrapper, fun, output_names)
+test_wrapper = function(inputDF, wrapper, fun, output_names, `data.frame`)
 {
   exportenv = new.env()
   maml.mapInputPort = function(x) inputDF
@@ -19,6 +20,7 @@ test_wrapper = function(inputDF, wrapper, fun, output_names)
   load = function(x) invisible()
   exportenv$..fun = fun
   exportenv$..output_names = output_names
+  exportenv$..data.frame = `data.frame`
   eval(parse(text=wrapper), envir=environment())
 }
 
@@ -69,7 +71,7 @@ azureSchema = function(argList) {
 #' web service created is a standard Azure ML web service, and can be used
 #' from any web or mobile platform as long as the user knows the API key and URL.
 #' The function to be published is limited to inputs/outputs consisting of
-#' lists of scalar values.
+#' lists of scalar values or single data frames (see the notes below and examples).
 #'
 #' @export
 #'
@@ -89,11 +91,22 @@ azureSchema = function(argList) {
 #' @param version optional R version string for required packages (the version of R running in the AzureML Web Service)
 #' @param wsid optional Azure web service ID; use to update an existing service (see Note below)
 #' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in
+#' @param data.frame \code{TRUE} indicates that the function \code{fun} accepts a data frame as input
+#'   and returns a data frame output.
 #' \code{\link{workspace}}.
 #' 
 #' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
 #'  
 #' @note AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
+#'
+#' Function input must be:
+#' \begin{enumerate}
+#' \item named scalar arguments with names and types specified in \code{inputSchema}
+#' \item one or more lists of named scalar values
+#' \item a single data frame when \code{data.frame=TRUE} is specified; the column names and types are specified in \code{inputSchema}
+#' \end{enumerate}
+#' Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
+#' See the examples for example use of all three I/O options.
 #'
 #' Leave the \code{wsid} parameter undefined to create a new AzureML web service, or specify the ID of an existing web service to update it, replacing the function and required R pacakges with new values. Although the API allows that the name, input and output schema to also be specified when updating it's not possible to change those values.
 #' 
@@ -109,7 +122,7 @@ azureSchema = function(argList) {
 #' @importFrom uuid UUIDgenerate
 #' @importFrom curl new_handle handle_setheaders handle_setopt
 publishWebService = function(ws, fun, name,
-                             inputSchema, outputSchema,
+                             inputSchema, outputSchema, `data.frame`=FALSE,
                              export=character(0), noexport=character(0), packages,
                              version="3.1.0", wsid, host = ws$.management_endpoint)
 {
@@ -125,9 +138,12 @@ publishWebService = function(ws, fun, name,
   publishURL = sprintf("%s/workspaces/%s/webservices/%s",
                        host, ws$id, wsid)
   # Make sure schema inputted matches function signature
-  if (length(formals(fun)) != length(inputSchema))
+  if(`data.frame`)
   {
-    stop(sprintf("Input schema does not contain the proper input. You provided %s inputs and %s were expected",length(inputSchema),length(formals(fun))), call. = TRUE)
+    if(length(formals(fun)) != 1) stop("when data.frame=TRUE fun must only take one data.frame argument")
+  } else
+  {
+    if(length(formals(fun)) != length(inputSchema)) stop("length(inputSchema) does not match the number of function arguments")
   }
   inputSchema = azureSchema(inputSchema)
   outputSchema = azureSchema(outputSchema)
@@ -139,6 +155,7 @@ publishWebService = function(ws, fun, name,
   # Assign required objects in the export environment
   assign("..fun", fun, envir=exportenv)
   assign("..output_names", names(outputSchema), envir=exportenv)
+  assign("..data.frame", `data.frame`, envir=exportenv)
   
   zipString = packageEnv(exportenv, packages=packages, version=version)
   

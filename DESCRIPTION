@@ -24,4 +24,4 @@ Imports:
     miniCRAN,
     uuid
 Suggests:
-    testthat, knitr
+    testthat, knitr, lme4

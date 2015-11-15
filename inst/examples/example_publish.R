@@ -16,20 +16,6 @@
   # Now remove the web service named "addme" that we just published
   deleteWebService(ws, "addme")
 
-  # The publishWebService uses `miniCRAN` to include dependencies on
-  # packages required by your function. The next example uses the
-  # `digest` function from the digest package:
-  ep <- publishWebService(ws, fun=function(x) digest::digest(x), name="digest",
-                          inputSchema=list(x="character"),
-                          outputSchema=list(ans="character"),
-                          packages="digest")
-
-  md5 <- consume(ep, list(x="test"))
-
-  # Compare, and then remove the web service:
-  cat(md5$ans, "\t", digest::digest("test"), "\n")
-  deleteWebService(ws, "digest")
-  
   
   # A neat trick to evaluate any expression in the Azure ML virtual
   # machine R session and view its output:
@@ -113,4 +99,52 @@
   
   # Remove the service we just published
   deleteWebService(ws, "rowSums")
+
+  # If your function can consume a whole data frame at once, you can also
+  # supply data in that form, resulting in more efficient computation.
+  # The following example builds a simple linear model on a subset of the
+  # airquality data and publishes a prediction function based on the model.
+  set.seed(1)
+  m <- lm(Ozone ~ ., data=airquality[sample(nrow(airquality), 100),])
+  # Define a prediction function based on the model:
+  fun <- function(newdata)
+  {
+    predict(m, newdata=newdata)
+  }
+  # Note the definition of inputSchema and use of the data.frame argument.
+  ep <- publishWebService(ws, fun=fun, name="Ozone",
+                          inputSchema=lapply(airquality, typeof),
+                          outputSchema=list(ans="numeric"),
+                          data.frame=TRUE)
+  ans = consume(ep, sleepstudy)$ans
+  plot(ans, airquality$Ozone)
+  deleteWebService(ws, "Ozone")
+
+  # The publishWebService function uses `miniCRAN` to include dependencies on
+  # packages required by your function. The next example uses the `lmer`
+  # function from the lme4 package, and also shows how to publish a function
+  # that consumes a data frame by setting data.frame=TRUE.
+  # Note! This example depends on a lot of packages and may take some time
+  # to upload to Azure.
+  library(lme4)
+  # Build a sample mixed effects model on just a subset of the sleepstudy data...
+  set.seed(1)
+  m <- lmer(Reaction ~ Days + (Days || Subject), data=sleepstudy[sample(nrow(sleepstudy), 120),])
+  # Deine a prediction function to publish based on the model:
+  fun <- function(newdata)
+  {
+    predict(m, newdata=newdata)
+  }
+  ep <- publishWebService(ws, fun=fun, name="sleepy lmer",
+                          inputSchema=lapply(sleepstudy, typeof),  # Note
+                          outputSchema=list(ans="numeric"),
+                          packages="lme4",                         # Note
+                          data.frame=TRUE)                         # Note
+
+  # OK, try this out, and compare with raw data
+  ans = consume(ep, sleepstudy)$ans
+  plot(ans, sleepstudy$Reaction)
+  
+  # Remove the service
+  deleteWebService(ws, "sleepy lmer")
 }
