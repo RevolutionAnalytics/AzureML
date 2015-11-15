@@ -166,7 +166,7 @@ packageEnv = function(exportenv, packages=NULL, version="3.1.0")
     if(is.null(re)) re = c(CRAN="http://cran.revolutionanalytics.com")
     p = paste(d,"packages",sep="/")
     tryCatch(dir.create(p), warning=function(e) stop(e))
-    tryCatch(makeRepo(pkgDep(packages, repos=re), path=p, re, type="win.binary", Rversion=version, suggests=FALSE),
+    tryCatch(makeRepo(pkgDep(packages, repos=re, suggests=FALSE), path=p, re, type="win.binary", Rversion=version),
       error=function(e) stop(e))
   }
 
