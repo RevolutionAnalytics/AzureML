@@ -59,11 +59,11 @@ lists of scalar values or single data frames (see the notes below and examples).
 AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
 
 Function input must be:
-\begin{enumerate}
+\enumerate{
 \item named scalar arguments with names and types specified in \code{inputSchema}
 \item one or more lists of named scalar values
 \item a single data frame when \code{data.frame=TRUE} is specified; the column names and types are specified in \code{inputSchema}
-\end{enumerate}
+}
 Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
 See the examples for example use of all three I/O options.
 
