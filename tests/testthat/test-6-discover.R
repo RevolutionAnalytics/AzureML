@@ -61,6 +61,9 @@ if(file.exists(settingsFile))
     # refresh(ws)
     ss <- services(ws)
     
+    expect_is(ss, "Service")
+    expect_is(ss, "data.frame")
+    
     idx <- tail(which(ss$Name == "addme"), 1) # Use the last published
     sid <- ss$Id[idx]
     

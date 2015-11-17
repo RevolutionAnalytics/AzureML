@@ -22,7 +22,9 @@
 #' @example inst/examples/example_publish.R
 consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
-  if(!is.Endpoint(endpoint)) stop("endpoint should be an object of class endpoint")
+  if(is.Service(endpoint)) stop("Invalid endpoint.  Use endpoints() to convert a Service to an Endpoint.")
+  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create an endpoint.")
+  
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
   

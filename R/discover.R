@@ -67,17 +67,26 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
                  `Authorization`=sprintf("Bearer %s",ws$.auth),
                  `Accept`="application/json")
   handle_setheaders(h, .list=headers)
+  
   if(missing(service_id)) service_id = ""
   else service_id = sprintf("/%s", service_id)
+  
   r = curl(
     sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
     handle=h
-    )
+  )
   on.exit(close(r))
   ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
   # Cache the result in the workspace
   if(service_id == "") ws$services = ans
-  if(!missing(name)) return(ans[ans$Name == name,])
+  if(!missing(name)) {
+    ans <- ans[ans$Name == name,]
+  }
+  if(is.null(ans)) {
+    warning("Service not found")
+  } else {
+    class(ans) <- c("Service", "data.frame")
+  }
   ans
 }
 
@@ -86,6 +95,9 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
 #' @export
 getWebServices = services
 
+is.Service <- function(x){
+  inherits(x, "Service")
+}
 
 #' List AzureML Web Service Endpoints
 #'
@@ -139,24 +151,27 @@ getWebServices = services
 endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
-  if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
+  # if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
+  if(is.Service(service_id)) service_id = service_id$Id[1]
+  
   h = new_handle()
   headers = list(`User-Agent`="R",
                  `Content-Type`="application/json;charset=UTF8",
-                 `Authorization`=sprintf("Bearer %s",ws$.auth),
+                 `Authorization`=sprintf("Bearer %s", ws$.auth),
                  `Accept`="application/json")
   handle_setheaders(h, .list=headers)
+  
   if(missing(endpoint_id)) endpoint_id = ""
   else endpoint_id = sprintf("/%s", endpoint_id)
-  if(is.list(service_id)) service_id = service_id$Id[1]
-  r = curl(
-    sprintf("%s/workspaces/%s/webservices/%s/endpoints%s", 
-            host, 
-            ws$id, 
-            service_id, 
-            endpoint_id
-    ), 
-    handle=h)
+  
+  # if(is.list(service_id)) service_id = service_id$Id[1]
+  uri <- sprintf("%s/workspaces/%s/webservices/%s/endpoints%s", 
+                 host, 
+                 ws$id, 
+                 service_id, 
+                 endpoint_id
+  )
+  r = curl(uri, handle=h)
   on.exit(close(r))
   ans = fromJSON(readLines(r, warn=FALSE))
   # Adjust the returned API location for completeness:
@@ -166,6 +181,7 @@ endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint
                             "/execute?api-version=2.0&details=true&format=swagger", 
                             sep="")
   }
+  class(ans) <- c("Endpoint", "data.frame")
   ans
 }
 
@@ -173,6 +189,10 @@ endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint
 #' @export
 getEndpoints = endpoints
 
+
+is.Endpoint <- function(x){
+  inherits(x, "Endpoint")
+}
 
 #' Display AzureML Web Service Endpoint Help Screens
 #'
@@ -214,8 +234,8 @@ endpointHelp = function(e, type = c("apidocument", "r-snippet","score","jobs","u
     rsnip = TRUE
   }
   uri = e$HelpLocation[1]
-# XXX This is totally nuts, and not documented, but help hosts vary depending on type.
-# Arrghhh...
+  # XXX This is totally nuts, and not documented, but help hosts vary depending on type.
+  # Arrghhh...
   if(type == "apidocument")
     uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
   pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"

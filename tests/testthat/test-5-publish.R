@@ -42,6 +42,7 @@ test_that("publishWebService works with simple function", {
   Sys.sleep(15)
   
   expect_is(endpoint, "data.frame")
+  expect_is(endpoint, "Endpoint")
   expect_is(endpoint$WorkspaceId, "character")
   expect_is(endpoint$WebServiceId, "character")
   expect_equal(ws$id, endpoint$WorkspaceId)
