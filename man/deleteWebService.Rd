@@ -10,6 +10,9 @@ deleteWebService(ws, name, refresh = TRUE)
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
 \item{name}{Either one row from the workspace \code{services} data.frame corresponding to a service to delete, or simply a service name character string.}
+
+\item{refresh}{Set to \code{FALSE} to supress automatic updating of the workspace list of services,
+useful when deleting many services in bulk.}
 }
 \value{
 The updated data.frame of workspace services is invisibly returned.

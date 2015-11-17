@@ -109,7 +109,9 @@ get_dataset = function(x, h, ...)
   opts = options(stringsAsFactors=FALSE)
   on.exit(options(opts))
   if(missing(h)) h = new_handle()
-  uri = curl(x$DownloadLocation, handle=h, open="rb")
+  conn = "r"
+  if(tolower(x$DataTypeId) == "zip") conn = "rb"
+  uri = curl(x$DownloadLocation, handle=h, open=conn)
   on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
 
    # Existence of DataTypeId, DowloadLocation guaranteed by caller

@@ -223,6 +223,8 @@ updateWebService = publishWebService
 #'
 #' @inheritParams refresh
 #' @param name Either one row from the workspace \code{services} data.frame corresponding to a service to delete, or simply a service name character string.
+#' @param refresh Set to \code{FALSE} to supress automatic updating of the workspace list of services,
+#' useful when deleting many services in bulk.
 #' @note If more than one service matches the supplied \code{name}, the first listed service will be deleted.
 #' @return The updated data.frame of workspace services is invisibly returned.
 #' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}

@@ -30,11 +30,6 @@ if(file.exists(settingsFile))
       expect_true(nrow(dl) > 0)
     })
   }
-  test_that("Throws error if trying to download Zip", {
-    expect_error(
-      download.datasets(ws, zip)
-    )
-  })
   
 } else
 {
