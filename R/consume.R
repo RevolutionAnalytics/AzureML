@@ -22,6 +22,7 @@
 #' @example inst/examples/example_publish.R
 consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
+  if(!is.Endpoint(endpoint)) stop("endpoint should be an object of class endpoint")
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
   
@@ -38,7 +39,8 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
     if(!is.list(requestsLists[[1]])) requestsLists = list(requestsLists)
   }
   # Make API call with parameters
-  result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
+  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  if(inherits(result, "error")) stop("AzureML returned error code")
   # Access output by converting from JSON into list and indexing into Results
   if(!is.null(output) && output == "output1") 
   {
@@ -98,8 +100,10 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     r = curl_fetch_memory(requestUrl, handle=h)
     # Get HTTP status to decide whether to throw bad request or retry, or return etc.
     httpStatus = r$status_code
-    result = rawToChar(r$content)
-    if(httpStatus == 200) break
+    result = fromJSON(rawToChar(r$content))
+    error <- result$error
+    breakOnErrors <- c("BadArgument")
+    if(httpStatus == 200 || (!is.null(error) && error$code %in% breakOnErrors)) break
     if(tries == 0)
       warning(sprintf("Request failed with status %s. Retrying request...", 
                       httpStatus), 
@@ -109,7 +113,9 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     tries = tries + 1
   }
   if(httpStatus >= 400){
-    warning(result)
+    warning("AzureML error code : ", result$error$code, immediate. = TRUE, call. = FALSE)
+    warning("AzureML error message : ", result$error$message, immediate. = TRUE, call. = FALSE)
+    class(result) <- c(class(result), "error")
   }
   result
 }
