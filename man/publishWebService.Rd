@@ -20,15 +20,17 @@ updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
 
 \item{name}{name of the new web service}
 
-\item{inputSchema}{a list of \code{fun} input parameters and their AzureML types
-formatted as \code{list("arg1"="type", "arg2"="type", ...)}; see the note below
+\item{inputSchema}{either a list of \code{fun} input parameters and their AzureML types
+formatted as \code{list("arg1"="type", "arg2"="type", ...)}, or an example input
+data frame when \code{fun} takes a single data frame argument; see the note below
 for details}
 
 \item{outputSchema}{list of \code{fun} outputs and AzureML types,
-formmated as \code{list("output1"="type", "output2"="type", ...)}}
+formmated as \code{list("output1"="type", "output2"="type", ...)}, optional
+when \code{inputSchema} is an example input data frame}
 
 \item{data.frame}{\code{TRUE} indicates that the function \code{fun} accepts a data frame as input
-  and returns a data frame output.
+  and returns a data frame output; automatically set to \code{TRUE} when \code{inputSchema} is a data frame
 \code{\link{workspace}}.}
 
 \item{export}{optional character vector of variable names to explicitly export
@@ -62,7 +64,7 @@ Function input must be:
 \enumerate{
 \item named scalar arguments with names and types specified in \code{inputSchema}
 \item one or more lists of named scalar values
-\item a single data frame when \code{data.frame=TRUE} is specified; the column names and types are specified in \code{inputSchema}
+\item a single data frame when \code{data.frame=TRUE} is specified; either explicitly specify the column names and types in \code{inputSchema} or provide an example input data frame as \code{inputSchema}
 }
 Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
 See the examples for example use of all three I/O options.
@@ -175,6 +177,13 @@ The \code{publishWebService} function automatically exports objects required by 
   
   # Remove the service we just published
   deleteWebService(ws, "rowSums")
+
+  # A more efficient way to do the same thing using data frame input/output:
+  f <- function(df) with(df, list(sum = a+b+c+d, prod = a*b*c*d))
+  ep = publishWebService(ws, f, name="rowSums2", inputSchema=data.frame(a=0,b=0,c=0,d=0))
+  consume(ep, data.frame(a=1:2, b=3:4, c=5:6, d=7:8))
+  deleteWebService(ws, "rowSums2")
+
 
   # If your function can consume a whole data frame at once, you can also
   # supply data in that form, resulting in more efficient computation.

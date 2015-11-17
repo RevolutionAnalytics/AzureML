@@ -51,7 +51,7 @@ azureSchema = function(argList) {
     else if (type == "logical" || type == "bool" || type == "boolean") {
       form[[arg]] = list("type"="boolean")
     }
-    else if (type == "character" || type == "string") {
+    else if (type == "character" || type == "string" || type == "factor") {
       form[[arg]] = list("type"="string", "format"="string")
     }
     else {
@@ -76,11 +76,13 @@ azureSchema = function(argList) {
 #' @inheritParams refresh
 #' @param fun a function to publish; the function must have at least one argument
 #' @param name name of the new web service
-#' @param inputSchema a list of \code{fun} input parameters and their AzureML types
-#'   formatted as \code{list("arg1"="type", "arg2"="type", ...)}; see the note below
+#' @param inputSchema either a list of \code{fun} input parameters and their AzureML types
+#'   formatted as \code{list("arg1"="type", "arg2"="type", ...)}, or an example input
+#'   data frame when \code{fun} takes a single data frame argument; see the note below
 #'   for details
 #' @param outputSchema list of \code{fun} outputs and AzureML types,
-#'   formmated as \code{list("output1"="type", "output2"="type", ...)}
+#'   formmated as \code{list("output1"="type", "output2"="type", ...)}, optional
+#'   when \code{inputSchema} is an example input data frame
 #' @param export optional character vector of variable names to explicitly export
 #'   in the web service for use by the function. See the note below.
 #' @param noexport optional character vector of variable names to prevent from exporting
@@ -90,7 +92,7 @@ azureSchema = function(argList) {
 #' @param wsid optional Azure web service ID; use to update an existing service (see Note below)
 #' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in
 #' @param data.frame \code{TRUE} indicates that the function \code{fun} accepts a data frame as input
-#'   and returns a data frame output.
+#'   and returns a data frame output; automatically set to \code{TRUE} when \code{inputSchema} is a data frame
 #' \code{\link{workspace}}.
 #' 
 #' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
@@ -101,7 +103,7 @@ azureSchema = function(argList) {
 #' \enumerate{
 #' \item named scalar arguments with names and types specified in \code{inputSchema}
 #' \item one or more lists of named scalar values
-#' \item a single data frame when \code{data.frame=TRUE} is specified; the column names and types are specified in \code{inputSchema}
+#' \item a single data frame when \code{data.frame=TRUE} is specified; either explicitly specify the column names and types in \code{inputSchema} or provide an example input data frame as \code{inputSchema}
 #' }
 #' Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
 #' See the examples for example use of all three I/O options.
@@ -135,7 +137,19 @@ publishWebService = function(ws, fun, name,
   if(missing(wsid)) wsid = gsub("-", "", UUIDgenerate(use.time=TRUE))
   publishURL = sprintf("%s/workspaces/%s/webservices/%s",
                        host, ws$id, wsid)
-  # Make sure schema inputted matches function signature
+  # Make sure schema matches function signature
+  if(is.data.frame(inputSchema))
+  {
+    `data.frame` = TRUE
+    test = fun(head(inputSchema, n=1))
+    inputSchema = azureSchema(lapply(inputSchema, class))
+    if(missing(outputSchema))
+    {
+      if(is.data.frame(test) || is.list(test)) outputSchema = lapply(test, class)
+      else outputSchema = list(ans=class(test))
+    }
+  } else inputSchema = azureSchema(inputSchema)
+  outputSchema = azureSchema(outputSchema)
   if(`data.frame`)
   {
     if(length(formals(fun)) != 1) stop("when data.frame=TRUE fun must only take one data.frame argument")
@@ -143,8 +157,6 @@ publishWebService = function(ws, fun, name,
   {
     if(length(formals(fun)) != length(inputSchema)) stop("length(inputSchema) does not match the number of function arguments")
   }
-  inputSchema = azureSchema(inputSchema)
-  outputSchema = azureSchema(outputSchema)
   
   # Get and encode the dependencies
   if(missing(packages)) packages=NULL

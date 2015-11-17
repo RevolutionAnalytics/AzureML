@@ -100,6 +100,13 @@
   # Remove the service we just published
   deleteWebService(ws, "rowSums")
 
+  # A more efficient way to do the same thing using data frame input/output:
+  f <- function(df) with(df, list(sum = a+b+c+d, prod = a*b*c*d))
+  ep = publishWebService(ws, f, name="rowSums2", inputSchema=data.frame(a=0,b=0,c=0,d=0))
+  consume(ep, data.frame(a=1:2, b=3:4, c=5:6, d=7:8))
+  deleteWebService(ws, "rowSums2")
+
+
   # If your function can consume a whole data frame at once, you can also
   # supply data in that form, resulting in more efficient computation.
   # The following example builds a simple linear model on a subset of the
