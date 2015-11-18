@@ -65,6 +65,16 @@ get_datasets = function(ws)
   x
 }
 
+
+convertToDate <- function(x){
+  x <- as.numeric(gsub("[^-0-9]", "", x)) /1000
+  x <- ifelse(x >= 0, x, NA)
+  suppressWarnings(
+    as.POSIXct(x, tz = "GMT", origin = date_origin)
+  )
+}
+
+
 #' Internal function that retrieves experiments.
 #'
 #' @param ws A workspace object
@@ -81,14 +91,11 @@ get_experiments = function(ws)
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data
   x = cbind(x, x[,"Status"])
+  
   x$Status = c()
-  x$EndTime = as.POSIXct(as.numeric(gsub("[^0-9]","",x[,"EndTime"]))/1000,
-                         origin=date_origin)
-  x$StartTime = as.POSIXct(as.numeric(gsub("[^0-9]","",x[,"StartTime"]))/1000,
-                           origin=date_origin)
-  x$CreationTime = as.POSIXct(as.numeric(gsub("[^0-9]","",
-                                         x[,"CreationTime"]))/1000,
-                              origin=date_origin)
+  x$EndTime = convertToDate(x[["EndTime"]])
+  x$StartTime = convertToDate(x[["StartTime"]])
+  x$CreationTime = convertToDate(x[["CreationTime"]])
   class(x) = c("Experiments", "data.frame")
   x
 }
