@@ -104,8 +104,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     httpStatus = r$status_code
     result = fromJSON(rawToChar(r$content))
     error <- result$error
-    breakOnErrors <- c("BadArgument")
-    if(httpStatus == 200 || (!is.null(error) && error$code %in% breakOnErrors)) break
+    if(httpStatus != 503) break
     if(tries == 0)
       warning(sprintf("Request failed with status %s. Retrying request...", 
                       httpStatus), 
@@ -115,6 +114,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     tries = tries + 1
   }
   if(httpStatus >= 400){
+    warning("AzureML http status code : ", httpStatus, immediate. = TRUE, call. = FALSE)
     warning("AzureML error code : ", result$error$code, immediate. = TRUE, call. = FALSE)
     warning("AzureML error message : ", result$error$message, immediate. = TRUE, call. = FALSE)
     class(result) <- c(class(result), "error")
