@@ -92,10 +92,6 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
 #' @export
 getWebServices = services
 
-is.Service = function(x){
-  inherits(x, "Service")
-}
-
 #' List AzureML Web Service Endpoints
 #'
 #' Return a list of web services endpoints for the specified web service id.

@@ -21,11 +21,19 @@
 # THE SOFTWARE.
 
 
-#' @title is.Workspace: Test if an object is an Azure ML workspace.
+#' @title Test if an object is an Azure ML workspace.
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
 #' @export
 is.Workspace = function(x) "Workspace" %in% class(x)
+
+#' @title Test if an object is an Azure ML Service.
+#' @param x an R object
+#' @return logical value, TRUE if \code{x} represents an Azure ML web service
+#' @export
+is.Service = function(x){
+  inherits(x, "Service")
+}
 
 #' @export
 print.Workspace =  function(x, ...)

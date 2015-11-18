@@ -32,7 +32,7 @@ date_origin = "1970-1-1"
 #' @param delay in seconds between retries, subject to exponent
 #' @param exponent increment each successive delay by delay^exponent
 #' @return the result of curl_fetch_memory(uri, handle)
-try_fetch = function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1)
+try_fetch = function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
 {
   i = 0
   while(i < tries)
