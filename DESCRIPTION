@@ -2,8 +2,8 @@ Package: AzureML
 Type: Package
 Title: Interface with Azure ML datasets
 Description: Functions and datasets to support Azure Machine Learning. This allows you to interact with datasets, as well as publish and consume R functions as API services.
-Version: 0.2.1
-Date: 2015-11-12
+Version: 0.2.2
+Date: 2015-11-18
 Authors@R: c(
       person("Raymond", "Laghaeian", role=c("aut", "cre"), email="raymondl@microsoft.com"),
       person(family="Microsoft Corporation", role="cph"),
