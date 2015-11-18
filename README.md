@@ -37,11 +37,8 @@ This package provides an interface to publish web services on Microsoft Azure Ma
 
 This is a technology preview. The APIs used by the package are still subject to change. Please report any issues at the [github issue tracker](https://github.com/RevolutionAnalytics/AzureML/issues).
 
-# Vignettes
+# Vignette
 
 See the package vignette and help documentation for examples and more information.
 
-You can also view the vignettes at:
-
-- [Getting Started with the AzureML Package](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/getting_started.html).
-- [Publishing R functions as API endpoints in the AzureML service](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/publish_and_consume.html).
+You can view the vignette at [Getting Started with the AzureML Package](https://htmlpreview.github.io/?https://github.com/RevolutionAnalytics/AzureML/blob/master/vignettes/getting_started.html).

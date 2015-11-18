@@ -21,13 +21,13 @@ download.intermediate.dataset(ws, experiment, node_id, port_name, data_type_id,
 \item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
 }
 \value{
-A data.frame.
+A data frame.
 }
 \description{
 Download a dataset from an AzureML experiment port.
 }
 \note{
-TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
+TSV- and CSV-formatted datasets return data frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
 This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId" of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
 }
 \seealso{

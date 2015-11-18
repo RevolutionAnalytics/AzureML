@@ -9,12 +9,12 @@ delete.datasets(ws, name, host = "https://studioapi.azureml.net/api")
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{name}{Either one or more \code{Dataset} objects (rows from the workspace \code{datasets} data.frame), or a character vector of dataset names to delete.}
+\item{name}{Either one or more \code{Dataset} objects (rows from the workspace \code{datasets} data frame), or a character vector of dataset names to delete.}
 
 \item{host}{AzureML delete service endpoint}
 }
 \value{
-A data.frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
+A data frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 }
 \description{
 Delete datasets from an AzureML workspace.

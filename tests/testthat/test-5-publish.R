@@ -31,75 +31,93 @@ test_that(".getexports finds function and creates zip string", {
 test_that("publishWebService works with simple function", {
   ws <- workspace()
   add <- function(x,y) x + y
+  
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
+  expect_error({
+    endpoint <- publishWebService(ws, 
+                                  fun = "add", 
+                                  name = timestamped_name, 
+                                  inputSchema = list(x="numeric", 
+                                                     y="numeric"), 
+                                  outputSchema = list(ans="numeric")
+    )
+    if(is.Endpoint(endpoint)) deleteWebService(ws, timestamped_name)
+  }, 
+  "You must specify 'fun' as a function, not a character"
+  )
+  
+  
+  
+  
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
   endpoint <- publishWebService(ws, 
                                 fun = add, 
-                                name = "addme", 
+                                name = timestamped_name, 
                                 inputSchema = list(x="numeric", 
                                                    y="numeric"), 
                                 outputSchema = list(ans="numeric"))
   
-  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
-  Sys.sleep(15)
   
   expect_is(endpoint, "data.frame")
+  expect_is(endpoint, "Endpoint")
   expect_is(endpoint$WorkspaceId, "character")
   expect_is(endpoint$WebServiceId, "character")
   expect_equal(ws$id, endpoint$WorkspaceId)
   
+  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
+  Sys.sleep(3)
+  
   # Now test if we can consume the service we just published
-  res <- consume(endpoint, list(x=pi, y=2))
+  res <- consume(endpoint, list(x=pi, y=2), retryDelay = 2)
   expect_is(res, "data.frame")
-  expect_equal(as.numeric(res$ans), pi + 2, tolerance = 1e-5)
+  expect_equal(res$ans, pi + 2, tolerance = 1e-5)
+  
+  deleteWebService(ws, timestamped_name)
 })
 
 
+test_that("publishWebService works with data frame input", {
+  ws <- workspace()
 
-#  # Train the model
-#  model <- naiveBayes(as.factor(Species) ~., dataset)
-#})
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
 
+  library(lme4)
+  set.seed(1)
+  train <- sleepstudy[sample(nrow(sleepstudy), 120),]
+  m <- lm(Reaction ~ Days + Subject, data = train)
+  
+  # Deine a prediction function to publish based on the model:
+  sleepyPredict <- function(newdata){
+    predict(m, newdata=newdata)
+  }
+  
+  ws <- workspace()
+  endpoint <- publishWebService(ws, fun = sleepyPredict, name=timestamped_name,
+                          inputSchema = sleepstudy,
+                          data.frame=TRUE)
+  
 
-#test_that("publishWebService returns a working web service", {
-#  skip_on_cran()
-#  testID = ""
-#  testAuth = ""
-#  require(quantmod) || install.packages(quantmod)
-#  library(quantmod)
-
-#  getSymbols('MSFT')
-#  data = as.data.frame(cbind(MSFT[,4],MSFT[,5]/100000))
-#  model = lm(MSFT.Close~.,data=data)
-
-#  MSFTpredict <- function(close, volume) {
-#    return(predict(model, data.frame("MSFT.Close"=close, "MSFT.Volume"=volume)))
-#  }
-
-#  msftWebService <- publishWebService("MSFTpredict", "MSFTdemo", list("close"="float", "volume"="float"), list("number"="float"), testID, testAuth)
-#  msftEndpoints <- msftWebService[[2]]
-#  response <- consumeDataTable(msftEndpoints[[1]]["PrimaryKey"], msftEndpoints[[1]]$ApiLocation, list("close", "volume"), list(25, 300), list(30, 100))
-
-#  expect_equal(as.numeric(response[1,1]), 1)
-#  expect_equal(as.numeric(response[2,1]), 1)
-#})
-
-
-#test_that("publishWebService handles bad input correctly", {
-#  add <- function (x, y) {
-#    print("This will add x and y")
-#    return(x + y)
-#  }
-
-#  expect_error(publishWebService("add", "addTest", list(), list(), testID, testAuth), "Input schema does not contain the proper input. You provided 0 inputs and 2 were expected")
-#  expect_error(publishWebService("add", "addTest", list("x"="foo", "y"="bar"), list("z"="int"), testID, testAuth), "data type \"foo\" not supported")
-#})
+  expect_is(endpoint, "data.frame")
+  expect_is(endpoint, "Endpoint")
+  expect_is(endpoint$WorkspaceId, "character")
+  expect_is(endpoint$WebServiceId, "character")
+  expect_equal(ws$id, endpoint$WorkspaceId)
 
 
-#test_that("publishWebService handles various errors correctly", {
-#  add <- function (x, y) {
-#    print("This will add x and y")
-#    return(x + y)
-#  }
+  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
+  Sys.sleep(3)
+  
+  # Now test if we can consume the service we just published
+  res <- consume(endpoint, sleepstudy, retryDelay = 2)$ans
+  expect_is(res, "numeric")
+  expect_equal(length(res), nrow(sleepstudy))
 
-#  expect_error(publishWebService("add", "add", list("x"="float", "y"="float"), list("z"="float"), "foo", "bar"), "InvalidWorkspaceIdInvalid workspace ID provided. Verify the workspace ID is correct and try again.")
-#})
+  deleteWebService(ws, timestamped_name)
+})
+
 

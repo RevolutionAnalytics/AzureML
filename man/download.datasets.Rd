@@ -7,31 +7,33 @@
 download.datasets(source, name, ...)
 }
 \arguments{
-\item{source}{Either one or more rows from a \code{\link{datasets}} data.frame in a workspace,
+\item{source}{Either one or more rows from a \code{\link{datasets}} data frame in a workspace,
 or just a workspace from \code{\link{workspace}}. When \code{source} is a workspace, then
 the \code{name} parameter must also be specified.}
 
 \item{name}{Optional character vector of one or more dataset names to filter the \code{datasets}
 parameter list by.}
 
-\item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example,
+\item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds or to
+\code{readBin} for the ZIP DataTypeId. For example,
 specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
 }
 \value{
-If one dataset is specified (that is, one row from a workspace \code{datasets} data.frame),
-then a single data.frame is returned.
-If more than one dataset is specified (more than one row), then a list of data.frames is returned.
+If one dataset is specified (that is, one row from a workspace \code{datasets} data frame),
+then a single data frame is returned.
+If more than one dataset is specified (more than one row), then a list of data frames is returned.
 }
 \description{
-Download one or more datasets from an AzureML workspace into local R data.frame objects.
+Download one or more datasets from an AzureML workspace into local R data frame or raw binary objects.
 }
 \note{
-TSV- and CSV-formatted datasets return data.frame results with \code{stringsAsFactors=FALSE}
+TSV- and CSV-formatted datasets return data frame results with \code{stringsAsFactors=FALSE}
 by default (independently of the global \code{stringsAsFactors} option).
 
 This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId"
-of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format
-Conversion modules to convert data to a supported format.
+of "ARFF", "PlainText" or "ZIP". Other "DataTypeIds" return an error. See the AzureML Data Format
+Conversion modules to convert data to a supported format. Data with DataTypeId "ZIP" are returned
+in a raw binary R vector, which could then be passed through \code{unzip}, for example.
 }
 \examples{
 \dontrun{

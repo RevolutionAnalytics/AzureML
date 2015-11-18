@@ -15,15 +15,19 @@
 #' @return data frame containing results returned from web service call
 #' 
 #' @note Set \code{...} to a list of key/value pairs corresponding to web service inputs. Optionally, set \code{...} to a single data frame with columns corresponding to web service variables. The data frame approach returns output from the evaluation of each row of the data frame (see the examples).
-#' 
+#'
 #' @seealso \code{\link{publishWebService}} \code{\link{endpoints}} \code{\link{services}} \code{\link{workspace}}
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
 consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
+  if(is.Service(endpoint)) stop("Invalid endpoint.  Use endpoints() to convert a Service to an Endpoint.")
+  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create an endpoint.")
+  
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
+  
   if(missing(globalParam)) {
     globalParam = setNames(list(), character(0))
   }
@@ -32,12 +36,24 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
   if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]]))
   {
     requestsLists = requestsLists[[1]]
+  } else
+  {
+    if(!is.list(requestsLists[[1]])) requestsLists = list(requestsLists)
   }
   # Make API call with parameters
-  result = fromJSON(callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay))
+  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  if(inherits(result, "error")) stop("AzureML returned error code")
   # Access output by converting from JSON into list and indexing into Results
   if(!is.null(output) && output == "output1") 
-    return(data.frame(result$Results$output1))
+  {
+    help = endpointHelp(endpoint)$definitions$output1Item
+    ans = data.frame(result$Results$output1)
+    nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    logi = which("boolean" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    if(length(nums) > 0) for(j in nums) ans[,j] = as.numeric(ans[,j])
+    if(length(logi) > 0) for(j in logi) ans[,j] = as.logical(ans[,j])
+    return(ans)
+  }
   if(!is.null(output) && output == "output2") 
     return(fromJSON(result$Results$output2[[1]]))
   result$Results
@@ -72,7 +88,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
       Inputs = list(input1 = keyvalues), 
       GlobalParameters = globalParam
     )
-    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE), collapse = "\n"))
+    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
     h = new_handle()
     headers = list(`User-Agent`="R",
                    `Content-Type`="application/json",
@@ -86,19 +102,22 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     r = curl_fetch_memory(requestUrl, handle=h)
     # Get HTTP status to decide whether to throw bad request or retry, or return etc.
     httpStatus = r$status_code
-    result = rawToChar(r$content)
-    if(httpStatus == 200) break
+    result = fromJSON(rawToChar(r$content))
+    error <- result$error
+    if(httpStatus %in% c(200, 400)) break
     if(tries == 0)
-      warning(sprintf("Request failed with status %s. Retrying request...", 
-                      httpStatus), 
-              immediate. = TRUE,
-              call. = FALSE)
+      message(sprintf("Request failed with status %s. Retrying request...", 
+                      httpStatus))
+#               immediate. = TRUE,
+#               call. = FALSE)
     Sys.sleep(retryDelay)
     tries = tries + 1
   }
   if(httpStatus >= 400){
-    print(str(fromJSON(result)))
-    stop()
+    warning("AzureML http status code : ", httpStatus, immediate. = TRUE, call. = FALSE)
+    warning("AzureML error code : ", result$error$code, immediate. = TRUE, call. = FALSE)
+    warning("AzureML error message : ", result$error$message, immediate. = TRUE, call. = FALSE)
+    class(result) <- c(class(result), "error")
   }
   result
 }

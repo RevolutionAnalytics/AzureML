@@ -4,7 +4,8 @@
 \alias{endpointHelp}
 \title{Display AzureML Web Service Endpoint Help Screens}
 \usage{
-endpointHelp(e, type = c("r-snippet", "score", "jobs", "update"))
+endpointHelp(e, type = c("apidocument", "r-snippet", "score", "jobs",
+  "update"))
 }
 \arguments{
 \item{e}{an AzureML web service endpoint from the \code{\link{endpoints}} function.}
@@ -12,11 +13,11 @@ endpointHelp(e, type = c("r-snippet", "score", "jobs", "update"))
 \item{type}{the type of help to display.}
 }
 \value{
-The help text is invisibly returned.
+The help text is returned. If \code{type="apidocument"}, then the help
+is returned as a list from a parsed JSON document describing the service.
 }
 \description{
-Download and display help for the specified AzureML web service endpoint.
-The result is displayed as text using the pager.
+Download and return help for the specified AzureML web service endpoint.
 }
 \examples{
 \dontrun{
@@ -31,6 +32,10 @@ ws <- workspace(
 s <- services(ws)
 e <- endpoints(ws, s[1,])
 endpointHelp(e[1,])
+
+Particularly useful way to see expected service input and output:
+endpointHelp(e[1,])$definitions
+
 
 }
 }

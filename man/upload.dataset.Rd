@@ -2,12 +2,12 @@
 % Please edit documentation in R/datasets.R
 \name{upload.dataset}
 \alias{upload.dataset}
-\title{Upload an R data.frame to an AzureML workspace.}
+\title{Upload an R data frame to an AzureML workspace.}
 \usage{
 upload.dataset(x, ws, name, description = "", family_id = "", ...)
 }
 \arguments{
-\item{x}{An R data.frame object}
+\item{x}{An R data frame object}
 
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
@@ -20,10 +20,10 @@ upload.dataset(x, ws, name, description = "", family_id = "", ...)
 \item{...}{Optional additional options passed to \code{write.table}}
 }
 \value{
-A single-row data.frame of "Datasets" class that corresponds to the uploaded object now available in ws$datasets.
+A single-row data frame of "Datasets" class that corresponds to the uploaded object now available in ws$datasets.
 }
 \description{
-Upload any R data.frame to an AzureML workspace using the \code{GenericTSV} format.
+Upload any R data frame to an AzureML workspace using the \code{GenericTSV} format.
 }
 \note{
 The additional \code{\link[utils]{write.table}} options may not include \code{sep} or \code{row.names} or \code{file}, but any other options are accepted.

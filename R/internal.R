@@ -65,6 +65,16 @@ get_datasets = function(ws)
   x
 }
 
+
+convertToDate <- function(x){
+  x <- as.numeric(gsub("[^-0-9]", "", x)) /1000
+  x <- ifelse(x >= 0, x, NA)
+  suppressWarnings(
+    as.POSIXct(x, tz = "GMT", origin = date_origin)
+  )
+}
+
+
 #' Internal function that retrieves experiments.
 #'
 #' @param ws A workspace object
@@ -81,14 +91,11 @@ get_experiments = function(ws)
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data
   x = cbind(x, x[,"Status"])
+  
   x$Status = c()
-  x$EndTime = as.POSIXct(as.numeric(gsub("[^0-9]","",x[,"EndTime"]))/1000,
-                         origin=date_origin)
-  x$StartTime = as.POSIXct(as.numeric(gsub("[^0-9]","",x[,"StartTime"]))/1000,
-                           origin=date_origin)
-  x$CreationTime = as.POSIXct(as.numeric(gsub("[^0-9]","",
-                                         x[,"CreationTime"]))/1000,
-                              origin=date_origin)
+  x$EndTime = convertToDate(x[["EndTime"]])
+  x$StartTime = convertToDate(x[["StartTime"]])
+  x$CreationTime = convertToDate(x[["CreationTime"]])
   class(x) = c("Experiments", "data.frame")
   x
 }
@@ -109,7 +116,9 @@ get_dataset = function(x, h, ...)
   opts = options(stringsAsFactors=FALSE)
   on.exit(options(opts))
   if(missing(h)) h = new_handle()
-  uri = curl(x$DownloadLocation, handle=h)
+  conn = "r"
+  if(tolower(x$DataTypeId) == "zip") conn = "rb"
+  uri = curl(x$DownloadLocation, handle=h, open=conn)
   on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
 
    # Existence of DataTypeId, DowloadLocation guaranteed by caller
@@ -120,6 +129,7 @@ get_dataset = function(x, h, ...)
      generictsv = read.table(uri, sep="\t", header=TRUE, ...),
      genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
      genericcsv = read.table(uri, sep=",", header=TRUE, ...),
+     zip = readBin(uri, what="raw", n=x$Size, ...),
      stop("unsupported data type: '",x$DataTypeId,"'")
    )
 }
@@ -165,7 +175,7 @@ packageEnv = function(exportenv, packages=NULL, version="3.1.0")
     if(is.null(re)) re = c(CRAN="http://cran.revolutionanalytics.com")
     p = paste(d,"packages",sep="/")
     tryCatch(dir.create(p), warning=function(e) stop(e))
-    tryCatch(makeRepo(pkgDep(packages, repos=re), path=p, re, type="win.binary", Rversion=version),
+    tryCatch(makeRepo(pkgDep(packages, repos=re, suggests=FALSE), path=p, re, type="win.binary", Rversion=version),
       error=function(e) stop(e))
   }
 
