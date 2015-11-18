@@ -213,7 +213,7 @@ publishWebService = function(ws, fun, name,
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
-  r = curl_fetch_memory(publishURL, handle = h)
+  r = try_fetch(publishURL, handle = h)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)

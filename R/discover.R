@@ -80,13 +80,10 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
   # Cache the result in the workspace
   if(service_id == "") ws$services = ans
   if(!missing(name)) {
-    ans <- ans[ans$Name == name,]
+    ans = ans[ans$Name == name,]
   }
-  if(is.null(ans)) {
-    warning("Service not found")
-  } else {
-    class(ans) <- c("Service", "data.frame")
-  }
+  if(is.null(ans)) ans = data.frame()
+  class(ans) = c("Service", "data.frame")
   ans
 }
 
@@ -95,7 +92,7 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
 #' @export
 getWebServices = services
 
-is.Service <- function(x){
+is.Service = function(x){
   inherits(x, "Service")
 }
 

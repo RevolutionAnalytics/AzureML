@@ -137,8 +137,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   handle_setheaders(h, .list=hdr)
   body = charToRaw(paste(tsv, collapse="\n"))
   handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
-  step1 = curl_fetch_memory(url, handle=h)
-  # Check for error (see ?curl_fetch_memory)
+  step1 = try_fetch(url, handle=h)
   if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
   # Parse the response
   step1 = fromJSON(rawToChar(step1$content))
@@ -164,7 +163,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   handle_setheaders(h, .list=ws$.headers)
   body = charToRaw(paste(metadata, collapse="\n"))
   handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
-  step2 = curl_fetch_memory(url, handle=h)
+  step2 = try_fetch(url, handle=h)
   if(step2$status_code != 200) stop("HTTP ", step2$status_code, " ", rawToChar(step2$content))
   id = gsub("\\\"","",rawToChar(step2$content))
   
@@ -200,16 +199,7 @@ delete.datasets = function(ws, name, host="https://studioapi.azureml.net/api")
   {
     uri = sprintf("%s/workspaces/%s/datasources/family/%s", host,
                   curl_escape(ws$id), curl_escape(familyId))
-    s = 400
-    try = 0
-    while(s >= 300 && try < 3)
-    {
-      s = curl_fetch_memory(uri, handle=h)$status_code
-      if(s < 300) break
-      try = try + 1
-      Sys.sleep(5)
-    }
-    s
+    try_fetch(uri, h)$status_code
   }, 1, USE.NAMES=FALSE)
   ans = data.frame(
     Name = datasets$Name, 
