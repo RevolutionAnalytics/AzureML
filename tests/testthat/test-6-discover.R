@@ -1,5 +1,7 @@
 if(interactive()) library(testthat)
 
+context("Discover API")
+
 settingsFile <- "~/.azureml/settings.json" 
 if(file.exists(settingsFile))
 {
@@ -54,19 +56,34 @@ if(file.exists(settingsFile))
                            PortEmbarkation = "C"))
   })
   
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
   
   test_that("Can discover endpoints starting from workspace ID", {
     
     ws <- workspace()
     # refresh(ws)
+    
+    
+    add <- function(x,y) x + y
+    
+    publishWebService(ws, 
+                      fun = add, 
+                      name = timestamped_name, 
+                      inputSchema = list(x="numeric", 
+                                         y="numeric"), 
+                      outputSchema = list(ans="numeric")
+    )
     ss <- services(ws)
     
     expect_is(ss, "Service")
     expect_is(ss, "data.frame")
     
-    idx <- tail(which(ss$Name == "addme"), 1) # Use the last published
+    idx <- which(ss$Name == timestamped_name)
     sid <- ss$Id[idx]
     
+    Sys.sleep(3)
     testWS <- services(ws, sid)
     ep <- endpoints(ws, sid)
     testEP <- endpoints(ws, sid, ep$Name)
@@ -87,15 +104,17 @@ if(file.exists(settingsFile))
     # refresh(ws)
     ss <- services(ws)
     
-    idx <- tail(which(ss$Name == "addme"), 1) # Use the last published
+    idx <- which(ss$Name == timestamped_name)
     sid <- ss$Id[idx]
     ep <- endpoints(ws, sid)
     testEP <- endpoints(ws, sid, ep$Name)
-    res <- consume(testEP, list(x=pi, y=2))
+    res <- consume(testEP, list(x=pi, y=2), retryDelay = 2)
     expect_is(res, "data.frame")
-    expect_equal(as.numeric(res$ans), pi + 2, tolerance = 1e-5)
+    expect_equal(res$ans, pi + 2, tolerance = 1e-5)
   })
   
+  ws <- workspace()
+  deleteWebService(ws, timestamped_name)
   
   test_that("Discovery function handles error correctly", {
     ws <- workspace()
