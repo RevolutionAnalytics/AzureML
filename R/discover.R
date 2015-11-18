@@ -182,11 +182,6 @@ endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint
 #' @export
 getEndpoints = endpoints
 
-
-is.Endpoint <- function(x){
-  inherits(x, "Endpoint")
-}
-
 #' Display AzureML Web Service Endpoint Help Screens
 #'
 #' Download and return help for the specified AzureML web service endpoint.

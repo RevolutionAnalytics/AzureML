@@ -35,6 +35,14 @@ is.Service = function(x){
   inherits(x, "Service")
 }
 
+#' @title Test if an object is an Azure ML Endpoint
+#' @param x an R object
+#' @return logical value, TRUE if \code{x} represents an Azure ML web service endpoint
+#' @export
+is.Endpoint = function(x){
+  inherits(x, "Endpoint")
+}
+
 #' @export
 print.Workspace =  function(x, ...)
 {
