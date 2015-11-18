@@ -97,7 +97,7 @@ diamondLevels <- diamonds[1, ]
 
 plot(exp(predict(model, test)) ~ test$price)
 
-# Create a function to publish. The function takes care of converting characters correctly to factors
+# Create a prediction function that converts characters correctly to factors
 
 predictDiamonds <- function(x){
   x$cut     <- factor(x$cut,     
