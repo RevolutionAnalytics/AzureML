@@ -77,13 +77,14 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
   )
   on.exit(close(r))
   ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
-  # Cache the result in the workspace
-  if(service_id == "") ws$services = ans
+  attr(ans, "workspace") = ws
   if(!missing(name)) {
     ans = ans[ans$Name == name,]
   }
   if(is.null(ans)) ans = data.frame()
   class(ans) = c("Service", "data.frame")
+  # Cache the result in the workspace
+  if(service_id == "") ws$services = ans
   ans
 }
 
