@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-11-12" />
+<meta name="date" content="2015-11-18" />
 
 <title>Getting Started with the AzureML Package</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Getting Started with the AzureML Package</h1>
-<h4 class="date"><em>2015-11-12</em></h4>
+<h4 class="date"><em>2015-11-18</em></h4>
 </div>
 
 
@@ -81,6 +81,11 @@ devtools::install_github(&quot;RevolutionAnalytics/azureml&quot;)</code></pre>
 <li><code>base64enc</code></li>
 <li><code>uuid</code></li>
 </ul>
+<p>Some of the examples use data and functions in:</p>
+<ul>
+<li><code>lme4</code></li>
+<li><code>ggplot2</code></li>
+</ul>
 </div>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
@@ -93,7 +98,7 @@ devtools::install_github(&quot;RevolutionAnalytics/azureml&quot;)</code></pre>
 </ul>
 <div id="getting-started" class="section level2">
 <h2>Getting Started</h2>
-<p>To get st arted, please go <a href="https://studio.azureml.net">here</a> and create a free account (not guest) or use your existing AzureML account. After logging in, under the “Settings” tab, copy and paste your Workspace ID from the “Name” sub-tab into your R console. From the “Authorization Tokens” sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.</p>
+<p>To get started, please navigate to <a href="https://studio.azureml.net">AzureML Studio</a> and create a free account (not guest) or use your existing AzureML account. After logging in, under the “Settings” tab, copy and paste your Workspace ID from the “Name” sub-tab into your R console. From the “Authorization Tokens” sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.</p>
 <p>The package defines a <code>Workspace</code> class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the <code>workspace</code> function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token.</p>
 </div>
 <div id="obtaining-azureml-credentials" class="section level2">
@@ -148,8 +153,8 @@ ws</code></pre>
 ## 2                                 TestReadFromBlob    Dataset      8102
 ## 3                                 New York weather GenericCSV    116989
 ## 4                                       airquality GenericTSV      2901
-## 5                           text.preprocessing.zip        Zip      2782
-## 6                            fraudTemplateUtil.zip        Zip      3471
+## 5         dataset-test-upload-2015-11-17--22-12-47 GenericTSV      2901
+## 6         dataset-test-upload-2015-11-17--22-14-37 GenericTSV      2901
 ##   ...
 ## 1 ...
 ## 2 ...
@@ -175,8 +180,8 @@ head(ws$datasets)</code></pre>
 ## 2                                 TestReadFromBlob    Dataset      8102
 ## 3                                 New York weather GenericCSV    116989
 ## 4                                       airquality GenericTSV      2901
-## 5                           text.preprocessing.zip        Zip      2782
-## 6                            fraudTemplateUtil.zip        Zip      3471
+## 5         dataset-test-upload-2015-11-17--22-12-47 GenericTSV      2901
+## 6         dataset-test-upload-2015-11-17--22-14-37 GenericTSV      2901
 ##   ...
 ## 1 ...
 ## 2 ...
@@ -199,7 +204,7 @@ head(ws$datasets)</code></pre>
 <pre class="r"><code>ws$datasets$Owner</code></pre>
 <pre><code>##  [1] &quot;apdevries&quot;             &quot;apdevries&quot;            
 ##  [3] &quot;apdevries&quot;             &quot;R&quot;                    
-##  [5] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+##  [5] &quot;R&quot;                     &quot;R&quot;                    
 ##  [7] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ##  [9] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [11] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
@@ -218,7 +223,8 @@ head(ws$datasets)</code></pre>
 ## [37] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [39] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [41] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [43] &quot;Microsoft Corporation&quot;</code></pre>
+## [43] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+## [45] &quot;Microsoft Corporation&quot;</code></pre>
 </div>
 <div id="downloading-datasets" class="section level3">
 <h3>Downloading datasets</h3>
@@ -272,12 +278,12 @@ head(download.datasets(ws, name = &quot;Air quality&quot;))</code></pre>
 <pre class="r"><code>e &lt;- experiments(ws, filter = &quot;samples&quot;)
 head(e)</code></pre>
 <pre><code>##                                        Description        CreationTime ...
-## 1  Sample 6: Train, Test, Evaluate for Regression: 2015-08-27 14:34:57 ...
-## 2 Text Classification: Step 2 of 5, text preproces 2015-08-27 14:39:38 ...
-## 3        Quantile Regression: Car price prediction 2015-08-27 14:37:39 ...
-## 4   Multiclass Classification: News categorization 2015-08-27 14:36:23 ...
-## 5                Neural Network: Basic convolution 2015-08-27 14:36:48 ...
-## 6 Text Classification: Step 3B of 5, unigrams TF-I 2015-08-27 14:39:49 ...
+## 1  Sample 6: Train, Test, Evaluate for Regression: 2015-08-27 21:34:57 ...
+## 2 Text Classification: Step 2 of 5, text preproces 2015-08-27 21:39:38 ...
+## 3        Quantile Regression: Car price prediction 2015-08-27 21:37:39 ...
+## 4   Multiclass Classification: News categorization 2015-08-27 21:36:23 ...
+## 5                Neural Network: Basic convolution 2015-08-27 21:36:48 ...
+## 6 Text Classification: Step 3B of 5, unigrams TF-I 2015-08-27 21:39:49 ...
 ## -------------------------------------------------
 ## AzureML experiments data.frame variables include:
 ##  [1] &quot;ExperimentId&quot;                       
@@ -319,7 +325,7 @@ head(e)</code></pre>
 api &lt;- publishWebService(
   ws,
   fun = add, 
-  name = &quot;add&quot;,
+  name = &quot;AzureML-vignette-add&quot;,
   inputSchema = list(
     x = &quot;numeric&quot;, 
     y = &quot;numeric&quot;
@@ -330,7 +336,7 @@ api &lt;- publishWebService(
 )</code></pre>
 <p>The result of <code>publishWebService()</code> is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
 <pre class="r"><code>class(api)</code></pre>
-<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<pre><code>## [1] &quot;Endpoint&quot;   &quot;data.frame&quot;</code></pre>
 <pre class="r"><code>names(api)</code></pre>
 <pre><code>##  [1] &quot;Name&quot;                  &quot;Description&quot;          
 ##  [3] &quot;CreationTime&quot;          &quot;WorkspaceId&quot;          
@@ -342,12 +348,12 @@ api &lt;- publishWebService(
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
 <pre class="r"><code>helpPageUrl &lt;- api$HelpLocation
 helpPageUrl</code></pre>
-<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/284c94be89b311e5baf5f5fa7e0f059f/endpoints/13a76d1a088d423ba6d47f73450347ef&quot;</code></pre>
+<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/102c76f48df211e581dfdf415a1bdd9d/endpoints/13bc44e3969b49ff8ce1045c2f695efb&quot;</code></pre>
 <p>Once published, you can update a web service using the <code>updateWebService()</code> function. However, note that <code>updateWebService()</code> really is just an alias for <code>publishWebService()</code>, except that the argument <code>wsid</code> is compulsory</p>
 <pre class="r"><code>api &lt;- updateWebService(
   ws,
   fun = add, 
-  name = &quot;add&quot;,
+  name = &quot;AzureML-vignette-add&quot;,
   inputSchema = list(
     x = &quot;numeric&quot;, 
     y = &quot;numeric&quot;
@@ -358,14 +364,14 @@ helpPageUrl</code></pre>
   wsid = api$WorkspaceId   # &lt;&lt;-- Note you must add wsid to update!
 )</code></pre>
 </div>
-<div id="discovering-web-service" class="section level2">
-<h2>Discovering Web Service</h2>
+<div id="discovering-web-services" class="section level2">
+<h2>Discovering Web Services</h2>
 <p>The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:</p>
-<pre class="r"><code>webservices &lt;- services(ws, name = &quot;add&quot;)</code></pre>
+<pre class="r"><code>webservices &lt;- services(ws, name = &quot;AzureML-vignette-add&quot;)</code></pre>
 <p>Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:</p>
 <pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ]$Id)
 class(ep)</code></pre>
-<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<pre><code>## [1] &quot;Endpoint&quot;   &quot;data.frame&quot;</code></pre>
 <pre class="r"><code>names(ep)</code></pre>
 <pre><code>##  [1] &quot;Name&quot;                  &quot;Description&quot;          
 ##  [3] &quot;CreationTime&quot;          &quot;WorkspaceId&quot;          
@@ -377,7 +383,7 @@ class(ep)</code></pre>
 <p>Alternatively, you can use the <code>discoverSchema()</code> function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:</p>
 <pre class="r"><code>discoverSchema(ep$HelpLocation)</code></pre>
 <pre><code>## $requestUrl
-## [1] &quot;https://ussouthcentral.services.azureml.net/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/services/0cd2a92378744de39d0ef3848186189d/execute?api-version=2.0&amp;format=swagger&quot;
+## [1] &quot;https://ussouthcentral.services.azureml.net/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/services/13bc44e3969b49ff8ce1045c2f695efb/execute?api-version=2.0&amp;format=swagger&quot;
 ## 
 ## $columnNames
 ## $columnNames[[1]]
@@ -422,7 +428,7 @@ class(ep)</code></pre>
   x = 1:5,
   y = 6:10
 )
-s &lt;- services(ws, name = &quot;add&quot;)
+s &lt;- services(ws, name = &quot;AzureML-vignette-add&quot;)
 s &lt;- tail(s, 1) # use the last published function, in case of duplicate function names
 ep &lt;- endpoints(ws, s$Id)
 consume(ep, df)</code></pre>
@@ -433,6 +439,11 @@ consume(ep, df)</code></pre>
 ## 4  13
 ## 5  15</code></pre>
 <p>Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.</p>
+</div>
+<div id="deleting-a-web-service" class="section level2">
+<h2>Deleting a Web Service</h2>
+<p>To remove a webservice endpoint that you no longer need, use <code>deleteWebservice()</code>:</p>
+<pre class="r"><code>deleteWebService(ws, name = &quot;AzureML-vignette-add&quot;)</code></pre>
 </div>
 </div>
 

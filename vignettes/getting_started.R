@@ -55,7 +55,7 @@ ws <- workspace()
 api <- publishWebService(
   ws,
   fun = add, 
-  name = "add",
+  name = "AzureML-vignette-add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
@@ -77,7 +77,7 @@ helpPageUrl
 api <- updateWebService(
   ws,
   fun = add, 
-  name = "add",
+  name = "AzureML-vignette-add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
@@ -89,7 +89,7 @@ api <- updateWebService(
 )
 
 ## ----webservice----------------------------------------------------------
-webservices <- services(ws, name = "add")
+webservices <- services(ws, name = "AzureML-vignette-add")
 
 ## ----endpoints-----------------------------------------------------------
 ep <- endpoints(ws, webservices[1, ]$Id)
@@ -104,8 +104,11 @@ df <- data.frame(
   x = 1:5,
   y = 6:10
 )
-s <- services(ws, name = "add")
+s <- services(ws, name = "AzureML-vignette-add")
 s <- tail(s, 1) # use the last published function, in case of duplicate function names
 ep <- endpoints(ws, s$Id)
 consume(ep, df)
+
+## ----delete--------------------------------------------------------------
+deleteWebService(ws, name = "AzureML-vignette-add")
 

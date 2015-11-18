@@ -28,6 +28,11 @@ The package depends on:
 - `base64enc`
 - `uuid`
 
+Some of the examples use data and functions in:
+
+- `lme4`
+- `ggplot2`
+
 
 # Overview
 
@@ -35,13 +40,12 @@ AzureML provides an interface to publish web services on Microsoft Azure Machine
 
 - Workspace: connect to and manage AzureML workspaces
 - Datasets: upload and download datasets to and from AzureML workspaces
-- Publish: publish R functions as AzureML web services, and update or delete
-   existing services
+- Publish: publish R functions as AzureML web services, and update or delete existing services
 - Consume: apply any AzureML web service to your R data
 
 ## Getting Started
 
-To get st arted, please go [here](https://studio.azureml.net) and create a free account (not guest) or use your existing AzureML account.  After logging in, under the "Settings" tab, copy and paste your Workspace ID from the "Name" sub-tab into your R console. From the "Authorization Tokens" sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.
+To get started, please navigate to [AzureML Studio](https://studio.azureml.net) and create a free account (not guest) or use your existing AzureML account.  After logging in, under the "Settings" tab, copy and paste your Workspace ID from the "Name" sub-tab into your R console. From the "Authorization Tokens" sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.
 
 The package defines a `Workspace` class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the `workspace` function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token.
 
@@ -205,7 +209,7 @@ ws <- workspace()
 api <- publishWebService(
   ws,
   fun = add, 
-  name = "add",
+  name = "AzureML-vignette-add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
@@ -241,7 +245,7 @@ Once published, you can update a web service using the `updateWebService()` func
 api <- updateWebService(
   ws,
   fun = add, 
-  name = "add",
+  name = "AzureML-vignette-add",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
@@ -253,12 +257,12 @@ api <- updateWebService(
 )
 ```
 
-## Discovering Web Service
+## Discovering Web Services
 
 The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:
 
 ```{r webservice}
-webservices <- services(ws, name = "add")
+webservices <- services(ws, name = "AzureML-vignette-add")
 ```
 
 Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:
@@ -287,7 +291,7 @@ df <- data.frame(
   x = 1:5,
   y = 6:10
 )
-s <- services(ws, name = "add")
+s <- services(ws, name = "AzureML-vignette-add")
 s <- tail(s, 1) # use the last published function, in case of duplicate function names
 ep <- endpoints(ws, s$Id)
 consume(ep, df)
@@ -295,4 +299,12 @@ consume(ep, df)
 
 
 Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.
+
+## Deleting a Web Service
+
+To remove a webservice endpoint that you no longer need, use `deleteWebservice()`:
+
+```{r delete}
+deleteWebService(ws, name = "AzureML-vignette-add")
+```
 
