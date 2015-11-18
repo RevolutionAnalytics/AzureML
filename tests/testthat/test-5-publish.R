@@ -31,15 +31,36 @@ test_that(".getexports finds function and creates zip string", {
 test_that("publishWebService works with simple function", {
   ws <- workspace()
   add <- function(x,y) x + y
+  
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
+  expect_error({
+    endpoint <- publishWebService(ws, 
+                                  fun = "add", 
+                                  name = timestamped_name, 
+                                  inputSchema = list(x="numeric", 
+                                                     y="numeric"), 
+                                  outputSchema = list(ans="numeric")
+    )
+    if(is.Endpoint(endpoint)) deleteWebService(ws, timestamped_name)
+  }, 
+  "You must specify 'fun' as a function, not a character"
+  )
+  
+  
+  
+  
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
   endpoint <- publishWebService(ws, 
                                 fun = add, 
-                                name = "addme", 
+                                name = timestamped_name, 
                                 inputSchema = list(x="numeric", 
                                                    y="numeric"), 
                                 outputSchema = list(ans="numeric"))
   
-  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
-  Sys.sleep(15)
   
   expect_is(endpoint, "data.frame")
   expect_is(endpoint, "Endpoint")
@@ -47,10 +68,15 @@ test_that("publishWebService works with simple function", {
   expect_is(endpoint$WebServiceId, "character")
   expect_equal(ws$id, endpoint$WorkspaceId)
   
+  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
+  Sys.sleep(3)
+  
   # Now test if we can consume the service we just published
-  res <- consume(endpoint, list(x=pi, y=2))
+  res <- consume(endpoint, list(x=pi, y=2), retryDelay = 2)
   expect_is(res, "data.frame")
-  expect_equal(as.numeric(res$ans), pi + 2, tolerance = 1e-5)
+  expect_equal(res$ans, pi + 2, tolerance = 1e-5)
+  
+  deleteWebService(ws, timestamped_name)
 })
 
 
