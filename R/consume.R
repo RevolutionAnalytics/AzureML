@@ -6,7 +6,8 @@
 #' @export
 #'
 #' @inheritParams refresh
-#' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
+#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
+#' simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
 #' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
@@ -22,9 +23,16 @@
 #' @example inst/examples/example_publish.R
 consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
-  if(is.Service(endpoint)) stop("Invalid endpoint.  Use endpoints() to convert a Service to an Endpoint.")
-  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create an endpoint.")
+  if(is.Service(endpoint))
+  {
+    if(nrow(endpoint) > 1) endpoint = endpoint[1,]
+    default = endpoint$DefaultEndpointName
+    endpoint = endpoints(attr(endpoint, "workspace"), endpoint)
+    endpoint = subset(endpoint, Name=default)
+  }
   
+  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint.")
+
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
   

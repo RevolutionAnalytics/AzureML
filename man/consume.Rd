@@ -7,7 +7,8 @@
 consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 }
 \arguments{
-\item{endpoint}{AzureML Web Service endpoint returned by \code{\link{endpoints}}}
+\item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
+simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.}
 
 \item{...}{variable number of requests entered as lists in key-value format; optionally a single data frame argument.}
 
