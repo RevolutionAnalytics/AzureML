@@ -61,6 +61,21 @@ azureSchema = function(argList) {
   return(form)
 }
 
+# Maps the class of an object to the appropriate AzureML type
+azuremlTypes <- function(x){
+  lapply(x, function(x){
+    switch(class(x)[1],
+           integer = "integer",
+           numeric = "numeric",
+           double = "numeric",
+           character = "character",
+           factor = "character",
+           ordered = "character",
+           logical = "logical",
+           stop("unknown class")
+    )
+  })
+}
 
 
 #' Publish a function as a Microsoft Azure Web Service
@@ -141,11 +156,11 @@ publishWebService = function(ws, fun, name,
   if(is.data.frame(inputSchema))
   {
     `data.frame` = TRUE
-    test = fun(head(inputSchema, n=1))
-    inputSchema = azureSchema(lapply(inputSchema, class))
+    test = match.fun(fun)(head(inputSchema))
+    inputSchema = azureSchema(azuremlTypes(inputSchema))
     if(missing(outputSchema))
     {
-      if(is.data.frame(test) || is.list(test)) outputSchema = lapply(test, class)
+      if(is.data.frame(test) || is.list(test)) outputSchema = azuremlTypes(test)
       else outputSchema = list(ans=class(test))
     }
   } else inputSchema = azureSchema(inputSchema)
@@ -233,11 +248,11 @@ updateWebService = publishWebService
 deleteWebService = function(ws, name, refresh = TRUE)
 {
 #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
-  if(is.data.frame(name) || is.list(name))
-  {
+  
+  if(!is.Workspace(ws)) stop("Invalid ws. Please provide a workspace object")
+  if(is.data.frame(name) || is.list(name)){
     name = name$Id[1]
-  } else
-  {
+  } else {
     name = ws$services[ws$services$Name == name, "Id"][1]
     if(is.na(name)) stop("service not found")
   }
