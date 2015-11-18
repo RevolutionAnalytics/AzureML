@@ -79,3 +79,45 @@ test_that("publishWebService works with simple function", {
   deleteWebService(ws, timestamped_name)
 })
 
+
+test_that("publishWebService works with data frame input", {
+  ws <- workspace()
+
+  timestamped_name <- paste0("webservice-test-publish-", 
+                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+
+  library(lme4)
+  set.seed(1)
+  train <- sleepstudy[sample(nrow(sleepstudy), 120),]
+  m <- lm(Reaction ~ Days + Subject, data = train)
+  
+  # Deine a prediction function to publish based on the model:
+  sleepyPredict <- function(newdata){
+    predict(m, newdata=newdata)
+  }
+  
+  ws <- workspace()
+  endpoint <- publishWebService(ws, fun = sleepyPredict, name=timestamped_name,
+                          inputSchema = sleepstudy,
+                          data.frame=TRUE)
+  
+
+  expect_is(endpoint, "data.frame")
+  expect_is(endpoint, "Endpoint")
+  expect_is(endpoint$WorkspaceId, "character")
+  expect_is(endpoint$WebServiceId, "character")
+  expect_equal(ws$id, endpoint$WorkspaceId)
+
+
+  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
+  Sys.sleep(3)
+  
+  # Now test if we can consume the service we just published
+  res <- consume(endpoint, sleepstudy, retryDelay = 2)$ans
+  expect_is(res, "numeric")
+  expect_equal(length(res), nrow(sleepstudy))
+
+  deleteWebService(ws, timestamped_name)
+})
+
+
