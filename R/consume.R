@@ -104,12 +104,12 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
     httpStatus = r$status_code
     result = fromJSON(rawToChar(r$content))
     error <- result$error
-    if(httpStatus != 503) break
+    if(httpStatus %in% c(200, 400)) break
     if(tries == 0)
-      warning(sprintf("Request failed with status %s. Retrying request...", 
-                      httpStatus), 
-              immediate. = TRUE,
-              call. = FALSE)
+      message(sprintf("Request failed with status %s. Retrying request...", 
+                      httpStatus))
+#               immediate. = TRUE,
+#               call. = FALSE)
     Sys.sleep(retryDelay)
     tries = tries + 1
   }
