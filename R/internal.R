@@ -165,7 +165,7 @@ zipAvailable = function(){
   z != ""
 }
 
-zipNotAvailableMessage = "Requires external zip utility. Please install zip and try again."
+zipNotAvailableMessage = "Requires external zip utility. Please install zip, ensure it's on your path and try again."
 
 #' Package a Function and Dependencies into an Environment
 #'
