@@ -129,6 +129,7 @@ publishWebService = function(ws, fun, name,
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(is.character(fun)) stop("You must specify 'fun' as a function, not a character")
   if(!is.function(fun)) stop("The argument 'fun' must be a function.")
+  if(!is.list(inputSchema)) stop("You must specify inputSchema as either a list or a data.frame")
   
   if(missing(wsid) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the wsid parameter is specified")
@@ -146,12 +147,15 @@ publishWebService = function(ws, fun, name,
       if(is.data.frame(test) || is.list(test)) outputSchema = azureSchema(lapply(test, class))
       else outputSchema = list(ans=class(test))
     }
-  } else inputSchema = azureSchema(inputSchema)
+  } else 
+  {
+    inputSchema = azureSchema(inputSchema)
+  }
   outputSchema = azureSchema(outputSchema)
   if(`data.frame`)
   {
     if(length(formals(fun)) != 1) stop("when data.frame=TRUE fun must only take one data.frame argument")
-  } else
+  } else 
   {
     if(length(formals(fun)) != length(inputSchema)) stop("length(inputSchema) does not match the number of function arguments")
   }
@@ -230,7 +234,7 @@ updateWebService = publishWebService
 #' @example inst/examples/example_publish.R
 deleteWebService = function(ws, name, refresh = TRUE)
 {
-#DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
+  #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
   
   if(!is.Workspace(ws)) stop("Invalid ws. Please provide a workspace object")
   if(is.data.frame(name) || is.list(name)){
