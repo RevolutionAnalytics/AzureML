@@ -4,8 +4,8 @@
 \alias{download.intermediate.dataset}
 \title{Download a dataset from an AzureML experiment port.}
 \usage{
-download.intermediate.dataset(ws, experiment, node_id, port_name, data_type_id,
-  ...)
+download.intermediate.dataset(ws, experiment, node_id,
+  port_name = "Results dataset", data_type_id = "GenericCSV", ...)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
@@ -14,9 +14,9 @@ download.intermediate.dataset(ws, experiment, node_id, port_name, data_type_id,
 
 \item{node_id}{Experiment node ID obtained from "Generate Data Access Code"}
 
-\item{port_name}{Experiment port name obtained from "Generate Data Access Code"}
+\item{port_name}{Experiment port name obtained from "Generate Data Access Code". The default is "Results dataset"}
 
-\item{data_type_id}{Experiment data type id obtained from "Generate Data Access Code"}
+\item{data_type_id}{Experiment data type id obtained from "Generate Data Access Code". The default is "GenericCSV"}
 
 \item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
 }

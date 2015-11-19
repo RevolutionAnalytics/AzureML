@@ -43,7 +43,7 @@ if(file.exists(settingsFile))
                                          data_type_id='GenericCSV')
    
    expect_is(frame, "data.frame")
-   expect_true(nrow(frame) > 0)
+   expect_true(nrow(frame) > 1)
  })
 } else {
  message("To run tests, add a file ~/.azureml/settings.json containing AzureML keys, see ?workspace for help")

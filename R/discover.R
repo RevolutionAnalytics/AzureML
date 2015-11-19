@@ -77,16 +77,14 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
   )
   on.exit(close(r))
   ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
+  attr(ans, "workspace") = ws
+  if(!missing(name)) {
+    ans = ans[ans$Name == name,]
+  }
+  if(is.null(ans)) ans = data.frame()
+  class(ans) = c("Service", "data.frame")
   # Cache the result in the workspace
   if(service_id == "") ws$services = ans
-  if(!missing(name)) {
-    ans <- ans[ans$Name == name,]
-  }
-  if(is.null(ans)) {
-    warning("Service not found")
-  } else {
-    class(ans) <- c("Service", "data.frame")
-  }
   ans
 }
 
@@ -94,10 +92,6 @@ services = function(ws, service_id, name, host = ws$.management_endpoint)
 #' @rdname services
 #' @export
 getWebServices = services
-
-is.Service <- function(x){
-  inherits(x, "Service")
-}
 
 #' List AzureML Web Service Endpoints
 #'
@@ -188,11 +182,6 @@ endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint
 #' @rdname endpoints
 #' @export
 getEndpoints = endpoints
-
-
-is.Endpoint <- function(x){
-  inherits(x, "Endpoint")
-}
 
 #' Display AzureML Web Service Endpoint Help Screens
 #'

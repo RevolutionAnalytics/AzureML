@@ -36,22 +36,22 @@ azureSchema = function(argList) {
   for (arg in names(argList)) {
     type = argList[[arg]]
     
-    if (type == "numeric" || type == "double") {
+    if ("numeric" %in% type || "double" %in% type) {
       form[[ arg ]] = list("type"="number", "format"="double")
     }
-    else if (type == "date-time" || type == "time-span") {
+    else if ("date-time" %in% type || "time-span" %in% type) {
       form[[arg]] = list("type"="string", "format"=type)
     }
-    else if (type == "uint16" || type == "int16" || type == "uint32" || type == "int32" || type == "uint64" || type == "int64") {
+    else if (any(c("uint16", "int16", "uint32", "int32", "uint64", "int64") %in% type)) {
       form[[arg]] = list("type"="integer", "format"=type)
     }
-    else if (type == "integer") {
+    else if ("integer" %in% type) {
       form[[arg]] = list("type"="integer", "format"="int32")
     }
-    else if (type == "logical" || type == "bool" || type == "boolean") {
+    else if (any(c("logical", "bool", "boolean") %in% type)) {
       form[[arg]] = list("type"="boolean")
     }
-    else if (type == "character" || type == "string" || type == "factor") {
+    else if (any(c("character", "string", "factor", "ordered") %in% type)) {
       form[[arg]] = list("type"="string", "format"="string")
     }
     else {
@@ -60,23 +60,6 @@ azureSchema = function(argList) {
   }
   return(form)
 }
-
-# Maps the class of an object to the appropriate AzureML type
-azuremlTypes <- function(x){
-  lapply(x, function(x){
-    switch(class(x)[1],
-           integer = "integer",
-           numeric = "numeric",
-           double = "numeric",
-           character = "character",
-           factor = "character",
-           ordered = "character",
-           logical = "logical",
-           stop("unknown class")
-    )
-  })
-}
-
 
 #' Publish a function as a Microsoft Azure Web Service
 #'
@@ -146,6 +129,7 @@ publishWebService = function(ws, fun, name,
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(is.character(fun)) stop("You must specify 'fun' as a function, not a character")
   if(!is.function(fun)) stop("The argument 'fun' must be a function.")
+  if(!is.list(inputSchema)) stop("You must specify inputSchema as either a list or a data.frame")
   
   if(missing(wsid) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the wsid parameter is specified")
@@ -157,18 +141,21 @@ publishWebService = function(ws, fun, name,
   {
     `data.frame` = TRUE
     test = match.fun(fun)(head(inputSchema))
-    inputSchema = azureSchema(azuremlTypes(inputSchema))
+    inputSchema = azureSchema(lapply(inputSchema, class))
     if(missing(outputSchema))
     {
-      if(is.data.frame(test) || is.list(test)) outputSchema = azuremlTypes(test)
+      if(is.data.frame(test) || is.list(test)) outputSchema = azureSchema(lapply(test, class))
       else outputSchema = list(ans=class(test))
     }
-  } else inputSchema = azureSchema(inputSchema)
+  } else 
+  {
+    inputSchema = azureSchema(inputSchema)
+  }
   outputSchema = azureSchema(outputSchema)
   if(`data.frame`)
   {
     if(length(formals(fun)) != 1) stop("when data.frame=TRUE fun must only take one data.frame argument")
-  } else
+  } else 
   {
     if(length(formals(fun)) != length(inputSchema)) stop("length(inputSchema) does not match the number of function arguments")
   }
@@ -213,7 +200,7 @@ publishWebService = function(ws, fun, name,
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
-  r = curl_fetch_memory(publishURL, handle = h)
+  r = try_fetch(publishURL, handle = h)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)
@@ -247,7 +234,7 @@ updateWebService = publishWebService
 #' @example inst/examples/example_publish.R
 deleteWebService = function(ws, name, refresh = TRUE)
 {
-#DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
+  #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
   
   if(!is.Workspace(ws)) stop("Invalid ws. Please provide a workspace object")
   if(is.data.frame(name) || is.list(name)){

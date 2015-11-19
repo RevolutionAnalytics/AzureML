@@ -71,8 +71,8 @@ download.datasets = function(source, name, ...)
 #' 
 #' @param experiment AzureML experiment ID obtained from "Generate Data Access Code"
 #' @param node_id Experiment node ID obtained from "Generate Data Access Code"
-#' @param port_name Experiment port name obtained from "Generate Data Access Code"
-#' @param data_type_id Experiment data type id obtained from "Generate Data Access Code"
+#' @param port_name Experiment port name obtained from "Generate Data Access Code". The default is "Results dataset"
+#' @param data_type_id Experiment data type id obtained from "Generate Data Access Code". The default is "GenericCSV"
 #' @param ... Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.
 #' 
 #' @return A data frame.
@@ -89,7 +89,7 @@ download.datasets = function(source, name, ...)
 #' @export
 #' @family dataset functions
 #' @family experiment functions
-download.intermediate.dataset = function(ws, experiment, node_id, port_name, data_type_id, ...)
+download.intermediate.dataset = function(ws, experiment, node_id, port_name="Results dataset", data_type_id="GenericCSV", ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
                 ws$.baseuri, curl_escape(ws$id),
@@ -97,7 +97,7 @@ download.intermediate.dataset = function(ws, experiment, node_id, port_name, dat
                 curl_escape(port_name))
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  get_dataset(list(DataTypeId="GenericTSV", DownloadLocation=url), h, ...)
+  get_dataset(list(DataTypeId = data_type_id, DownloadLocation = url), h, ...)
 }
 
 
@@ -137,8 +137,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   handle_setheaders(h, .list=hdr)
   body = charToRaw(paste(tsv, collapse="\n"))
   handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
-  step1 = curl_fetch_memory(url, handle=h)
-  # Check for error (see ?curl_fetch_memory)
+  step1 = try_fetch(url, handle=h)
   if(step1$status_code != 200) stop("HTTP ", step1$status_code, rawToChar(step1$content))
   # Parse the response
   step1 = fromJSON(rawToChar(step1$content))
@@ -164,7 +163,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
   handle_setheaders(h, .list=ws$.headers)
   body = charToRaw(paste(metadata, collapse="\n"))
   handle_setopt(h, post=TRUE, postfieldsize=length(body), postfields=body)
-  step2 = curl_fetch_memory(url, handle=h)
+  step2 = try_fetch(url, handle=h)
   if(step2$status_code != 200) stop("HTTP ", step2$status_code, " ", rawToChar(step2$content))
   id = gsub("\\\"","",rawToChar(step2$content))
   
@@ -200,16 +199,7 @@ delete.datasets = function(ws, name, host="https://studioapi.azureml.net/api")
   {
     uri = sprintf("%s/workspaces/%s/datasources/family/%s", host,
                   curl_escape(ws$id), curl_escape(familyId))
-    s = 400
-    try = 0
-    while(s >= 300 && try < 3)
-    {
-      s = curl_fetch_memory(uri, handle=h)$status_code
-      if(s < 300) break
-      try = try + 1
-      Sys.sleep(5)
-    }
-    s
+    try_fetch(uri, h)$status_code
   }, 1, USE.NAMES=FALSE)
   ans = data.frame(
     Name = datasets$Name, 

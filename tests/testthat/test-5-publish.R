@@ -9,18 +9,18 @@ test_that(".getexports finds function and creates zip string", {
   assign("add", function(x, y) x + y, envir = funEnv)
   
   exportEnv = new.env()
-  .getexports(substitute(add), e = exportEnv, env = funEnv)
+  AzureML:::.getexports(substitute(add), e = exportEnv, env = funEnv)
   
   expect_equal(
     ls(exportEnv), 
     "add"
   )
   
-  za <- zipAvailable()
-  if(!za) skip(zipNotAvailableMessage)
+  za <- AzureML:::zipAvailable()
+  if(!za) skip(AzureML:::zipNotAvailableMessage)
   expect_true(za)
   
-  z <- packageEnv(exportEnv)
+  z <- AzureML:::packageEnv(exportEnv)
   expect_is(z, "character")
   expect_true(nchar(z) > 1)
   
@@ -68,11 +68,8 @@ test_that("publishWebService works with simple function", {
   expect_is(endpoint$WebServiceId, "character")
   expect_equal(ws$id, endpoint$WorkspaceId)
   
-  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
-  Sys.sleep(3)
-  
   # Now test if we can consume the service we just published
-  res <- consume(endpoint, list(x=pi, y=2), retryDelay = 2)
+  res <- consume(endpoint, x=pi, y=2)
   expect_is(res, "data.frame")
   expect_equal(res$ans, pi + 2, tolerance = 1e-5)
   
@@ -97,11 +94,9 @@ test_that("publishWebService works with data frame input", {
   }
   
   ws <- workspace()
-  endpoint <- publishWebService(ws, fun = sleepyPredict, name=timestamped_name,
-                          inputSchema = sleepstudy,
-                          data.frame=TRUE)
+  endpoint <- publishWebService(ws, fun = sleepyPredict, name = timestamped_name,
+                          inputSchema = sleepstudy)
   
-
   expect_is(endpoint, "data.frame")
   expect_is(endpoint, "Endpoint")
   expect_is(endpoint$WorkspaceId, "character")
@@ -109,15 +104,10 @@ test_that("publishWebService works with data frame input", {
   expect_equal(ws$id, endpoint$WorkspaceId)
 
 
-  # Wait 15 seconds to allow the AzureML server to finish whatever it's doing
-  Sys.sleep(3)
-  
   # Now test if we can consume the service we just published
-  res <- consume(endpoint, sleepstudy, retryDelay = 2)$ans
+  res <- consume(endpoint, sleepstudy)$ans
   expect_is(res, "numeric")
   expect_equal(length(res), nrow(sleepstudy))
 
   deleteWebService(ws, timestamped_name)
 })
-
-

@@ -6,7 +6,8 @@
 #' @export
 #'
 #' @inheritParams refresh
-#' @param endpoint AzureML Web Service endpoint returned by \code{\link{endpoints}}
+#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
+#' simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
 #' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
@@ -22,9 +23,16 @@
 #' @example inst/examples/example_publish.R
 consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
-  if(is.Service(endpoint)) stop("Invalid endpoint.  Use endpoints() to convert a Service to an Endpoint.")
-  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create an endpoint.")
+  if(is.Service(endpoint))
+  {
+    if(nrow(endpoint) > 1) endpoint = endpoint[1,]
+    default = endpoint$DefaultEndpointName
+    endpoint = endpoints(attr(endpoint, "workspace"), endpoint)
+    endpoint = subset(endpoint, Name=default)
+  }
   
+  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint.")
+
   apiKey = endpoint$PrimaryKey
   requestUrl = endpoint$ApiLocation
   
@@ -80,44 +88,30 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 {
   # Set number of tries and HTTP status to 0
   result = NULL
-  tries = 0
-  while(tries < 3) # Limit number of API calls to 3
+  # Construct request payload
+  req = list(
+    Inputs = list(input1 = keyvalues), 
+    GlobalParameters = globalParam
+  )
+  body = charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
+  h = new_handle()
+  headers = list(`User-Agent`="R",
+                 `Content-Type`="application/json",
+                 `Authorization`=sprintf("Bearer %s", apiKey))
+  handle_setheaders(h, .list=headers)
+  handle_setopt(h, .list = list(
+    post=TRUE, 
+    postfieldsize=length(body), 
+    postfields=body)
+  )
+  r = try_fetch(requestUrl, h, delay=retryDelay)
+  result = fromJSON(rawToChar(r$content))
+  if(r$status_code >= 400)
   {
-    # Construct request payload
-    req = list(
-      Inputs = list(input1 = keyvalues), 
-      GlobalParameters = globalParam
-    )
-    body = charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
-    h = new_handle()
-    headers = list(`User-Agent`="R",
-                   `Content-Type`="application/json",
-                   `Authorization`=sprintf("Bearer %s", apiKey))
-    handle_setheaders(h, .list=headers)
-    handle_setopt(h, .list = list(
-      post=TRUE, 
-      postfieldsize=length(body), 
-      postfields=body)
-    )
-    r = curl_fetch_memory(requestUrl, handle=h)
-    # Get HTTP status to decide whether to throw bad request or retry, or return etc.
-    httpStatus = r$status_code
-    result = fromJSON(rawToChar(r$content))
-    error <- result$error
-    if(httpStatus %in% c(200, 400)) break
-    if(tries == 0)
-      message(sprintf("Request failed with status %s. Retrying request...", 
-                      httpStatus))
-#               immediate. = TRUE,
-#               call. = FALSE)
-    Sys.sleep(retryDelay)
-    tries = tries + 1
-  }
-  if(httpStatus >= 400){
-    warning("AzureML http status code : ", httpStatus, immediate. = TRUE, call. = FALSE)
+    warning("AzureML http status code : ", r$status_code, immediate. = TRUE, call. = FALSE)
     warning("AzureML error code : ", result$error$code, immediate. = TRUE, call. = FALSE)
     warning("AzureML error message : ", result$error$message, immediate. = TRUE, call. = FALSE)
-    class(result) <- c(class(result), "error")
+    class(result) = c(class(result), "error")
   }
   result
 }
@@ -248,7 +242,7 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
 #'
 #' @keywords internal
 getDetailsFromUrl = function(url) {
-  ptn <- ".*?/workspaces/([[:alnum:]]*)/webservices/([[:alnum:]]*)/endpoints/([[:alnum:]]*)/*.*$"
+  ptn = ".*?/workspaces/([[:alnum:]]*)/webservices/([[:alnum:]]*)/endpoints/([[:alnum:]]*)/*.*$"
   if(!grepl(ptn, url)) stop("Invalid url")
   c(
     gsub(ptn, "\\1", url),

@@ -24,7 +24,30 @@
 # Used in experiment date parsing
 date_origin = "1970-1-1"
 
-# internal utility
+#' Try to fetch a uri/handle, retrying on certain returned status codes after a timeout
+#' @param uri the uri to fetch
+#' @param handle a curl handle
+#' @param retry_on HTTP status codes that result in retry
+#' @param tries number of tries before failing
+#' @param delay in seconds between retries, subject to exponent
+#' @param exponent increment each successive delay by delay^exponent
+#' @return the result of curl_fetch_memory(uri, handle)
+try_fetch = function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
+{
+  i = 0
+  while(i < tries)
+  {
+    r = curl_fetch_memory(uri, handle)
+    if(!(r$status_code %in% retry_on)) return(r)
+    if(i == 0)
+      message(sprintf("Request failed with status %s. Retrying request...", r$status_code))
+    Sys.sleep(delay)
+    delay = delay^exponent
+    i = i + 1
+  }
+  r
+}
+
 urlconcat = function(a,b)
 {
   ans = paste(gsub("/$", "", a), b, sep="/")
@@ -66,9 +89,9 @@ get_datasets = function(ws)
 }
 
 
-convertToDate <- function(x){
-  x <- as.numeric(gsub("[^-0-9]", "", x)) /1000
-  x <- ifelse(x >= 0, x, NA)
+convertToDate = function(x){
+  x = as.numeric(gsub("[^-0-9]", "", x)) /1000
+  x = ifelse(x >= 0, x, NA)
   suppressWarnings(
     as.POSIXct(x, tz = "GMT", origin = date_origin)
   )
@@ -137,12 +160,12 @@ get_dataset = function(x, h, ...)
 
 # Checks if zip is available on system.
 # Required for packageEnv()
-zipAvailable <- function(){
-  z <- unname(Sys.which("zip"))
+zipAvailable = function(){
+  z = unname(Sys.which("zip"))
   z != ""
 }
 
-zipNotAvailableMessage <- "Requires external zip utility. Please install zip and try again."
+zipNotAvailableMessage = "Requires external zip utility. Please install zip, ensure it's on your path and try again."
 
 #' Package a Function and Dependencies into an Environment
 #'
@@ -179,7 +202,7 @@ packageEnv = function(exportenv, packages=NULL, version="3.1.0")
       error=function(e) stop(e))
   }
 
-  z <- try({
+  z = try({
     zip(zipfile="export.zip", files=dir())
   })
   if(inherits(z, "error") || z > 0) stop("Unable to create zip file")

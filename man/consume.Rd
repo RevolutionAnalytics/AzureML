@@ -7,7 +7,8 @@
 consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 }
 \arguments{
-\item{endpoint}{AzureML Web Service endpoint returned by \code{\link{endpoints}}}
+\item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
+simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.}
 
 \item{...}{variable number of requests entered as lists in key-value format; optionally a single data frame argument.}
 
@@ -51,7 +52,7 @@ ep <- publishWebService(ws, fun = sleepyPredict, name="sleepy lm",
                         data.frame=TRUE)
 
 # OK, try this out, and compare with raw data
-ans = consume(ep, sleepstudy)$ans
+ans <- consume(ep, sleepstudy)$ans
 plot(ans, sleepstudy$Reaction)
 
 # Remove the service
@@ -76,21 +77,21 @@ fun <- function(newdata)
 ep <- publishWebService(ws, fun=fun, name="Ozone",
                         inputSchema = airquality,
                         data.frame=TRUE)
-ans = consume(ep, airquality)$ans
+ans <- consume(ep, airquality)$ans
 plot(ans, airquality$Ozone)
 deleteWebService(ws, "Ozone")
 
 
 
 # Train a model using diamonds in ggplot2 ------------------------------------
-
 # This example also demonstrates how to deal with factor in the data
 
-library(ggplot2)
-library(rpart)
-
-train <- diamonds[sample.int(nrow(diamonds), 30000), ]
-test  <- diamonds[sample(nrow(diamonds), 500), ]
+data(diamonds, package="ggplot2")
+set.seed(1)
+train_idx = sample.int(nrow(diamonds), 30000)
+test_idx = sample(setdiff(seq(1, nrow(diamonds)), train_idx), 500)
+train <- diamonds[train_idx, ]
+test  <- diamonds[test_idx, ]
 
 model <- glm(price ~ carat + clarity + color + cut - 1, data = train, 
              family = Gamma(link = "log"))
@@ -98,7 +99,6 @@ model <- glm(price ~ carat + clarity + color + cut - 1, data = train,
 diamondLevels <- diamonds[1, ]
 
 # The model works reasonably well, except for some outliers
-
 plot(exp(predict(model, test)) ~ test$price)
 
 # Create a prediction function that converts characters correctly to factors
@@ -123,8 +123,6 @@ ep <- publishWebService(ws, fun = predictDiamonds, name = "diamonds",
 )
 
 # Consume the service
-
-Sys.sleep(0)
 results <- consume(ep, test)$ans
 plot(results ~ test$price)
 
