@@ -71,8 +71,8 @@ download.datasets = function(source, name, ...)
 #' 
 #' @param experiment AzureML experiment ID obtained from "Generate Data Access Code"
 #' @param node_id Experiment node ID obtained from "Generate Data Access Code"
-#' @param port_name Experiment port name obtained from "Generate Data Access Code"
-#' @param data_type_id Experiment data type id obtained from "Generate Data Access Code"
+#' @param port_name Experiment port name obtained from "Generate Data Access Code". The default is "Results dataset"
+#' @param data_type_id Experiment data type id obtained from "Generate Data Access Code". The default is "GenericCSV"
 #' @param ... Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.
 #' 
 #' @return A data frame.
@@ -89,7 +89,7 @@ download.datasets = function(source, name, ...)
 #' @export
 #' @family dataset functions
 #' @family experiment functions
-download.intermediate.dataset = function(ws, experiment, node_id, port_name, data_type_id, ...)
+download.intermediate.dataset = function(ws, experiment, node_id, port_name="Results dataset", data_type_id="GenericCSV", ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
                 ws$.baseuri, curl_escape(ws$id),
@@ -97,7 +97,7 @@ download.intermediate.dataset = function(ws, experiment, node_id, port_name, dat
                 curl_escape(port_name))
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  get_dataset(list(DataTypeId="GenericTSV", DownloadLocation=url), h, ...)
+  get_dataset(list(DataTypeId = data_type_id, DownloadLocation = url), h, ...)
 }
 
 
