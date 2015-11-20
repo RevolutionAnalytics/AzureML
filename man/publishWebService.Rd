@@ -7,18 +7,19 @@
 \usage{
 publishWebService(ws, fun, name, inputSchema, outputSchema,
   data.frame = FALSE, export = character(0), noexport = character(0),
-  packages, version = "3.1.0", wsid, host = ws$.management_endpoint)
+  packages, version = "3.1.0", serviceId, host = ws$.management_endpoint)
 
 updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
   export = character(0), noexport = character(0), packages,
-  version = "3.1.0", wsid, host = ws$.management_endpoint)
+  version = "3.1.0", serviceId, host = ws$.management_endpoint)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
 \item{fun}{a function to publish; the function must have at least one argument}
 
-\item{name}{name of the new web service}
+\item{name}{name of the new web service; ignored when \code{serviceId} is specified
+(when updating an existing web service)}
 
 \item{inputSchema}{either a list of \code{fun} input parameters and their AzureML types
 formatted as \code{list("arg1"="type", "arg2"="type", ...)}, or an example input
@@ -43,9 +44,9 @@ in the web service}
 
 \item{version}{optional R version string for required packages (the version of R running in the AzureML Web Service)}
 
-\item{wsid}{optional Azure web service ID; use to update an existing service (see Note below)}
-
 \item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in}
+
+\item{workspaceID}{optional Azure web service ID; use to update an existing service (see Note below)}
 }
 \value{
 A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
@@ -69,9 +70,13 @@ Function input must be:
 Function output is always returned as a data frame with column names and types specified in \code{outputSchema}.
 See the examples for example use of all three I/O options.
 
-Leave the \code{wsid} parameter undefined to create a new AzureML web service, or specify the ID of an existing web service to update it, replacing the function and required R pacakges with new values. Although the API allows that the name, input and output schema to also be specified when updating it's not possible to change those values.
+Leave the \code{serviceId} parameter undefined to create a new AzureML web
+service, or specify the ID of an existing web service to update it, replacing
+the function, \code{inputSchema}, \code{outputSchema}, and required R pacakges with new values.
+The \code{name} parameter is ignored \code{serviceId} is specified to update an existing
+web service.
 
-The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{wsid} parameter is required by \code{\link{updateWebService}}.
+The \code{\link{updateWebService}} function is nearly an alias for \code{\link{publishWebService}}, differing only in that the \code{serviceId} parameter is required by \code{\link{updateWebService}}.
 
 The \code{publishWebService} function automatically exports objects required by the function to a working environment in the AzureML machine, including objects accessed within the function using lexical scoping rules. Use the \code{exports} parameter to explicitly include other objects that are needed. Use \code{noexport} to explicitly prevent objects from being exported.
 }

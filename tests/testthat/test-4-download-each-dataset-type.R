@@ -1,16 +1,16 @@
 if(interactive()) library("testthat")
 
-settingsFile <- "~/.azureml/settings.json" 
+settingsFile <- "~/.azureml/settings.json"
 if(file.exists(settingsFile))
 {
   context("Download one file of every type")
-  
+
   ws <- workspace()
   ds <- datasets(ws, filter = "samples")
   unique(ds$DataTypeId)
-  
+
   oneOfEach <- do.call(
-    rbind, 
+    rbind,
     lapply(
       split(ds, ds$DataTypeId),
       function(x){
@@ -18,11 +18,11 @@ if(file.exists(settingsFile))
       }
     )
   )
-  
+
   zip <- oneOfEach[oneOfEach$DataTypeId %in% c("Zip"), ]
   oneOfEach <- oneOfEach[!oneOfEach$DataTypeId %in% c("Zip"), ]
   oneOfEach$DataTypeId
-  
+
   for(type in oneOfEach$DataTypeId){
     test_that(sprintf("Can download dataset of type %s", type), {
       dl <- download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
@@ -30,7 +30,7 @@ if(file.exists(settingsFile))
       expect_true(nrow(dl) > 0)
     })
   }
-  
+
 } else
 {
   message("To run tests, add a file ~/.azureml/settings.json containing AzureML keys, see ?workspace for help")
