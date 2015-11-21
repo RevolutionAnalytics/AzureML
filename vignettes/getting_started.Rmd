@@ -301,6 +301,8 @@ web applications.
 The new web service will show up on the 'Web Services' tab of the Studio
 interface, and the service will have a help page for each endpoint, e.g.
 
+Note that AzureML allows multiple services to have the same name.
+
 ```{r help}
 helpPageUrl <- api$HelpLocation
 helpPageUrl
@@ -323,51 +325,38 @@ api <- updateWebService(
   outputSchema = list(
     ans = "numeric"
   ),
-  serviceId = api$WorkspaceId   # <<-- Note you must add wsid to update!
+  serviceId = api$WorkspaceId   # <<-- Required to update!
 )
 ```
-
-## Other examples of publishing web services
-
-The simplest and perhaps most useful way to define a web service uses functions
-that take a single data frame argument and return a vector or data frame of
-results.
-
-
 
 
 ## Discovering Web Services
 
-The discovery functionality in this package allows users to explore and obtain
-the web services available to their workspace. On the highest level, the user
-can use their workspace ID and authorization token, both of which were
-described in the preceding sections, to obtain a list of web services available
-to that workspace:
+Use the `services()` function to list in detail all of the available services
+in your AzureML workspace:
 
 ```{r webservice}
 webservices <- services(ws, name = "AzureML-vignette-add")
 ```
 
-Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:
+From a given service, use the `endpoints()` function to list the AzureML
+service endpoints for the service:
 
 ```{r endpoints}
-ep <- endpoints(ws, webservices[1, ]$Id)
+ep <- endpoints(ws, webservices[1, ])
 class(ep)
 names(ep)
 ```
 
-The `endpoints` object contains all the information needed to consume a web service.
+The returned `Endpoints` object contains all the information needed to consume a web
+service. The  `endpointHelp()` function returns detailed information about an endpoint
+including its input and output schema and URI.
 
-Alternatively, you can use the `discoverSchema` function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:
-
-```{r discover}
-discoverSchema(ep$HelpLocation)
-```
 
 ## Consuming Web Services
 
-To send data to your newly published web service API for scoring, use the function `consume`:
-
+Use the `consume()` function to send data to your newly published web service
+API for scoring.
 
 ```{r df}
 df <- data.frame(
@@ -376,10 +365,9 @@ df <- data.frame(
 )
 s <- services(ws, name = "AzureML-vignette-add")
 s <- tail(s, 1) # use the last published function, in case of duplicate function names
-ep <- endpoints(ws, s$Id)
+ep <- endpoints(ws, s)
 consume(ep, df)
 ```
-
 
 Alternatively, the endpoint primary key and API location can be found on the
 help page for that specific endpoint, which can be found on Azure Machine
@@ -388,9 +376,96 @@ clients that can consume this web service in real time to make predictions.
 
 ## Deleting a Web Service
 
-To remove a webservice endpoint that you no longer need, use `deleteWebservice`:
+Use `deleteWebservice()` to remove a webservice endpoint that you no longer need
+or want (like these silly examples):
 
 ```{r delete}
 deleteWebService(ws, name = "AzureML-vignette-add")
 ```
 
+## Other examples of publishing web services
+
+The simplest and perhaps most useful way to define a web service uses functions
+that take a single data frame argument and return a vector or data frame of
+results. The next example trains a generalized boosted regression model using
+the gbm package, publishes the model as a web service with name
+"AzureML-vignette-gbm", and runs example data through the model for prediction
+using the `consume()` function.
+
+```{r}
+library(AzureML)
+library(MASS)
+library(gbm)
+
+ws <- workspace()
+test <- Boston[1:5, 1:13]
+
+set.seed(123)
+gbm1 <- gbm(medv ~ .,
+            distribution = "gaussian",
+            n.trees = 5000,
+            interaction.depth = 8,
+            n.minobsinnode = 1,
+            shrinkage = 0.01,
+            cv.folds = 5,
+            data = Boston)
+best.iter <- gbm.perf(gbm1, method="cv", plot=FALSE)
+
+mypredict <- function(newdata)
+{
+  require(gbm)
+  predict(gbm1, newdata, best.iter)
+}
+
+# Example use of the prediction function
+print(mypredict(test))
+
+# Publish the service
+ep <- publishWebService(ws = ws, fun = mypredict, name = "AzureML-vignette-gbm",
+                        inputSchema = test)
+
+# Consume test data, comparing with result above
+print(consume(ep, test))
+```
+
+Notice that we don't need to explicitly specific the `inputSchema` or
+`outputSchema` arguments when working with functions that use data frame I/O.
+When finished with this example, we can delete the example service with:
+```r
+deleteWebService(ws, "AzureML-vignette-gbm")
+```
+
+## Tips on writing functions used in web services
+
+Try to use the data frame I/O interface as illustrated in the last example
+above. It's simpler and more robust than using functions of scalars or lists
+and exhibits faster execution for large data sets.
+
+Use `require` in your function to explicitly load required packages.
+
+The `publishWebServce()` function uses codetools to bundle objects required by
+your function following R lexical scoping rules. The previous example, for
+instance, uses the `best.iter` and `gbm1` variables inside of the `mypredict()`
+function. `publishWebService()` identified that and included their definitions
+in the R environment in which the function is evaluated in AzureML.
+Fine-grained control over the export of variables is provided by the
+`publishWebService()` function in case you need it (see the help page for
+details).
+
+Use the `packages` option of `publishWebService()` to explicitly bundle
+required packages and their dependencies (but not suggested dependencies) using
+miniCRAN. This lets you upload packages to AzureML that may not otherwise be
+available in that environment already, using the correct R version and platform
+used by AzureML.
+
+Be aware that the version of R running in AzureML may not be the same as the
+version of R that you are running locally. That means that some packages might
+not be available, or sometimes package behavior in the AzureML version of R
+might be different that what you observe locally. This is generally only an
+issue for cutting-edge packages.
+
+JSON is used to transfer data between your local R environment and the R
+services running in AzureML--numeric values experience a change of base, which
+can lead to a small loss of precision in some circumstances. If you really,
+really need to move binary objects between your local R session and the AzureML
+R service you might try base64 encoding the data, for example.
