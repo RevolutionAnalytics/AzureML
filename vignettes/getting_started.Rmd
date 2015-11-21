@@ -146,6 +146,13 @@ ws <- workspace()
 ws
 ```
 
+## Service availability
+
+AzureML is a web service and sometimes operations can't
+immediately proceed due to rate limiting or other factors. When this
+kind of thing occurs, the AzureML R package presents a warning and
+retries the service a few times before giving up with an error.
+
 ## Datasets
 
 AzureML _datasets_ correspond more or less to R data frames. The AzureML
@@ -157,10 +164,7 @@ delete.
 The following example illustrates listing available datasets in your workspace.
 
 ```{r}
-head(datasets(ws))
-
-# Or, equivalently:
-head(ws$datasets)
+head(datasets(ws))     # Or, equivalently: head(ws$datasets)
 ```
 
 The list of datasets is presented as an a R data frame with class `Datasets`.
@@ -169,7 +173,7 @@ available variables. Use any normal R data frame operation to manipulate the
 datasets. For example, to see the "Owner" value of each dataset:
 
 ```{r}
-ws$datasets$Owner
+head(ws$datasets$Owner, n=20)
 ```
 
 ### Downloading datasets
@@ -257,14 +261,14 @@ add <- function(x, y) {
 ```
 
 Use the function `publishWebService()` to publish the function as a
-service named "AzureML-vignette-add":
+service named "AzureML-vignette-silly":
 
 ```{r publish}
 ws <- workspace()
 api <- publishWebService(
   ws,
   fun = add, 
-  name = "AzureML-vignette-add",
+  name = "AzureML-vignette-silly",
   inputSchema = list(
     x = "numeric", 
     y = "numeric"
@@ -304,8 +308,7 @@ interface, and the service will have a help page for each endpoint, e.g.
 Note that AzureML allows multiple services to have the same name.
 
 ```{r help}
-helpPageUrl <- api$HelpLocation
-helpPageUrl
+(helpPageUrl <- api$HelpLocation)
 ```
 
 Once published, you can update a web service using the `updateWebService()` or
@@ -317,29 +320,30 @@ compulsory.
 ```{r update}
 api <- updateWebService(
   ws,
-  fun = f(x, y) x - y, 
+  fun = function(x, y) x - y,
   inputSchema = list(
     x = "numeric",
     y = "numeric"
-  ), 
+  ),
   outputSchema = list(
     ans = "numeric"
   ),
-  serviceId = api$WorkspaceId   # <<-- Required to update!
+  serviceId = api$WebServiceId   # <<-- Required to update!
 )
 ```
 
+The "AzureML-vignette-silly" service now substracts two numbers instead of adding them.
 
 ## Discovering Web Services
 
 Use the `services()` function to list in detail all of the available services
-in your AzureML workspace:
+in your AzureML workspace, or filter by web service name as shown below:
 
 ```{r webservice}
-webservices <- services(ws, name = "AzureML-vignette-add")
+(webservices <- services(ws, name = "AzureML-vignette-silly"))
 ```
 
-From a given service, use the `endpoints()` function to list the AzureML
+Given a service, use the `endpoints()` function to list the AzureML
 service endpoints for the service:
 
 ```{r endpoints}
@@ -363,7 +367,7 @@ df <- data.frame(
   x = 1:5,
   y = 6:10
 )
-s <- services(ws, name = "AzureML-vignette-add")
+s <- services(ws, name = "AzureML-vignette-silly")
 s <- tail(s, 1) # use the last published function, in case of duplicate function names
 ep <- endpoints(ws, s)
 consume(ep, df)
@@ -380,7 +384,7 @@ Use `deleteWebservice()` to remove a webservice endpoint that you no longer need
 or want (like these silly examples):
 
 ```{r delete}
-deleteWebService(ws, name = "AzureML-vignette-add")
+deleteWebService(ws, name = "AzureML-vignette-silly")
 ```
 
 ## Other examples of publishing web services
@@ -461,7 +465,7 @@ used by AzureML.
 Be aware that the version of R running in AzureML may not be the same as the
 version of R that you are running locally. That means that some packages might
 not be available, or sometimes package behavior in the AzureML version of R
-might be different that what you observe locally. This is generally only an
+might be different that what you observe locally. This is generally more of an
 issue for cutting-edge packages.
 
 JSON is used to transfer data between your local R environment and the R
