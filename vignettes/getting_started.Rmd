@@ -163,7 +163,7 @@ head(datasets(ws))
 head(ws$datasets)
 ```
 
-The list of datasets is presented as an a R data frame with class `datasets`.
+The list of datasets is presented as an a R data frame with class `Datasets`.
 Its print method shows a summary of the datasets, along with all of the
 available variables. Use any normal R data frame operation to manipulate the
 datasets. For example, to see the "Owner" value of each dataset:
@@ -176,22 +176,22 @@ ws$datasets$Owner
 
 The next example illustrates downloading a specific  dataset named "Airport
 Codes Dataset" from AzureML to your R session. This dataset is presented by
-AzureML as a "Generic CSV" dataset, and will be parsed by R's `read.table`
+AzureML as a "Generic CSV" dataset, and will be parsed by R's `read.table()`
 function. (Other formats are parsed by an appropriate parser, for example
-`read.arff`.) The example illustrates passing additional arguments to the
-`read.table` function used to parse the data from AzureML in this case.
+`read.arff()`.) The example illustrates passing additional arguments to the
+`read.table()` function used to parse the data from AzureML in this case.
 
 ```{r}
 airports <- download.datasets(ws, name = "Airport Codes Dataset", quote="\"")
 head(airports)
 ```
 
-You can use `download.datasets` to download more than one dataset as a time,
+You can use `download.datasets()` to download more than one dataset as a time,
 returning the results in a list of data frames.
 
 ### Uploading R data frames as AzureML datasets and deleting datasets
 
-Use the `upload.dataset` function to upload R data frames to AzureML.
+Use the `upload.dataset()` function to upload R data frames to AzureML.
 
 
 ```{r, echo=FALSE}
@@ -208,7 +208,7 @@ upload.dataset(airquality, ws, name = "Air quality")
 head(download.datasets(ws, name = "Air quality"))
 ```
 
-Delete one or more AzureML datasets with `delete.datasets`:
+Delete one or more AzureML datasets with `delete.datasets()`:
 
 ```{r}
 delete.datasets(ws, name="Air quality")
@@ -217,21 +217,21 @@ delete.datasets(ws, name="Air quality")
 
 ## Experiments
 
-Use the `experiments` function or simply use the `ws$experiments` data frame
-directly to list details about experiments in your AzureML workspace. The
-`experiments` function optionally filters experiments by ownership.
+Use the `experiments()` function or simply use the `ws$experiments` data frame
+object directly to list details about experiments in your AzureML workspace.
+The `experiments()` function optionally filters experiments by ownership.
 
 ```{r}
 e <- experiments(ws, filter = "samples")
 head(e)
 ```
 
-The `ws$experiments` object is just an R data frame with class `experiments`.
+The `ws$experiments` object is just an R data frame with class `Experiments`.
 Its print method shows a summary of the available experiments, but it can
 otherwise be manipulated like a normal R data frame.
 
 The list of experiments in your workspace is cached in the workspace
-environment.  Use the `refresh` function to explicitly update the cache at any
+environment.  Use the `refresh()` function to explicitly update the cache at any
 time, for example:
 
 ```{r}
@@ -247,8 +247,8 @@ data through an existing web service and collect the output.
 
 ## Publishing a Web Service
 
-The `publishWebService` function helps you to publish an R function as an Azure
-ML web service. Consider this simple example R function:
+The `publishWebService()` publishes an R function as an AzureML web service.
+Consider this simple example R function:
 
 ```{r train}
 add <- function(x, y) {
@@ -256,7 +256,7 @@ add <- function(x, y) {
 }
 ```
 
-Use the function `publishWebService` to publish the `add` function as a
+Use the function `publishWebService()` to publish the function as a
 service named "AzureML-vignette-add":
 
 ```{r publish}
@@ -280,7 +280,7 @@ single numeric scalar output value. Note that we explicitly define the web
 service input and output schema in the example. See the examples below for more
 flexible ways of defining web services with functions of data frames.
 
-The result of `publishWebService` is an `Endpoint` object, really just an R
+The result of `publishWebService()` is an `Endpoint` object, really just an R
 data frame with two elements: a list containing the details of the newly
 created web service, and a list of the endpoints of the web service. From here,
 you can pass the information on to another user, or use the information to use
@@ -306,32 +306,43 @@ helpPageUrl <- api$HelpLocation
 helpPageUrl
 ```
 
-Once published, you can update a web service using the `updateWebService`
-or `publishWebService` functions.
-The `updateWebService` function really is just an alias for
-`publishWebService`, except that the argument `wsid` is compulsory.
-
+Once published, you can update a web service using the `updateWebService()` or
+`publishWebService()` functions.  The `updateWebService()` function is just an
+alias for `publishWebService()`, except that the argument `serviceId` is
+compulsory.
 
 
 ```{r update}
 api <- updateWebService(
   ws,
-  fun = add, 
-  name = "AzureML-vignette-add",
+  fun = f(x, y) x - y, 
   inputSchema = list(
-    x = "numeric", 
+    x = "numeric",
     y = "numeric"
   ), 
   outputSchema = list(
     ans = "numeric"
   ),
-  wsid = api$WorkspaceId   # <<-- Note you must add wsid to update!
+  serviceId = api$WorkspaceId   # <<-- Note you must add wsid to update!
 )
 ```
 
+## Other examples of publishing web services
+
+The simplest and perhaps most useful way to define a web service uses functions
+that take a single data frame argument and return a vector or data frame of
+results.
+
+
+
+
 ## Discovering Web Services
 
-The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:
+The discovery functionality in this package allows users to explore and obtain
+the web services available to their workspace. On the highest level, the user
+can use their workspace ID and authorization token, both of which were
+described in the preceding sections, to obtain a list of web services available
+to that workspace:
 
 ```{r webservice}
 webservices <- services(ws, name = "AzureML-vignette-add")
