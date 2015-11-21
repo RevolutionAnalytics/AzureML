@@ -108,10 +108,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
   result = fromJSON(rawToChar(r$content))
   if(r$status_code >= 400)
   {
-    warning("AzureML http status code : ", r$status_code, immediate. = TRUE, call. = FALSE)
-    warning("AzureML error code : ", result$error$code, immediate. = TRUE, call. = FALSE)
-    warning("AzureML error message : ", result$error$message, immediate. = TRUE, call. = FALSE)
-    class(result) = c(class(result), "error")
+    stop(paste(capture.output(result), collapse="\n"))
   }
   result
 }
