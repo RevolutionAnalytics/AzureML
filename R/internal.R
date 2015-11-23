@@ -127,12 +127,13 @@ get_experiments = function(ws)
 #'
 #' @param x a list or data.frame with \code{DownloadLocation} and \code{DataTypeId} fields
 #' @param h optional curl handle
+#' @param quote passed to \code{\link[utils]{read.table}}
 #' @param ... additional parameters to pass to \code{read.table}
 #' @return a data.frame
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
 #' @keywords Internal
-get_dataset = function(x, h, ...)
+get_dataset = function(x, h, quote = "\"", ...)
 {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
@@ -148,10 +149,10 @@ get_dataset = function(x, h, ...)
    switch(tolower(x$DataTypeId),
      arff = read.arff(uri),
      plaintext = paste(readLines(uri, warn=FALSE), collapse="\n"),
-     generictsvnoheader = read.table(uri, sep="\t", header=FALSE, ...),
-     generictsv = read.table(uri, sep="\t", header=TRUE, ...),
-     genericcsvnoheader = read.table(uri, sep=",", header=FALSE, ...),
-     genericcsv = read.table(uri, sep=",", header=TRUE, ...),
+     generictsvnoheader = read.table(uri, sep="\t", header=FALSE, quote, ...),
+     generictsv = read.table(uri, sep="\t", header=TRUE, quote, ...),
+     genericcsvnoheader = read.table(uri, sep=",", header=FALSE, quote, ...),
+     genericcsv = read.table(uri, sep=",", header=TRUE, quote, ...),
      zip = readBin(uri, what="raw", n=x$Size, ...),
      stop("unsupported data type: '",x$DataTypeId,"'")
    )
