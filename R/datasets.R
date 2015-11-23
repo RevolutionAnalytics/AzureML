@@ -66,23 +66,28 @@ download.datasets = function(source, name, ...)
   ans
 }
 
-#' Download a dataset from an AzureML experiment port.
+#' Download a dataset from an AzureML experiment module.
+#' 
+#' Allows you to download the data from certain types of modules in AzureML experiments. You can generate the information required from AzureML Studio by (right) clicking on a module output port and selecting the option "Generate Data Access Code...".
 #'
 #' @inheritParams refresh
 #' 
-#' @param experiment AzureML experiment ID obtained from "Generate Data Access Code"
-#' @param node_id Experiment node ID obtained from "Generate Data Access Code"
-#' @param port_name Experiment port name obtained from "Generate Data Access Code". The default is "Results dataset"
-#' @param data_type_id Experiment data type id obtained from "Generate Data Access Code". The default is "GenericCSV"
+#' @param experiment AzureML experiment ID.
+#' @param node_id Experiment node ID.
+#' @param port_name Experiment port name. The default is "Results dataset".
+#' @param data_type_id Experiment data type id. The default is "GenericCSV". See the note below for other types.
 #' @param ... Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.
 #' 
-#' @return A data frame.
+#' @return In most cases a data frame. Exceptions are: a raw vector for \code{DataTypeId="Zip"} and character vector for \code{DataTypeId="PlainText"}
 #' 
 #' @note TSV- and CSV-formatted datasets return data frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
-#' This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId" of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
 #' 
-#' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}}
-#' \code{\link{download.datasets}}
+#' \bold{Supported DataTypeId options}
+#' 
+#' 
+#' This function can download datasets with various CSV and TSV \code{DataTypeId} (with or without headers), in addition to "ARFF", "PlainText" and "Zip". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
+#' 
+#' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}} and \code{\link{download.datasets}}
 #' 
 #' @importFrom curl curl_escape new_handle handle_setheaders
 #' @importFrom jsonlite toJSON

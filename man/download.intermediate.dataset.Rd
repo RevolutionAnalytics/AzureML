@@ -2,7 +2,7 @@
 % Please edit documentation in R/datasets.R
 \name{download.intermediate.dataset}
 \alias{download.intermediate.dataset}
-\title{Download a dataset from an AzureML experiment port.}
+\title{Download a dataset from an AzureML experiment module.}
 \usage{
 download.intermediate.dataset(ws, experiment, node_id,
   port_name = "Results dataset", data_type_id = "GenericCSV", ...)
@@ -10,29 +10,32 @@ download.intermediate.dataset(ws, experiment, node_id,
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}
 
-\item{experiment}{AzureML experiment ID obtained from "Generate Data Access Code"}
+\item{experiment}{AzureML experiment ID.}
 
-\item{node_id}{Experiment node ID obtained from "Generate Data Access Code"}
+\item{node_id}{Experiment node ID.}
 
-\item{port_name}{Experiment port name obtained from "Generate Data Access Code". The default is "Results dataset"}
+\item{port_name}{Experiment port name. The default is "Results dataset".}
 
-\item{data_type_id}{Experiment data type id obtained from "Generate Data Access Code". The default is "GenericCSV"}
+\item{data_type_id}{Experiment data type id. The default is "GenericCSV". See the note below for other types.}
 
 \item{...}{Optional arguments to pass to \code{read.table} for CSV or TSV DataTypeIds. For example, specify \code{stringsAsFactors=TRUE} if you wish, or any other valid argument to \code{read.table}.}
 }
 \value{
-A data frame.
+In most cases a data frame. Exceptions are: a raw vector for \code{DataTypeId="Zip"} and character vector for \code{DataTypeId="PlainText"}
 }
 \description{
-Download a dataset from an AzureML experiment port.
+Allows you to download the data from certain types of modules in AzureML experiments. You can generate the information required from AzureML Studio by (right) clicking on a module output port and selecting the option "Generate Data Access Code...".
 }
 \note{
 TSV- and CSV-formatted datasets return data frame results with \code{stringsAsFactors=FALSE} by default (independently of the global \code{stringsAsFactors} option).
-This function can download datasets with various CSV and TSV "DataTypeIds", or "DataTypeId" of "ARFF" or "PlainText". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
+
+\bold{Supported DataTypeId options}
+
+
+This function can download datasets with various CSV and TSV \code{DataTypeId} (with or without headers), in addition to "ARFF", "PlainText" and "Zip". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
 }
 \seealso{
-\code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}}
-\code{\link{download.datasets}}
+\code{\link{workspace}}, \code{\link{datasets}}, \code{\link[utils]{read.table}} and \code{\link{download.datasets}}
 
 Other dataset functions: \code{\link{datasets}};
   \code{\link{delete.datasets}};
