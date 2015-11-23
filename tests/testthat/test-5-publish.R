@@ -1,6 +1,8 @@
 if(interactive()) library(testthat)
 
 context("Publish API")
+ws <- workspace()
+endpoint <- NA
 
 test_that(".getexports finds function and creates zip string", {
 
@@ -29,7 +31,6 @@ test_that(".getexports finds function and creates zip string", {
 
 
 test_that("publishWebService throws error if fun is not a function", {
-  ws <- workspace()
   add <- function(x,y) x + y
 
   timestamped_name <- paste0("webservice-test-publish-",
@@ -55,7 +56,6 @@ timestamped_name <- paste0("webservice-test-publish-",
 
 
 test_that("publishWebService works with simple function", {
-  ws <- workspace()
   add <- function(x,y) x + y
   
   endpoint <- publishWebService(ws,
@@ -64,6 +64,8 @@ test_that("publishWebService works with simple function", {
                                 inputSchema = list(x="numeric",
                                                    y="numeric"),
                                 outputSchema = list(ans="numeric"))
+  
+  endpoint <<- endpoint # Used to test updateWebservice in next test
 
 
   expect_is(endpoint, "data.frame")
@@ -102,8 +104,6 @@ test_that("updateWebService works with simple function", {
 
 
 test_that("publishWebService works with data frame input", {
-  ws <- workspace()
-
   timestamped_name <- paste0("webservice-test-publish-",
                              format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
 
@@ -117,7 +117,6 @@ test_that("publishWebService works with data frame input", {
     predict(m, newdata=newdata)
   }
 
-  ws <- workspace()
   endpoint <- publishWebService(ws, fun = sleepyPredict, name = timestamped_name,
                           inputSchema = sleepstudy)
 
