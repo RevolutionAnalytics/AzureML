@@ -1,3 +1,26 @@
+# Copyright (c) 2015 Microsoft Corporation
+# All rights reserved.
+#   
+# The MIT License (MIT)
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#   
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+
 # `wrapper` is the expression executed in the AzureML R environment.  The
 # publishWebService function sets up the environment "exportenv" from which
 # this expression follows.
@@ -80,14 +103,13 @@ azureSchema = function(argList) {
 #' @param noexport optional character vector of variable names to prevent from exporting in the web service.
 #' @param packages optional character vector of R packages to bundle in the web service, including their dependencies.
 #' @param version optional R version string for required packages (the version of R running in the AzureML Web Service).
-#' @param serviceID optional Azure web service ID; use to update an existing service (see Note below).
+#' @param serviceId optional Azure web service ID; use to update an existing service (see Note below).
 #' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in \code{\link{workspace}}
 #' @param data.frame \code{TRUE} indicates that the function \code{fun} accepts a data frame as input and returns a data frame output; automatically set to \code{TRUE} when \code{inputSchema} is a data frame.
 #' 
 #' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
 #'  
 #' @note 
-#' 
 #' \bold{Data Types}
 #' 
 #' AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
@@ -114,7 +136,7 @@ azureSchema = function(argList) {
 #' 
 #' \bold{External zip program required}
 #' 
-#' The function uses \code(\link[utils]{zip}) to compress information before transmission to AzureML. To use this, you need to have a zip program installed on your machine, and this program should be available in the path. The program should be called \code{zip} otherwise R may not find it. On windows, it is sufficient to install RTools (see \url{https://cran.r-project.org/bin/windows/Rtools/})
+#' The function uses \code{\link[utils]{zip}} to compress information before transmission to AzureML. To use this, you need to have a zip program installed on your machine, and this program should be available in the path. The program should be called \code{zip} otherwise R may not find it. On windows, it is sufficient to install RTools (see \url{https://cran.r-project.org/bin/windows/Rtools/})
 #' 
 #' @seealso \code{\link{endpoints}}, \code{\link{discoverSchema}}, \code{\link{consume}} and \code{\link{services}}.
 #' @family publishing functions
