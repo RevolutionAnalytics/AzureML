@@ -4,12 +4,14 @@
 \alias{get_dataset}
 \title{Internal function that retrieves a dataset from AzureML.}
 \usage{
-get_dataset(x, h, ...)
+get_dataset(x, h, quote = "\\"", ...)
 }
 \arguments{
 \item{x}{a list or data.frame with \code{DownloadLocation} and \code{DataTypeId} fields}
 
 \item{h}{optional curl handle}
+
+\item{quote}{passed to \code{\link[utils]{read.table}}}
 
 \item{...}{additional parameters to pass to \code{read.table}}
 }

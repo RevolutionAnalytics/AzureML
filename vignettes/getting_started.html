@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2015-11-18" />
+<meta name="date" content="2015-11-21" />
 
 <title>Getting Started with the AzureML Package</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Getting Started with the AzureML Package</h1>
-<h4 class="date"><em>2015-11-18</em></h4>
+<h4 class="date"><em>2015-11-21</em></h4>
 </div>
 
 
@@ -99,7 +99,7 @@ devtools::install_github(&quot;RevolutionAnalytics/azureml&quot;)</code></pre>
 <div id="getting-started" class="section level2">
 <h2>Getting Started</h2>
 <p>To get started, please navigate to <a href="https://studio.azureml.net">AzureML Studio</a> and create a free account (not guest) or use your existing AzureML account. After logging in, under the “Settings” tab, copy and paste your Workspace ID from the “Name” sub-tab into your R console. From the “Authorization Tokens” sub-tab, copy your Primary Authorization Token into your R console. You will need this information to access all package functionality.</p>
-<p>The package defines a <code>Workspace</code> class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the <code>workspace</code> function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token.</p>
+<p>The package defines a <code>Workspace</code> class that represents an AzureML work space. Most of the functions in the package refer to a Workspace object directly or indirectly. Use the <code>workspace()</code> function to create Workspace objects, either by explicitly specifying an AzureML workspace ID and authorization token. Workspace objects are simply R environments that actively cache details about your AzureML sessions.</p>
 </div>
 <div id="obtaining-azureml-credentials" class="section level2">
 <h2>Obtaining AzureML Credentials</h2>
@@ -125,43 +125,40 @@ ws &lt;- workspace(
 <div id="examining-workspace-datasets-experiments-and-services" class="section level2">
 <h2>Examining workspace datasets, experiments and services</h2>
 <p>The <code>datasets()</code>, <code>experiments()</code>, and <code>services()</code> functions return data frames that contain information about those objects available in the workspace.</p>
-<p>The package caches R data frames describing available datasets, experiments and services in the workspace environment. That cache can be refreshed at any time with the <code>refresh</code> function. Data frames make it relatively easy to sort and filter the datasets, experiments, and servies in arbitrary ways. The functions also include filtering options for specific and common filters, like looking up something by name.</p>
-<p>Use the <code>download.datasets</code> and <code>upload.dataset</code> functions to download or upload data between R and your Azure workspace. The <code>download.intermediate.dataset</code> function can download ephemeral data from a port in an experiment that is not explicitly stored in your Azure workspace.</p>
-<p>Use <code>delete.datasets</code> to remove and delete datasets from the workspace.</p>
-<p>The <code>endpoints</code> function describes Azure web service endpoints, and works with supporting help functions like <code>discoverSchema</code> and <code>endpointHelp</code>.</p>
-<p>The <code>publishWebService</code> function publishes a custom R function as an AzureML web service, available for use by any client. The <code>updateWebService</code> and <code>deleteWebServce</code> update or delete existing web services, respectively.</p>
-<p>Use the <code>consume</code> function to evaluate an Azure ML web service with uploaded R data.</p>
+<p>The package caches R data frame objects describing available datasets, experiments and services in the workspace environment. That cache can be refreshed at any time with the <code>refresh()</code> function. The data frame objects make it relatively easy to sort and filter the datasets, experiments, and services in arbitrary ways. The functions also include filtering options for specific and common filters, like looking up something by name.</p>
+<p>Use the <code>download.datasets()</code> and <code>upload.dataset()</code> functions to download or upload data between R and your Azure workspace. The <code>download.intermediate.dataset()</code> function can download ephemeral data from a port in an experiment that is not explicitly stored in your Azure workspace.</p>
+<p>Use <code>delete.datasets()</code> to remove and delete datasets from the workspace.</p>
+<p>The <code>endpoints()</code> function describes Azure web service endpoints, and works with supporting help functions like <code>endpointHelp()</code>.</p>
+<p>The <code>publishWebService()</code> function publishes a custom R function as an AzureML web service, available for use by any client. The <code>updateWebService()</code> and <code>deleteWebServce()</code> update or delete existing web services, respectively.</p>
+<p>Use the <code>consume()</code> function to evaluate an Azure ML web service with new data uploaded to AzureML from your R environment.</p>
 </div>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
-<p>Work with the AzureML package begins by defining a workspace object. The example below uses the configured workspace ID and authorization token in the <code>~/.azureml/settings.json</code> file. Alternatively specify these settings explicitly in the <code>workspace</code> function as outlined above. All of the examples require this step.</p>
+<p>Work with the AzureML package begins by defining a workspace object. The example below uses the configured workspace ID and authorization token in the <code>~/.azureml/settings.json</code> file. Alternatively specify these settings explicitly in the <code>workspace()</code> function as outlined above. All of the examples require this step.</p>
 <pre class="r"><code>library(AzureML)
 ws &lt;- workspace()
 ws</code></pre>
 <pre><code>## AzureML Workspace
-## Workspace ID:  dd01c7e4a424432c9a9f83142d5cfec4</code></pre>
+## Workspace ID:  a2760707c7fa4245a057680427f31b17</code></pre>
+<div id="service-availability" class="section level2">
+<h2>Service availability</h2>
+<p>AzureML is a web service and sometimes operations can’t immediately proceed due to rate limiting or other factors. When this kind of thing occurs, the AzureML R package presents a warning and retries the service a few times before giving up with an error.</p>
+</div>
 <div id="datasets" class="section level2">
 <h2>Datasets</h2>
-<p>AzureML ‘datasets’ correspond more or less to R data frames. The AzureML package defines four basic dataset operations: list, upload, download, and delete.</p>
+<p>AzureML <em>datasets</em> correspond more or less to R data frames. The AzureML package defines four basic dataset operations: list, upload, download, and delete.</p>
 <div id="list-available-datasets" class="section level3">
 <h3>List available datasets</h3>
 <p>The following example illustrates listing available datasets in your workspace.</p>
-<pre class="r"><code>head(datasets(ws))</code></pre>
-<pre><code>##                                               Name DataTypeId      Size
-## 1 Flight_On_Time_Performance_July_October_2013.csv GenericCSV 100506313
-## 2                                 TestReadFromBlob    Dataset      8102
-## 3                                 New York weather GenericCSV    116989
-## 4                                       airquality GenericTSV      2901
-## 5         dataset-test-upload-2015-11-17--22-12-47 GenericTSV      2901
-## 6         dataset-test-upload-2015-11-17--22-14-37 GenericTSV      2901
-##   ...
-## 1 ...
-## 2 ...
-## 3 ...
-## 4 ...
-## 5 ...
-## 6 ...
+<pre class="r"><code>head(datasets(ws))     # Or, equivalently: head(ws$datasets)</code></pre>
+<pre><code>##                                           Name DataTypeId Size ...
+## 1 Result Dataset (saved from Execute R Script)    Dataset 3535 ...
+## 2     dataset-test-upload-2015-11-06--04-35-29 GenericTSV 2901 ...
+## 3     dataset-test-upload-2015-11-06--12-26-32 GenericTSV 2901 ...
+## 4     dataset-test-upload-2015-11-17--18-00-22 GenericTSV 2901 ...
+## 5     dataset-test-upload-2015-11-18--09-51-45 GenericTSV 2901 ...
+## 6     dataset-test-upload-2015-11-18--09-59-35 GenericTSV 2901 ...
 ## ----------------------------------------------
 ## AzureML datasets data.frame variables include:
 ##  [1] &quot;VisualizeEndPoint&quot;    &quot;SchemaEndPoint&quot;       &quot;SchemaStatus&quot;        
@@ -173,58 +170,18 @@ ws</code></pre>
 ## [19] &quot;IsLatest&quot;             &quot;Category&quot;             &quot;DownloadLocation&quot;    
 ## [22] &quot;IsDeprecated&quot;         &quot;Culture&quot;              &quot;Batch&quot;               
 ## [25] &quot;CreatedDateTicks&quot;</code></pre>
-<pre class="r"><code># Or, equivalently:
-head(ws$datasets)</code></pre>
-<pre><code>##                                               Name DataTypeId      Size
-## 1 Flight_On_Time_Performance_July_October_2013.csv GenericCSV 100506313
-## 2                                 TestReadFromBlob    Dataset      8102
-## 3                                 New York weather GenericCSV    116989
-## 4                                       airquality GenericTSV      2901
-## 5         dataset-test-upload-2015-11-17--22-12-47 GenericTSV      2901
-## 6         dataset-test-upload-2015-11-17--22-14-37 GenericTSV      2901
-##   ...
-## 1 ...
-## 2 ...
-## 3 ...
-## 4 ...
-## 5 ...
-## 6 ...
-## ----------------------------------------------
-## AzureML datasets data.frame variables include:
-##  [1] &quot;VisualizeEndPoint&quot;    &quot;SchemaEndPoint&quot;       &quot;SchemaStatus&quot;        
-##  [4] &quot;Id&quot;                   &quot;DataTypeId&quot;           &quot;Name&quot;                
-##  [7] &quot;Description&quot;          &quot;FamilyId&quot;             &quot;ResourceUploadId&quot;    
-## [10] &quot;SourceOrigin&quot;         &quot;Size&quot;                 &quot;CreatedDate&quot;         
-## [13] &quot;Owner&quot;                &quot;ExperimentId&quot;         &quot;ClientVersion&quot;       
-## [16] &quot;PromotedFrom&quot;         &quot;UploadedFromFilename&quot; &quot;ServiceVersion&quot;      
-## [19] &quot;IsLatest&quot;             &quot;Category&quot;             &quot;DownloadLocation&quot;    
-## [22] &quot;IsDeprecated&quot;         &quot;Culture&quot;              &quot;Batch&quot;               
-## [25] &quot;CreatedDateTicks&quot;</code></pre>
-<p>The list of datasets is presented as an a R data frame with class <code>datasets()</code>. Its print method shows a summary of the datasets, along with all of the available variables. Use any normal R data frame operation to manipulate the datasets. For example, to see the “Owner” value of each dataset:</p>
-<pre class="r"><code>ws$datasets$Owner</code></pre>
-<pre><code>##  [1] &quot;apdevries&quot;             &quot;apdevries&quot;            
-##  [3] &quot;apdevries&quot;             &quot;R&quot;                    
+<p>The list of datasets is presented as an a R data frame with class <code>Datasets</code>. Its print method shows a summary of the datasets, along with all of the available variables. Use any normal R data frame operation to manipulate the datasets. For example, to see the “Owner” value of each dataset:</p>
+<pre class="r"><code>head(ws$datasets$Owner, n=20)</code></pre>
+<pre><code>##  [1] &quot;bwaynelewis&quot;           &quot;R&quot;                    
+##  [3] &quot;R&quot;                     &quot;R&quot;                    
 ##  [5] &quot;R&quot;                     &quot;R&quot;                    
-##  [7] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
+##  [7] &quot;R&quot;                     &quot;Microsoft Corporation&quot;
 ##  [9] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [11] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [13] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [15] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
 ## [17] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [19] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [21] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [23] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [25] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [27] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [29] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [31] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [33] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [35] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [37] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [39] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [41] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [43] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [45] &quot;Microsoft Corporation&quot;</code></pre>
+## [19] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;</code></pre>
 </div>
 <div id="downloading-datasets" class="section level3">
 <h3>Downloading datasets</h3>
@@ -268,13 +225,14 @@ head(download.datasets(ws, name = &quot;Air quality&quot;))</code></pre>
 ## 6    28      NA 14.9   66     5   6</code></pre>
 <p>Delete one or more AzureML datasets with <code>delete.datasets()</code>:</p>
 <pre class="r"><code>delete.datasets(ws, name=&quot;Air quality&quot;)</code></pre>
+<pre><code>## Request failed with status 400. Retrying request...</code></pre>
 <pre><code>##          Name Deleted status_code
 ## 1 Air quality    TRUE         204</code></pre>
 </div>
 </div>
 <div id="experiments" class="section level2">
 <h2>Experiments</h2>
-<p>Use the <code>experiments()</code> function or simply use the <code>ws$experiments</code> data frame directly to list details about experiments in your AzureML workspace. The <code>experiments()</code> function optionally filters experiments by ownership.</p>
+<p>Use the <code>experiments()</code> function or simply use the <code>ws$experiments</code> data frame object directly to list details about experiments in your AzureML workspace. The <code>experiments()</code> function optionally filters experiments by ownership.</p>
 <pre class="r"><code>e &lt;- experiments(ws, filter = &quot;samples&quot;)
 head(e)</code></pre>
 <pre><code>##                                        Description        CreationTime ...
@@ -304,8 +262,8 @@ head(e)</code></pre>
 ## [16] &quot;StartTime&quot;                          
 ## [17] &quot;EndTime&quot;                            
 ## [18] &quot;Metadata&quot;</code></pre>
-<p>The <code>ws$experiments</code> object is just an R data frame with class <code>experiments()</code>. Its print method shows a summary of the avilable experiments, but it can otherwise be manipulated like a normal R data frame.</p>
-<p>The list of experiments in your workspace is cached in the workspace environment. Use the <code>refresh</code> function to explicitly update the cache at any time, for example:</p>
+<p>The <code>ws$experiments</code> object is just an R data frame with class <code>Experiments</code>. Its print method shows a summary of the available experiments, but it can otherwise be manipulated like a normal R data frame.</p>
+<p>The list of experiments in your workspace is cached in the workspace environment. Use the <code>refresh()</code> function to explicitly update the cache at any time, for example:</p>
 <pre class="r"><code>refresh(ws, &quot;experiments&quot;)</code></pre>
 </div>
 </div>
@@ -314,18 +272,16 @@ head(e)</code></pre>
 <p>The AzureML package helps you to publish R functions as AzureML web services that can be consumed anywhere. You can also use the AzureML package to run R data through an existing web service and collect the output.</p>
 <div id="publishing-a-web-service" class="section level2">
 <h2>Publishing a Web Service</h2>
-<p>The publishing functionality of this package allows you to publish a function or a trained model defined in R as an Azure ML web service.</p>
-<p>Functions can depend on arbitrary package or object. However, currently functions are constrained to take in primitive data types, e.g. <code>ints</code>, <code>strings</code>, etc. This means the function to be published cannot take in dataframes, lists, etc.</p>
-<p>As an example, consider this simple R function:</p>
+<p>The <code>publishWebService()</code> publishes an R function as an AzureML web service. Consider this simple example R function:</p>
 <pre class="r"><code>add &lt;- function(x, y) {
   x + y
 }</code></pre>
-<p>To publish this as a web service use the function <code>publishWebService()</code>:</p>
+<p>Use the function <code>publishWebService()</code> to publish the function as a service named “AzureML-vignette-silly”:</p>
 <pre class="r"><code>ws &lt;- workspace()
 api &lt;- publishWebService(
   ws,
   fun = add, 
-  name = &quot;AzureML-vignette-add&quot;,
+  name = &quot;AzureML-vignette-silly&quot;,
   inputSchema = list(
     x = &quot;numeric&quot;, 
     y = &quot;numeric&quot;
@@ -334,7 +290,8 @@ api &lt;- publishWebService(
     ans = &quot;numeric&quot;
   )
 )</code></pre>
-<p>The result of <code>publishWebService()</code> is a data frame containing two elements. The first is a list containing the details of the newly created web service, the second is a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
+<p>The example publishes a function of two scalar numeric arguments, returning a single numeric scalar output value. Note that we explicitly define the web service input and output schema in the example. See the examples below for more flexible ways of defining web services with functions of data frames.</p>
+<p>The result of <code>publishWebService()</code> is an <code>Endpoint</code> object, really just an R data frame with two elements: a list containing the details of the newly created web service, and a list of the endpoints of the web service. From here, you can pass the information on to another user, or use the information to use the web service from R:</p>
 <pre class="r"><code>class(api)</code></pre>
 <pre><code>## [1] &quot;Endpoint&quot;   &quot;data.frame&quot;</code></pre>
 <pre class="r"><code>names(api)</code></pre>
@@ -346,30 +303,36 @@ api &lt;- publishWebService(
 ## [11] &quot;DiagnosticsTraceLevel&quot; &quot;ThrottleLevel&quot;</code></pre>
 <p>The web service created is identical to a web service published through the Azure Machine Learning Studio. From the response, you can get the Web Service’s URL, API Key and Help Page URL, as shown above. The first two are needed to make calls to the web service. The latter has the sample code, sample request and other information for consuming the API from client apps such as mobile and web applications.</p>
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
-<pre class="r"><code>helpPageUrl &lt;- api$HelpLocation
-helpPageUrl</code></pre>
-<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/webservices/102c76f48df211e581dfdf415a1bdd9d/endpoints/13bc44e3969b49ff8ce1045c2f695efb&quot;</code></pre>
-<p>Once published, you can update a web service using the <code>updateWebService()</code> function. However, note that <code>updateWebService()</code> really is just an alias for <code>publishWebService()</code>, except that the argument <code>wsid</code> is compulsory</p>
+<p>Note that AzureML allows multiple services to have the same name.</p>
+<pre class="r"><code>(helpPageUrl &lt;- api$HelpLocation)</code></pre>
+<pre><code>## [1] &quot;https://studio.azureml.net/apihelp/workspaces/a2760707c7fa4245a057680427f31b17/webservices/666b3068900f11e5b1665c94780a34d3/endpoints/e84e9f1701ec4b5b884d24786ced9a30&quot;</code></pre>
+<p>Once published, you can update a web service using the <code>updateWebService()</code> or <code>publishWebService()</code> functions. The <code>updateWebService()</code> function is just an alias for <code>publishWebService()</code>, except that the argument <code>serviceId</code> is compulsory.</p>
 <pre class="r"><code>api &lt;- updateWebService(
   ws,
-  fun = add, 
-  name = &quot;AzureML-vignette-add&quot;,
+  fun = function(x, y) x - y,
   inputSchema = list(
-    x = &quot;numeric&quot;, 
+    x = &quot;numeric&quot;,
     y = &quot;numeric&quot;
-  ), 
+  ),
   outputSchema = list(
     ans = &quot;numeric&quot;
   ),
-  wsid = api$WorkspaceId   # &lt;&lt;-- Note you must add wsid to update!
+  serviceId = api$WebServiceId   # &lt;&lt;-- Required to update!
 )</code></pre>
+<p>The “AzureML-vignette-silly” service now substracts two numbers instead of adding them.</p>
 </div>
 <div id="discovering-web-services" class="section level2">
 <h2>Discovering Web Services</h2>
-<p>The discovery functionality in this package allows users to explore and obtain the web services available to their workspace. On the highest level, the user can use their workspace ID and authorization token, both of which were described in the preceding sections, to obtain a list of web services available to that workspace:</p>
-<pre class="r"><code>webservices &lt;- services(ws, name = &quot;AzureML-vignette-add&quot;)</code></pre>
-<p>Then, the web service ID can be used in conjunction with the authorization credentials to obtain a list of endpoints:</p>
-<pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ]$Id)
+<p>Use the <code>services()</code> function to list in detail all of the available services in your AzureML workspace, or filter by web service name as shown below:</p>
+<pre class="r"><code>(webservices &lt;- services(ws, name = &quot;AzureML-vignette-silly&quot;))</code></pre>
+<pre><code>##                                  Id                   Name
+## 31 666b3068900f11e5b1665c94780a34d3 AzureML-vignette-silly
+##                CreationTime                      WorkspaceId
+## 31 2015-11-21T05:19:14.227Z a2760707c7fa4245a057680427f31b17
+##    DefaultEndpointName EndpointCount
+## 31             default             1</code></pre>
+<p>Given a service, use the <code>endpoints()</code> function to list the AzureML service endpoints for the service:</p>
+<pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ])
 class(ep)</code></pre>
 <pre><code>## [1] &quot;Endpoint&quot;   &quot;data.frame&quot;</code></pre>
 <pre class="r"><code>names(ep)</code></pre>
@@ -379,71 +342,90 @@ class(ep)</code></pre>
 ##  [7] &quot;PrimaryKey&quot;            &quot;SecondaryKey&quot;         
 ##  [9] &quot;ApiLocation&quot;           &quot;MaxConcurrentCalls&quot;   
 ## [11] &quot;DiagnosticsTraceLevel&quot; &quot;ThrottleLevel&quot;</code></pre>
-<p>The <code>endpoints</code> object contains all the information needed to consume a web service.</p>
-<p>Alternatively, you can use the <code>discoverSchema()</code> function to discover the information needed to consume a web service. The function will return all information available on the endpoint help page, including the API location, the input names, and sample input:</p>
-<pre class="r"><code>discoverSchema(ep$HelpLocation)</code></pre>
-<pre><code>## $requestUrl
-## [1] &quot;https://ussouthcentral.services.azureml.net/workspaces/dd01c7e4a424432c9a9f83142d5cfec4/services/13bc44e3969b49ff8ce1045c2f695efb/execute?api-version=2.0&amp;format=swagger&quot;
-## 
-## $columnNames
-## $columnNames[[1]]
-## [1] &quot;x&quot;
-## 
-## $columnNames[[2]]
-## [1] &quot;y&quot;
-## 
-## 
-## $sampleInput
-## $sampleInput$x
-## [1] 1
-## 
-## $sampleInput$y
-## [1] 1
-## 
-## 
-## $inputSchema
-## $inputSchema$required
-## [1] &quot;x&quot; &quot;y&quot;
-## 
-## $inputSchema$properties
-## $inputSchema$properties$x
-## $inputSchema$properties$x$type
-## [1] &quot;number&quot;
-## 
-## $inputSchema$properties$x$format
-## [1] &quot;double&quot;
-## 
-## 
-## $inputSchema$properties$y
-## $inputSchema$properties$y$type
-## [1] &quot;number&quot;
-## 
-## $inputSchema$properties$y$format
-## [1] &quot;double&quot;</code></pre>
+<p>The returned <code>Endpoints</code> object contains all the information needed to consume a web service. The <code>endpointHelp()</code> function returns detailed information about an endpoint including its input and output schema and URI.</p>
 </div>
 <div id="consuming-web-services" class="section level2">
 <h2>Consuming Web Services</h2>
-<p>To send data to your newly published web service API for scoring, use the function <code>consume()</code>:</p>
+<p>Use the <code>consume()</code> function to send data to your newly published web service API for scoring.</p>
 <pre class="r"><code>df &lt;- data.frame(
   x = 1:5,
   y = 6:10
 )
-s &lt;- services(ws, name = &quot;AzureML-vignette-add&quot;)
+s &lt;- services(ws, name = &quot;AzureML-vignette-silly&quot;)
 s &lt;- tail(s, 1) # use the last published function, in case of duplicate function names
-ep &lt;- endpoints(ws, s$Id)
+ep &lt;- endpoints(ws, s)
 consume(ep, df)</code></pre>
 <pre><code>##   ans
-## 1   7
-## 2   9
-## 3  11
-## 4  13
-## 5  15</code></pre>
+## 1  -5
+## 2  -5
+## 3  -5
+## 4  -5
+## 5  -5</code></pre>
 <p>Alternatively, the endpoint primary key and API location can be found on the help page for that specific endpoint, which can be found on Azure Machine Learning Studio. Using the Help Page URL, you can access sample code to build clients that can consume this web service in real time to make predictions.</p>
 </div>
 <div id="deleting-a-web-service" class="section level2">
 <h2>Deleting a Web Service</h2>
-<p>To remove a webservice endpoint that you no longer need, use <code>deleteWebservice()</code>:</p>
-<pre class="r"><code>deleteWebService(ws, name = &quot;AzureML-vignette-add&quot;)</code></pre>
+<p>Use <code>deleteWebservice()</code> to remove a webservice endpoint that you no longer need or want (like these silly examples):</p>
+<pre class="r"><code>deleteWebService(ws, name = &quot;AzureML-vignette-silly&quot;)</code></pre>
+</div>
+<div id="other-examples-of-publishing-web-services" class="section level2">
+<h2>Other examples of publishing web services</h2>
+<p>The simplest and perhaps most useful way to define a web service uses functions that take a single data frame argument and return a vector or data frame of results. The next example trains a generalized boosted regression model using the gbm package, publishes the model as a web service with name “AzureML-vignette-gbm”, and runs example data through the model for prediction using the <code>consume()</code> function.</p>
+<pre class="r"><code>library(AzureML)
+library(MASS)
+library(gbm)</code></pre>
+<pre><code>## Loading required package: survival
+## Loading required package: lattice
+## Loading required package: splines
+## Loading required package: parallel
+## Loaded gbm 2.1.1</code></pre>
+<pre class="r"><code>ws &lt;- workspace()
+test &lt;- Boston[1:5, 1:13]
+
+set.seed(123)
+gbm1 &lt;- gbm(medv ~ .,
+            distribution = &quot;gaussian&quot;,
+            n.trees = 5000,
+            interaction.depth = 8,
+            n.minobsinnode = 1,
+            shrinkage = 0.01,
+            cv.folds = 5,
+            data = Boston)
+best.iter &lt;- gbm.perf(gbm1, method=&quot;cv&quot;, plot=FALSE)
+
+mypredict &lt;- function(newdata)
+{
+  require(gbm)
+  predict(gbm1, newdata, best.iter)
+}
+
+# Example use of the prediction function
+print(mypredict(test))</code></pre>
+<pre><code>## [1] 24.54431 21.15155 33.88859 34.06615 34.93906</code></pre>
+<pre class="r"><code># Publish the service
+ep &lt;- publishWebService(ws = ws, fun = mypredict, name = &quot;AzureML-vignette-gbm&quot;,
+                        inputSchema = test)
+
+# Consume test data, comparing with result above
+print(consume(ep, test))</code></pre>
+<pre><code>## Request failed with status 401. Retrying request...</code></pre>
+<pre><code>##        ans
+## 1 24.54431
+## 2 21.15155
+## 3 33.88859
+## 4 34.06615
+## 5 34.93906</code></pre>
+<p>Notice that we don’t need to explicitly specific the <code>inputSchema</code> or <code>outputSchema</code> arguments when working with functions that use data frame I/O. When finished with this example, we can delete the example service with:</p>
+<pre class="r"><code>deleteWebService(ws, &quot;AzureML-vignette-gbm&quot;)</code></pre>
+</div>
+<div id="tips-on-writing-functions-used-in-web-services" class="section level2">
+<h2>Tips on writing functions used in web services</h2>
+<p>Try to use the data frame I/O interface as illustrated in the last example above. It’s simpler and more robust than using functions of scalars or lists and exhibits faster execution for large data sets.</p>
+<p>Use <code>require</code> in your function to explicitly load required packages.</p>
+<p>The <code>publishWebServce()</code> function uses codetools to bundle objects required by your function following R lexical scoping rules. The previous example, for instance, uses the <code>best.iter</code> and <code>gbm1</code> variables inside of the <code>mypredict()</code> function. <code>publishWebService()</code> identified that and included their definitions in the R environment in which the function is evaluated in AzureML. Fine-grained control over the export of variables is provided by the <code>publishWebService()</code> function in case you need it (see the help page for details).</p>
+<p>Use the <code>packages</code> option of <code>publishWebService()</code> to explicitly bundle required packages and their dependencies (but not suggested dependencies) using miniCRAN. This lets you upload packages to AzureML that may not otherwise be available in that environment already, using the correct R version and platform used by AzureML.</p>
+<p>Be aware that the version of R running in AzureML may not be the same as the version of R that you are running locally. That means that some packages might not be available, or sometimes package behavior in the AzureML version of R might be different that what you observe locally. This is generally more of an issue for cutting-edge packages.</p>
+<p>JSON is used to transfer data between your local R environment and the R services running in AzureML–numeric values experience a change of base, which can lead to a small loss of precision in some circumstances. If you really, really need to move binary objects between your local R session and the AzureML R service you might try base64 encoding the data, for example.</p>
 </div>
 </div>
 

@@ -1,3 +1,4 @@
+# Copyright (c) 2015 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
