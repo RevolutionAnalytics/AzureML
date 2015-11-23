@@ -28,7 +28,7 @@ test_that(".getexports finds function and creates zip string", {
 
 
 
-test_that("publishWebService works with simple function", {
+test_that("publishWebService throws error if fun is not a function", {
   ws <- workspace()
   add <- function(x,y) x + y
 
@@ -47,13 +47,17 @@ test_that("publishWebService works with simple function", {
   },
   "You must specify 'fun' as a function, not a character"
   )
+})
+
+timestamped_name <- paste0("webservice-test-publish-",
+                           format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
 
 
 
-
-  timestamped_name <- paste0("webservice-test-publish-",
-                             format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
-
+test_that("publishWebService works with simple function", {
+  ws <- workspace()
+  add <- function(x,y) x + y
+  
   endpoint <- publishWebService(ws,
                                 fun = add,
                                 name = timestamped_name,
@@ -72,7 +76,10 @@ test_that("publishWebService works with simple function", {
   res <- consume(endpoint, x=pi, y=2)
   expect_is(res, "data.frame")
   expect_equal(res$ans, pi + 2, tolerance = 1e-8)
+})
 
+
+test_that("updateWebService works with simple function", {
   # Now test updateWebService
   endpoint <- updateWebService(ws,
                                serviceId = endpoint$WebServiceId,
@@ -82,7 +89,11 @@ test_that("publishWebService works with simple function", {
                                outputSchema = list(ans="numeric"))
 
   # Now test if we can consume the service we just updated
-  res <- consume(endpoint, x=pi, y=2)
+  for(i in 1:10){
+    Sys.sleep(3) # Allow some time for the service to update and refresh
+    res <- consume(endpoint, x=pi, y=2)
+    if(isTRUE(all.equal(res$ans, pi - 2, tolerance = 1e-8))) break
+  }
   expect_is(res, "data.frame")
   expect_equal(res$ans, pi - 2, tolerance = 1e-8)
 
