@@ -34,9 +34,9 @@ updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
 
 \item{version}{optional R version string for required packages (the version of R running in the AzureML Web Service).}
 
-\item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in \code{\link{workspace}}}
+\item{serviceId}{optional Azure web service ID; use to update an existing service (see Note below).}
 
-\item{serviceID}{optional Azure web service ID; use to update an existing service (see Note below).}
+\item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in \code{\link{workspace}}}
 }
 \value{
 A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
@@ -50,6 +50,7 @@ Publish a function to Microsoft Azure Machine Learning as a web service. The web
 AzureML data types are different from, but related to, R types. You may specify the R types \code{numeric, logical, integer,} and \code{character} and those will be specified as AzureML types \code{double, boolean, int32, string}, respectively.
 
 \bold{Input and output schemas}
+
 Function input must be:
 \enumerate{
 \item named scalar arguments with names and types specified in \code{inputSchema}
@@ -70,7 +71,7 @@ Note that it takes some time to update the AzureML service on the server.  After
 
 \bold{External zip program required}
 
-The function uses \code(\link[utils]{zip}) to compress information before transmission to AzureML. To use this, you need to have a zip program installed on your machine, and this program should be available in the path. The program should be called \code{zip} otherwise R may not find it. On windows, it is sufficient to install RTools (see \url{https://cran.r-project.org/bin/windows/Rtools/})
+The function uses \code{\link[utils]{zip}} to compress information before transmission to AzureML. To use this, you need to have a zip program installed on your machine, and this program should be available in the path. The program should be called \code{zip} otherwise R may not find it. On windows, it is sufficient to install RTools (see \url{https://cran.r-project.org/bin/windows/Rtools/})
 }
 \examples{
 \dontrun{
