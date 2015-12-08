@@ -47,7 +47,8 @@ is.Endpoint = function(x){
 print.Workspace =  function(x, ...)
 {
   cat("AzureML Workspace\n")
-  cat("Workspace ID: ",x$id,"\n")
+  cat("Workspace ID: ", x$id, "\n")
+  cat("API endpoint:", x$.api_endpoint, "\n")
 }
 
 #' @export

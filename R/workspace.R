@@ -21,24 +21,22 @@
 # THE SOFTWARE.
 
 
+api_endpoint_default <- "https://studio.azureml.net"
+management_endpoint_default <- "https://management.azureml.net"
+
 #' Create a reference to an AzureML Studio workspace.
 #'
-#' Create a reference to an AzureML Studio workspace, returning a \code{Workspace}
-#' object that is an R environment containing details and data associated with the
-#' AzureML work space. Data corresponding to services, experiments, and datasets in
-#' the workspace are cached in the result object environment.
-#' See \code{\link{refresh}} about updating cached data.
+#' Create a reference to an AzureML Studio workspace, returning a \code{Workspace} object that is an R environment containing details and data associated with the AzureML work space. Data corresponding to services, experiments, and datasets in the workspace are cached in the result object environment. See \code{\link{refresh}} about updating cached data.
 #' 
 #' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS
-#' @param api_endpoint Optional AzureML API web service URI
-#' @param management_endpoint Optional AzureML management web service URI
-#' @param config Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.
+#' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.
+#' @param management_endpoint Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.
+#' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}.
 #'
-#' @note If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
-#'  with JSON format: \preformatted{
+#' @note If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
 #'  {"workspace":{
-#'    "id":"test_id",
+#'    "id": "test_id",
 #'    "authorization_token": "test_token",
 #'    "api_endpoint": "api_endpoint",
 #'    "management_endpoint": "management_endpoint"
@@ -60,19 +58,45 @@
 #' @family publishing functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
-workspace = function(id, auth, api_endpoint="https://studio.azureml.net",
-                     management_endpoint="https://management.azureml.net",
+workspace = function(id, auth, api_endpoint, management_endpoint,
                      config="~/.azureml/settings.json")
 {
+  if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
+  {
+    if(!file.exists(config))  stop("missing file ", config)
+    s = fromJSON(file(config))
+    if(missing(id)){
+      id <- s[["workspace"]][["id"]]
+    }
+    if(missing(auth)){
+      auth <- s[["workspace"]][["authorization_token"]]
+    }
+    if(missing(api_endpoint)){
+      api_endpoint <- s[["workspace"]][["api_endpoint"]]
+    }
+    if(missing(management_endpoint)){
+      management_endpoint <- s[["workspace"]][["management_endpoint"]]
+    }
+  }
+  if(!exists("api_endpoint")) api_endpoint <- api_endpoint_default
+  if(!exists("management_endpoint")) management_endpoint <- management_endpoint_default
+  
+  # test to see if api_endpoint is a valid url
+  resp <- tryCatch(
+    suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
+    error = function(e)e
+  )
+  if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
+  
+  # test to see if api_endpoint is a valid url
+  resp <- tryCatch(
+    suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
+    error = function(e)e
+  )
+  if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  
   e = new.env()
   class(e) = "Workspace"
-  if(missing(id) && missing(auth))
-  {
-    if(!file.exists(config))  stop("missing file ",config)
-    s = fromJSON(file(config))
-    id = s$workspace$id
-    auth = s$workspace$authorization_token
-  }
   e$id = id
   e$.auth = auth
   e$.api_endpoint = api_endpoint

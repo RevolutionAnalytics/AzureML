@@ -4,8 +4,7 @@
 \alias{workspace}
 \title{Create a reference to an AzureML Studio workspace.}
 \usage{
-workspace(id, auth, api_endpoint = "https://studio.azureml.net",
-  management_endpoint = "https://management.azureml.net",
+workspace(id, auth, api_endpoint, management_endpoint,
   config = "~/.azureml/settings.json")
 }
 \arguments{
@@ -13,11 +12,11 @@ workspace(id, auth, api_endpoint = "https://studio.azureml.net",
 
 \item{auth}{Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS}
 
-\item{api_endpoint}{Optional AzureML API web service URI}
+\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.}
 
-\item{management_endpoint}{Optional AzureML management web service URI}
+\item{management_endpoint}{Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.}
 
-\item{config}{Optional settings file containing id and authorization info. Only used if \code{id} and \code{auth} are missing. The default config file is \code{~/.azureml/settings.json}.}
+\item{config}{Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}.}
 }
 \value{
 An R environment of class \code{Workspace} containing at least the following objects:
@@ -28,17 +27,12 @@ An R environment of class \code{Workspace} containing at least the following obj
 }
 }
 \description{
-Create a reference to an AzureML Studio workspace, returning a \code{Workspace}
-object that is an R environment containing details and data associated with the
-AzureML work space. Data corresponding to services, experiments, and datasets in
-the workspace are cached in the result object environment.
-See \code{\link{refresh}} about updating cached data.
+Create a reference to an AzureML Studio workspace, returning a \code{Workspace} object that is an R environment containing details and data associated with the AzureML work space. Data corresponding to services, experiments, and datasets in the workspace are cached in the result object environment. See \code{\link{refresh}} about updating cached data.
 }
 \note{
-If the \code{id} and \code{auth} parameters are missing, the function attempts to read values from the \code{config} file
- with JSON format: \preformatted{
+If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
  {"workspace":{
-   "id":"test_id",
+   "id": "test_id",
    "authorization_token": "test_token",
    "api_endpoint": "api_endpoint",
    "management_endpoint": "management_endpoint"
