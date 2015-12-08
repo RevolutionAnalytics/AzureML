@@ -33,12 +33,12 @@ wrapper = "inputDF <- maml.mapInputPort(1)\nload('src/env.RData')\n if(!is.null(
 #' @param fun a function to test
 #' @param output_names character vector of function output names
 #' @param data.frame i/o format
-test_wrapper = function(inputDF, wrapper, fun, output_names, `data.frame`)
+test_wrapper <- function(inputDF, wrapper, fun, output_names, `data.frame`)
 {
   exportenv = new.env()
-  maml.mapInputPort = function(x) inputDF
-  maml.mapOutputPort = function(x) get(x)
-  load = function(x) invisible()
+  maml.mapInputPort <- function(x) inputDF
+  maml.mapOutputPort <- function(x) get(x)
+  load <- function(x) invisible()
   exportenv$..fun = fun
   exportenv$..output_names = output_names
   exportenv$..data.frame = `data.frame`
@@ -54,7 +54,7 @@ test_wrapper = function(inputDF, wrapper, fun, output_names, `data.frame`)
 #' @return list of the format expected by the API
 #'
 #' @keywords internal
-azureSchema = function(argList) {
+azureSchema <- function(argList) {
   form = list()
   for (arg in names(argList)) {
     type = argList[[arg]]
@@ -145,7 +145,7 @@ azureSchema = function(argList) {
 #' @importFrom jsonlite toJSON
 #' @importFrom uuid UUIDgenerate
 #' @importFrom curl new_handle handle_setheaders handle_setopt
-publishWebService = function(ws, fun, name,
+publishWebService <- function(ws, fun, name,
                              inputSchema, outputSchema, `data.frame`=FALSE,
                              export=character(0), noexport=character(0), packages,
                              version="3.1.0", serviceId, host = ws$.management_endpoint)
@@ -259,7 +259,7 @@ updateWebService = publishWebService
 #' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}
 #' @family publishing functions
 #' @example inst/examples/example_publish.R
-deleteWebService = function(ws, name, refresh = TRUE)
+deleteWebService <- function(ws, name, refresh = TRUE)
 {
   #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
   

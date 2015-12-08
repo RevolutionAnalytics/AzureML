@@ -46,7 +46,7 @@
 #' \code{\link{download.intermediate.dataset}}
 #' @export
 #' @example inst/examples/example_download.R
-download.datasets = function(source, name, ...)
+download.datasets <- function(source, name, ...)
 {
   datasets = source
   if(! missing(name) && is.Workspace(source)) datasets = datasets(source)
@@ -95,7 +95,7 @@ download.datasets = function(source, name, ...)
 #' @export
 #' @family dataset functions
 #' @family experiment functions
-download.intermediate.dataset = function(ws, experiment, node_id, port_name="Results dataset", data_type_id="GenericCSV", ...)
+download.intermediate.dataset <- function(ws, experiment, node_id, port_name="Results dataset", data_type_id="GenericCSV", ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
                 ws$.baseuri, curl_escape(ws$id),
@@ -126,15 +126,20 @@ download.intermediate.dataset = function(ws, experiment, node_id, port_name="Res
 #' @export
 #' @family dataset functions
 #' @example inst/examples/example_upload.R
-upload.dataset = function(x, ws, name, description="", family_id="", ...)
+upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 {
+  if(!is.Workspace(ws)) stop("ws must be a Workspace object")
+  if(name %in% datasets(ws)$Name) {
+    msg <- sprintf("A dataset with the name '%s' already exists in AzureML", name)
+    stop(msg)
+  }
   # Uploading data to AzureML is a two-step process.
   # 1. Upload raw data, retrieving an ID.
   # 2. Construct a DataSource metadata JSON object describing the data and
   #    upload that.
   
   # Step 1
-  tsv = capture.output(write.table(x, file="", sep="\t", row.names=FALSE, ...))
+  tsv = capture.output(write.table(x, file = "", sep = "\t", row.names = FALSE, ...))
   url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
                 ws$.baseuri, curl_escape(ws$id))
   h = new_handle()
@@ -188,7 +193,7 @@ upload.dataset = function(x, ws, name, description="", family_id="", ...)
 #' @return A data frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 #' @family dataset functions
 #' @export
-delete.datasets = function(ws, name, host="https://studioapi.azureml.net/api")
+delete.datasets <- function(ws, name, host="https://studioapi.azureml.net/api")
 {
   # https://studioapi.azureml.net/api/workspaces/<workspaceId>/datasources/family/<familyId> HTTP/1.1
   datasets = name
