@@ -128,6 +128,11 @@ download.intermediate.dataset <- function(ws, experiment, node_id, port_name="Re
 #' @example inst/examples/example_upload.R
 upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 {
+  if(!is.Workspace(ws)) stop("ws must be a Workspace object")
+  if(name %in% datasets(ws)$Name) {
+    msg <- sprintf("A dataset with the name '%s' already exists in AzureML", name)
+    stop(msg)
+  }
   # Uploading data to AzureML is a two-step process.
   # 1. Upload raw data, retrieving an ID.
   # 2. Construct a DataSource metadata JSON object describing the data and
