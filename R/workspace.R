@@ -58,7 +58,7 @@ management_endpoint_default <- "https://management.azureml.net"
 #' @family publishing functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
-workspace = function(id, auth, api_endpoint, management_endpoint,
+workspace <- function(id, auth, api_endpoint, management_endpoint,
                      config="~/.azureml/settings.json")
 {
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
@@ -122,7 +122,7 @@ workspace = function(id, auth, api_endpoint, management_endpoint,
 #' @return NULL is invisibly returned--this function updates data in the \code{w} environment.
 #' @seealso \code{\link{workspace}}
 #' @export
-refresh = function(ws, what=c("everything", "datasets", "experiments", "services"))
+refresh <- function(ws, what=c("everything", "datasets", "experiments", "services"))
 {
   what = match.arg(what)
   if(what %in% c("everything", "experiments")) ws$experiments = get_experiments(ws)
@@ -146,7 +146,7 @@ refresh = function(ws, what=c("everything", "datasets", "experiments", "services
 #' @export
 #' @family dataset functions
 #' @example inst/examples/example_datasets.R
-datasets = function(ws, filter=c("all", "my datasets", "samples"))
+datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
   if(filter == "all") return(ws$datasets)
@@ -168,7 +168,7 @@ datasets = function(ws, filter=c("all", "my datasets", "samples"))
 #' @export
 #' @family experiment functions
 #' @example inst/examples/example_experiments.R
-experiments = function(ws, filter=c("all", "my datasets", "samples"))
+experiments <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
   if(filter == "all") return(ws$experiments)

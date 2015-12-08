@@ -32,7 +32,7 @@ date_origin = "1970-1-1"
 #' @param delay in seconds between retries, subject to exponent
 #' @param exponent increment each successive delay by delay^exponent
 #' @return the result of curl_fetch_memory(uri, handle)
-try_fetch = function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
+try_fetch <- function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
 {
   i = 0
   while(i < tries)
@@ -48,7 +48,7 @@ try_fetch = function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, 
   r
 }
 
-urlconcat = function(a,b)
+urlconcat <- function(a,b)
 {
   ans = paste(gsub("/$", "", a), b, sep="/")
   ans = gsub(":/([^/])", "://\\1", ans)
@@ -62,7 +62,7 @@ urlconcat = function(a,b)
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_datasets = function(ws)
+get_datasets <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
@@ -89,7 +89,7 @@ get_datasets = function(ws)
 }
 
 
-convertToDate = function(x){
+convertToDate <- function(x){
   x = as.numeric(gsub("[^-0-9]", "", x)) /1000
   x = ifelse(x >= 0, x, NA)
   suppressWarnings(
@@ -105,7 +105,7 @@ convertToDate = function(x){
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_experiments = function(ws)
+get_experiments <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
@@ -133,7 +133,7 @@ get_experiments = function(ws)
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
 #' @keywords Internal
-get_dataset = function(x, h, quote = "\"", ...)
+get_dataset <- function(x, h, quote = "\"", ...)
 {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
@@ -161,7 +161,7 @@ get_dataset = function(x, h, quote = "\"", ...)
 
 # Checks if zip is available on system.
 # Required for packageEnv()
-zipAvailable = function(){
+zipAvailable <- function(){
   z = unname(Sys.which("zip"))
   z != ""
 }
@@ -178,7 +178,7 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 #' @keywords Internal
-packageEnv = function(exportenv, packages=NULL, version="3.1.0")
+packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
 {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)

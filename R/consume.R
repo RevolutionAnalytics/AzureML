@@ -21,7 +21,7 @@
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
-consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
+consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
 {
   if(is.Service(endpoint))
   {
@@ -84,7 +84,7 @@ consume = function(endpoint, ..., globalParam, retryDelay = 10, output = "output
 #' @importFrom jsonlite toJSON
 #' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
 #' @keywords internal
-callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
+callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 {
   # Set number of tries and HTTP status to 0
   result = NULL
@@ -130,7 +130,7 @@ callAPI = function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 #' 
 #' @family discovery functions
 #' @export
-discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
+discoverSchema <- function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
 {
   workspaceId = getDetailsFromUrl(helpURL)[1]
   endpointId = getDetailsFromUrl(helpURL)[3]
@@ -238,7 +238,7 @@ discoverSchema = function(helpURL, scheme = "https", host = "ussouthcentral.serv
 #' @return a vector containing the workspace ID, webservices ID and endpoint ID
 #'
 #' @keywords internal
-getDetailsFromUrl = function(url) {
+getDetailsFromUrl <- function(url) {
   ptn = ".*?/workspaces/([[:alnum:]]*)/webservices/([[:alnum:]]*)/endpoints/([[:alnum:]]*)/*.*$"
   if(!grepl(ptn, url)) stop("Invalid url")
   c(

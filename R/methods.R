@@ -25,13 +25,13 @@
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
 #' @export
-is.Workspace = function(x) "Workspace" %in% class(x)
+is.Workspace <- function(x) "Workspace" %in% class(x)
 
 #' @title Test if an object is an Azure ML Service.
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service
 #' @export
-is.Service = function(x){
+is.Service <- function(x){
   inherits(x, "Service")
 }
 
@@ -39,7 +39,7 @@ is.Service = function(x){
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service endpoint
 #' @export
-is.Endpoint = function(x){
+is.Endpoint <- function(x){
   inherits(x, "Endpoint")
 }
 
@@ -52,7 +52,7 @@ print.Workspace =  function(x, ...)
 }
 
 #' @export
-print.Experiments = function(x, ...)
+print.Experiments <- function(x, ...)
 {
   dots = character()
   if(nrow(x) > 0) dots = "..."
@@ -69,7 +69,7 @@ print.Experiments = function(x, ...)
 }
 
 #' @export
-print.Datasets = function(x, ...)
+print.Datasets <- function(x, ...)
 {
   dots = character()
   if(nrow(x) > 0) dots = "..."

@@ -58,7 +58,7 @@
 #' getWebServices(ws)
 #' }
 #' @export
-services = function(ws, service_id, name, host = ws$.management_endpoint)
+services <- function(ws, service_id, name, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
   h = new_handle()
@@ -142,7 +142,7 @@ getWebServices = services
 #' getEndpoints(ws, s$Id[1])
 #' }
 #' @export
-endpoints = function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
+endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
   if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
   # if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
@@ -213,7 +213,7 @@ getEndpoints = endpoints
 #' 
 #' }
 #' @export
-endpointHelp = function(e, type = c("apidocument", "r-snippet","score","jobs","update"))
+endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","update"))
 {
   type = match.arg(type)
   rsnip = FALSE

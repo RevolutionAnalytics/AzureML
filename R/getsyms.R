@@ -17,8 +17,8 @@
 
 # These are all internal functions.
 
-.getsyms = function(ex) {
-  fun = function(x) {
+.getsyms <- function(ex) {
+  fun <- function(x) {
     if (is.symbol(x))
       as.character(x)
     else if (is.call(x))
@@ -29,8 +29,8 @@
   unlist(lapply(ex, fun))
 }
 
-.gather = function(x) {
-  fun = function(a, b) unique(c(a, b))
+.gather <- function(x) {
+  fun <- function(a, b) unique(c(a, b))
   accum = list(good=character(0), bad=character(0))
   for (e in x) {
     accum = mapply(fun, e, accum, SIMPLIFY=FALSE)
@@ -38,8 +38,8 @@
   accum
 }
 
-.expandsyms = function(syms, env, good, bad) {
-  fun = function(sym, good, bad) {
+.expandsyms <- function(syms, env, good, bad) {
+  fun <- function(sym, good, bad) {
     if (sym %in% c(good, bad)) {
       # we already saw this symbol
       list(good=good, bad=bad)
@@ -77,7 +77,7 @@
   .gather(lapply(syms, fun, good, bad))$good
 }
 
-.getexports = function(ex, e, env, good=character(0), bad=character(0)) {
+.getexports <- function(ex, e, env, good=character(0), bad=character(0)) {
   syms = .getsyms(ex)
   syms = .expandsyms(syms, env, good, bad)
   for (s in syms) {
