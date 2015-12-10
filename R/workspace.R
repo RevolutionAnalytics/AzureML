@@ -63,8 +63,15 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
 {
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
   {
-    if(!file.exists(config))  stop("missing file ", config)
-    s = fromJSON(file(config))
+    if(!file.exists(config))  stop(sprintf("config file is missing: '%s'", config))
+    s = tryCatch(fromJSON(file(config)),
+                 error = function(e)e
+    )
+    if(inherits(s, "error")) {
+      msg <- sprintf("Your config file contains invalid json", config)
+      msg <- paste(msg, s$message, sep = "\n\n")
+      stop(msg, call. = FALSE)
+    }
     if(missing(id)){
       id <- s[["workspace"]][["id"]]
     }
@@ -78,8 +85,8 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
       management_endpoint <- s[["workspace"]][["management_endpoint"]]
     }
   }
-  if(!exists("api_endpoint")) api_endpoint <- api_endpoint_default
-  if(!exists("management_endpoint")) management_endpoint <- management_endpoint_default
+  if(is.null(api_endpoint)) api_endpoint <- api_endpoint_default
+  if(is.null(management_endpoint)) management_endpoint <- management_endpoint_default
   
   # test to see if api_endpoint is a valid url
   resp <- tryCatch(

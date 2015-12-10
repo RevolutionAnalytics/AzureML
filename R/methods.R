@@ -49,6 +49,7 @@ print.Workspace =  function(x, ...)
   cat("AzureML Workspace\n")
   cat("Workspace ID: ", x$id, "\n")
   cat("API endpoint:", x$.api_endpoint, "\n")
+  cat("Management endpoint:", x$.management_endpoint, "\n")
 }
 
 #' @export

@@ -34,3 +34,31 @@ if(file.exists(settingsFile))
   message("To run tests, add a file ~/.azureml/settings.json containing AzureML keys, see ?workspace for help")
   message("No tests ran")
 }
+
+context("Reading from settings.json file")
+
+test_that("Add api_endpoint and management_endpoint if missing from config", {
+  tf <- tempfile(fileext = ".json")
+  on.exit(unlink(tf))
+  makeConfig("x", "y", file = tf)
+  ws <- workspace(config = tf)
+  expect_equal(ws$id, "x")
+  expect_equal(ws$.api_endpoint, api_endpoint_default)
+  expect_equal(ws$.management_endpoint, management_endpoint_default)
+})
+
+test_that("Add api_endpoint and management_endpoint if missing from config", {
+  expect_error(workspace(config = "file_does_not_exist"),
+               "config file is missing: 'file_does_not_exist'")
+})
+
+test_that("Throws helpful error if config is invalid json", {
+  tf <- tempfile(fileext = ".json")
+  on.exit(unlink(tf))
+  writeLines("garbage", con = tf)
+  msg <- cat("Error : Your config file contains invalid json\n\nlexical error: invalid char in json text.\n                                       garbage  \n                     (right here) ------^\n\n")
+  
+  expect_error(workspace(config = tf),
+               msg)
+})
+
