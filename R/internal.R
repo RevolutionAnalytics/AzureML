@@ -204,7 +204,7 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
   }
 
   z = try({
-    zip(zipfile="export.zip", files=dir())
+    zip(zipfile="export.zip", files=dir(), flags = "-r9Xq")
   })
   if(inherits(z, "error") || z > 0) stop("Unable to create zip file")
   setwd(cwd)
