@@ -154,7 +154,7 @@ deleteWebService(ws, "addme")
 # A neat trick to evaluate any expression in the Azure ML virtual
 # machine R session and view its output:
 ep <- publishWebService(ws, 
-                        fun = function(expr) {
+                        fun =  function(expr) {
                           paste(capture.output(
                             eval(parse(text=expr))), collapse="\\n")
                         },
