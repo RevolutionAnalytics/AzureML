@@ -21,6 +21,16 @@
 # THE SOFTWARE.
 
 
+stopIfNotWorkspace <- function(x){
+  if(!is.Workspace(x)) {
+    msg <- paste0("Error in ", as.character(sys.call(-1))[1], "()\n",
+                 "ws must be a Workspace object. See ?workspace"
+    )
+    stop(msg, call. = FALSE)
+  }
+}
+
+
 #' @title Test if an object is an Azure ML workspace.
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.

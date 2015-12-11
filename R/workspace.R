@@ -155,6 +155,7 @@ refresh <- function(ws, what=c("everything", "datasets", "experiments", "service
 #' @example inst/examples/example_datasets.R
 datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 {
+  stopIfNotWorkspace(ws)
   filter = match.arg(filter)
   if(filter == "all") return(ws$datasets)
   samples = filter == "samples"

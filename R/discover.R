@@ -60,7 +60,7 @@
 #' @export
 services <- function(ws, service_id, name, host = ws$.management_endpoint)
 {
-  if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
+  stopIfNotWorkspace(ws)
   h = new_handle()
   headers = list(`User-Agent`="R",
                  `Content-Type`="application/json;charset=UTF8",
@@ -144,7 +144,7 @@ getWebServices = services
 #' @export
 endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
-  if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
+  stopIfNotWorkspace(ws)
   # if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
   if(is.Service(service_id)) service_id = service_id$Id[1]
   

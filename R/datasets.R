@@ -128,7 +128,7 @@ download.intermediate.dataset <- function(ws, experiment, node_id, port_name="Re
 #' @example inst/examples/example_upload.R
 upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 {
-  if(!is.Workspace(ws)) stop("ws must be a Workspace object")
+  stopIfNotWorkspace(ws)
   if(name %in% datasets(ws)$Name) {
     msg <- sprintf("A dataset with the name '%s' already exists in AzureML", name)
     stop(msg)
@@ -185,6 +185,8 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
   ws$datasets[ws$datasets$Id == id, ]
 }
 
+
+
 #' Delete datasets from an AzureML workspace.
 #'
 #' @inheritParams refresh
@@ -193,7 +195,7 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 #' @return A data frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 #' @family dataset functions
 #' @export
-delete.datasets <- function(ws, name, host="https://studioapi.azureml.net/api")
+delete.datasets <- function(ws, name, host)
 {
   # https://studioapi.azureml.net/api/workspaces/<workspaceId>/datasources/family/<familyId> HTTP/1.1
   datasets = name
@@ -208,7 +210,7 @@ delete.datasets <- function(ws, name, host="https://studioapi.azureml.net/api")
   handle_setopt(h, customrequest="DELETE")
   status_code = vapply(datasets$FamilyId, function(familyId)
   {
-    uri = sprintf("%s/workspaces/%s/datasources/family/%s", host,
+    uri = sprintf("%s/workspaces/%s/datasources/family/%s", ws$.api_endpoint,
                   curl_escape(ws$id), curl_escape(familyId))
     try_fetch(uri, h)$status_code
   }, 1, USE.NAMES=FALSE)
