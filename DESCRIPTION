@@ -28,4 +28,5 @@ Suggests:
     testthat, 
     knitr, 
     lme4,
-    gbm
+    gbm,
+    MASS
