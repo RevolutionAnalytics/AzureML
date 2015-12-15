@@ -21,8 +21,10 @@
 # THE SOFTWARE.
 
 
-api_endpoint_default <- "https://studio.azureml.net"
+api_endpoint_default        <- "https://studio.azureml.net"
 management_endpoint_default <- "https://management.azureml.net"
+studioapi_default           <- "https://studioapi.azureml.net/api"
+baseuri_default             <- "https://studio.azureml.net/api"
 
 #' Create a reference to an AzureML Studio workspace.
 #'
@@ -59,7 +61,7 @@ management_endpoint_default <- "https://management.azureml.net"
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 workspace <- function(id, auth, api_endpoint, management_endpoint,
-                     config="~/.azureml/settings.json")
+                      config="~/.azureml/settings.json")
 {
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
   {
@@ -102,17 +104,20 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   )
   if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
   
-  e = new.env()
-  class(e) = "Workspace"
-  e$id = id
-  e$.auth = auth
-  e$.api_endpoint = api_endpoint
-  e$.management_endpoint = management_endpoint
-  e$.baseuri = urlconcat(api_endpoint, "api")
-  e$.headers = list(`User-Agent`="R",
-                    `Content-Type`="application/json;charset=UTF8",
-                    `x-ms-client-session-id`="DefaultSession",
-                    `x-ms-metaanalytics-authorizationtoken`=auth)
+  e <- new.env()
+  class(e) <- "Workspace"
+  e$id <- id
+  e$.auth <- auth
+  e$.api_endpoint <- api_endpoint
+  e$.management_endpoint <- management_endpoint
+  e$.studioapi <- studioapi_default
+  e$.studiobase <- baseuri_default
+  e$.headers <- list(
+    `User-Agent` = "R",
+    `Content-Type` = "application/json;charset=UTF8",
+    `x-ms-client-session-id` = "DefaultSession",
+    `x-ms-metaanalytics-authorizationtoken` = auth
+  )
   delayedAssign("experiments", get_experiments(e), assign.env=e)
   delayedAssign("datasets", get_datasets(e), assign.env=e)
   delayedAssign("services", services(e), assign.env=e)
@@ -132,9 +137,9 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
 refresh <- function(ws, what=c("everything", "datasets", "experiments", "services"))
 {
   what = match.arg(what)
-  if(what %in% c("everything", "experiments")) ws$experiments = get_experiments(ws)
-  if(what %in% c("everything", "datasets")) ws$datasets    = get_datasets(ws)
-  if(what %in% c("everything", "services")) ws$services    = services(ws)
+  if(what %in% c("everything", "experiments")) ws$experiments <-  get_experiments(ws)
+  if(what %in% c("everything", "datasets")) ws$datasets <- get_datasets(ws)
+  if(what %in% c("everything", "services")) ws$services <- services(ws)
   invisible()
 }
 

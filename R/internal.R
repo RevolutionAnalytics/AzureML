@@ -32,7 +32,10 @@ date_origin = "1970-1-1"
 #' @param delay in seconds between retries, subject to exponent
 #' @param exponent increment each successive delay by delay^exponent
 #' @return the result of curl_fetch_memory(uri, handle)
-try_fetch <- function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
+try_fetch <- function(uri, handle, 
+                      retry_on = c(400, 401, 440, 503, 504, 509), 
+                      tries = 3, 
+                      delay = 10, exponent = 1.2)
 {
   i = 0
   while(i < tries)
@@ -47,6 +50,10 @@ try_fetch <- function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3,
   }
   r
 }
+
+# urlAPIinsert <- function(x, text = "api"){
+#   gsub("(http.*?)(\\..*)", sprintf("\\1%s\\2", text), x)
+# }
 
 urlconcat <- function(a,b)
 {
@@ -66,7 +73,7 @@ get_datasets <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.baseuri, ws$id), handle=h)
+  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id), handle=h)
   on.exit(close(r))
   x = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=invisible)
   if(is.null(x) || is.na(x$Name[1]))
@@ -109,7 +116,7 @@ get_experiments <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.baseuri, ws$id), handle=h)
+  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id), handle=h)
   on.exit(close(r))
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data

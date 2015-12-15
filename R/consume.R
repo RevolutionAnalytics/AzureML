@@ -115,7 +115,7 @@ callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 
 
 
-#' Discover web service schema
+#' Discover web service schema.
 #'
 #' Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
 #'
@@ -130,7 +130,9 @@ callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
 #' 
 #' @family discovery functions
 #' @export
-discoverSchema <- function(helpURL, scheme = "https", host = "ussouthcentral.services.azureml.net", api_version = "2.0")
+discoverSchema <- function(helpURL, scheme = "https", 
+                           host = "ussouthcentral.services.azureml.net", 
+                           api_version = "2.0")
 {
   workspaceId = getDetailsFromUrl(helpURL)[1]
   endpointId = getDetailsFromUrl(helpURL)[3]

@@ -61,8 +61,8 @@
 services <- function(ws, service_id, name, host = ws$.management_endpoint)
 {
   stopIfNotWorkspace(ws)
-  h = new_handle()
-  headers = list(`User-Agent`="R",
+  h <- new_handle()
+  headers <- list(`User-Agent`="R",
                  `Content-Type`="application/json;charset=UTF8",
                  `Authorization`=sprintf("Bearer %s",ws$.auth),
                  `Accept`="application/json")
@@ -71,12 +71,12 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
   if(missing(service_id)) service_id = ""
   else service_id = sprintf("/%s", service_id)
   
-  r = curl(
+  r <- curl(
     sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
-    handle=h
+    handle = h
   )
   on.exit(close(r))
-  ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
+  ans <- tryCatch(fromJSON(readLines(r, warn = FALSE)), error = function(e) NULL)
   attr(ans, "workspace") = ws
   if(!missing(name)) {
     ans = ans[ans$Name == name,]
@@ -91,7 +91,7 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
 
 #' @rdname services
 #' @export
-getWebServices = services
+getWebServices <- services
 
 #' List AzureML Web Service Endpoints
 #'
