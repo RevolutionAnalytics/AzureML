@@ -34,18 +34,24 @@ date_origin = "1970-1-1"
 #' @return the result of curl_fetch_memory(uri, handle)
 try_fetch <- function(uri, handle, 
                       retry_on = c(400, 401, 440, 503, 504, 509), 
-                      tries = 3, 
-                      delay = 10, exponent = 1.2)
+                      tries = 6, 
+                      delay = 1, exponent = 2)
 {
-  i = 0
-  while(i < tries) {
+  collisions = 1
+  while(collisions < tries) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) return(r)
-    if(i == 0)
-      message(sprintf("Request failed with status %s. Retrying request...", r$status_code))
-    Sys.sleep(delay)
-    delay = delay^exponent
-    i = i + 1
+    wait_time = delay * (2 ^ collisions - 1)
+    wait_time <- ceiling(runif(1, min = 0.001, max = wait_time))
+    message(sprintf("Request failed with status %s. Waiting %s seconds before retry", 
+                    r$status_code,
+                    wait_time))
+    for(i in 1:wait_time){
+      message(".", appendLF = FALSE)
+      Sys.sleep(1)
+    }
+    message("\n")
+    collisions = collisions + 1
   }
   r
 }
