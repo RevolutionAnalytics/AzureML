@@ -1,3 +1,3 @@
 Sys.setenv("R_TESTS" = "")
-library(testthat)
+library(testthat, quietly = TRUE)
 test_check("AzureML")

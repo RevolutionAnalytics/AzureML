@@ -30,7 +30,7 @@ if(file.exists(settingsFile))
     z <- delete.datasets(ws, timestamped_name)
     expect_true(timestamped_name %in% z$Name && z$Deleted[z$Name == timestamped_name])
     # Force refresh - sometime this fails in non-interactive
-    Sys.sleep(0.5); refresh(ws, what = "datasets")
+    Sys.sleep(1); refresh(ws, what = "datasets")
     ds <- datasets(ws, filter = "my")
     expect_false(timestamped_name %in% ds$Name)
   })

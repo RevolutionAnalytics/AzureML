@@ -58,13 +58,10 @@ print.Workspace =  function(x, detail = FALSE, ...)
 {
   cat("AzureML Workspace\n")
   cat("Workspace ID :", x$id, "\n")
-  if(detail == "all" || isTRUE(detail)){
-    cat("API endpoint :", x$.api_endpoint, "\n")
-    cat("Management endpoint :", x$.management_endpoint, "\n")
-  }
-  if(detail == "all"){
+  cat("API endpoint :", x$.api_endpoint, "\n")
+  if(detail){
     cat("Studio API          :", x$.studioapi, "\n")
-    cat("Studio base API     :", x$.studiobase, "\n")
+    cat("Management endpoint :", x$.management_endpoint, "\n")
   }
 }
 

@@ -21,22 +21,31 @@
 # THE SOFTWARE.
 
 
-default_api_prod <- list(
-  api_endpoint        = "https://studioapi.azureml.net",
-  management_endpoint = "https://management.azureml.net",
-  studioapi           = "https://studioapi.azureml.net/api"
-  # baseuri             = "https://studioapi.azureml.net/api"
-)
 
-default_api_int <- list(
-  api_endpoint        = "https://studio.azureml-int.net",
-  management_endpoint = "https://management.azureml-int.net",
-  studioapi           = "https://studioapi.azureml-int.net/api"
-  # baseuri             = "https://studioapi.azureml-int.net/api"
-)
-
-default_api <- default_api_int
-
+default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
+  defaults <- list(
+    
+    "https://studioapi.azureml.net" = list(
+      api_endpoint        = "https://studioapi.azureml.net",
+      management_endpoint = "https://management.azureml.net",
+      studioapi           = "https://studioapi.azureml.net/api"
+      
+    ), "https://studioapi.azureml-int.net" = list(
+      
+      api_endpoint        = "https://studio.azureml-int.net",
+      management_endpoint = "https://management.azureml-int.net",
+      studioapi           = "https://studioapi.azureml-int.net/api"
+      
+    )
+  )
+  
+  
+  if(api_endpoint %in% names(defaults)){
+    defaults[api_endpoint][[1]]
+  } else {
+    stop("api_endpoint not recognized")
+  }
+}
 
 #' Create a reference to an AzureML Studio workspace.
 #'
@@ -78,26 +87,31 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
   {
     if(!file.exists(config))  stop(sprintf("config file is missing: '%s'", config))
-    s = tryCatch(fromJSON(file(config)),
-                 error = function(e)e
+    settings = tryCatch(fromJSON(file(config)),
+                        error = function(e)e
     )
-    if(inherits(s, "error")) {
+    if(inherits(settings, "error")) {
       msg <- sprintf("Your config file contains invalid json", config)
-      msg <- paste(msg, s$message, sep = "\n\n")
+      msg <- paste(msg, settings$message, sep = "\n\n")
       stop(msg, call. = FALSE)
     }
     if(missing(id)){
-      id <- s[["workspace"]][["id"]]
+      id <- settings[["workspace"]][["id"]]
     }
     if(missing(auth)){
-      auth <- s[["workspace"]][["authorization_token"]]
+      auth <- settings[["workspace"]][["authorization_token"]]
     }
     if(missing(api_endpoint)){
-      api_endpoint <- s[["workspace"]][["api_endpoint"]]
+      api_endpoint <- settings[["workspace"]][["api_endpoint"]]
     }
     if(missing(management_endpoint)){
-      management_endpoint <- s[["workspace"]][["management_endpoint"]]
+      management_endpoint <- settings[["workspace"]][["management_endpoint"]]
     }
+  }
+  default_api <- if(is.null(api_endpoint)) {
+     default_api()
+  } else {
+    default_api(api_endpoint)
   }
   if(is.null(api_endpoint)) api_endpoint <- default_api[["api_endpoint"]]
   if(is.null(management_endpoint)) management_endpoint <- default_api[["management_endpoint"]]
@@ -123,7 +137,6 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   e$.api_endpoint <- api_endpoint
   e$.management_endpoint <- management_endpoint
   e$.studioapi <- default_api[["studioapi"]]
-#   e$.studiobase <- default_api[["baseuri"]]
   e$.headers <- list(
     `User-Agent` = "R",
     `Content-Type` = "application/json;charset=UTF8",
