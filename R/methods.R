@@ -54,12 +54,15 @@ is.Endpoint <- function(x){
 }
 
 #' @export
-print.Workspace =  function(x, ...)
+print.Workspace =  function(x, detail = FALSE, ...)
 {
   cat("AzureML Workspace\n")
-  cat("Workspace ID: ", x$id, "\n")
-  cat("API endpoint:", x$.api_endpoint, "\n")
-  cat("Management endpoint:", x$.management_endpoint, "\n")
+  cat("Workspace ID :", x$id, "\n")
+  cat("API endpoint :", x$.api_endpoint, "\n")
+  if(detail){
+    cat("Studio API          :", x$.studioapi, "\n")
+    cat("Management endpoint :", x$.management_endpoint, "\n")
+  }
 }
 
 #' @export

@@ -7,6 +7,9 @@ if(file.exists(settingsFile))
 
   ws <- workspace()
   ds <- datasets(ws, filter = "samples")
+  ds$Name
+  testIdx <- grepl("[Tt]est", ds$Name)
+  ds <- ds[!testIdx, ]
   unique(ds$DataTypeId)
 
   oneOfEach <- do.call(
