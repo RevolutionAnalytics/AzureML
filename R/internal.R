@@ -38,8 +38,7 @@ try_fetch <- function(uri, handle,
                       delay = 10, exponent = 1.2)
 {
   i = 0
-  while(i < tries)
-  {
+  while(i < tries) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) return(r)
     if(i == 0)
@@ -76,20 +75,22 @@ get_datasets <- function(ws)
   r = curl(sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id), handle=h)
   on.exit(close(r))
   x = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=invisible)
-  if(is.null(x) || is.na(x$Name[1]))
-  {
+  if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
     class(x) = c("Datasets", "data.frame")
     return(x)
   }
   # Use strict variable name matching to look up data
   d = x[,"DownloadLocation"]
-  x$DownloadLocation = paste(d[,"BaseUri"], d[,"Location"],
+  x$DownloadLocation = paste(d[,"BaseUri"], 
+                             d[,"Location"],
                              d[,"AccessCredential"], sep="")
   d = x[,"VisualizeEndPoint"]
-  x$VisualizeEndPoint = paste(d[,"BaseUri"], d[,"AccessCredential"], sep="")
+  x$VisualizeEndPoint = paste(d[,"BaseUri"], 
+                              d[,"AccessCredential"], sep="")
   d = x[,"SchemaEndPoint"]
-  x$SchemaEndPoint = paste(d[,"BaseUri"], d[,"Location"],
+  x$SchemaEndPoint = paste(d[,"BaseUri"], 
+                           d[,"Location"],
                            d[,"AccessCredential"], sep="")
   class(x) = c("Datasets", "data.frame")
   x

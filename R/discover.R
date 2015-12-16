@@ -217,16 +217,19 @@ endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","
 {
   type = match.arg(type)
   rsnip = FALSE
-  if(type=="r-snippet")
-  {
+  if(type=="r-snippet") {
     type = "score"
     rsnip = TRUE
   }
   uri = e$HelpLocation[1]
+  
   # XXX This is totally nuts, and not documented, but help hosts vary depending on type.
   # Arrghhh...
-  if(type == "apidocument")
+  if(type == "apidocument"){
     uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
+    uri = gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
+  }
+  
   pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
   con = curl(paste(uri, type, sep="/"))
   text = paste(
@@ -239,10 +242,9 @@ endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","
     collapse="\n"
   )
   close(con)
-  if(rsnip)
-  {
+  if(rsnip) {
     text = substr(text, 
-                  grepRaw("code-snippet-r",text)+nchar("code-snippet-r")+2,nchar(text)
+                  grepRaw("code-snippet-r", text) + nchar("code-snippet-r") + 2, nchar(text)
     )
   }
   if(type == "apidocument") text = fromJSON(text)

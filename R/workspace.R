@@ -21,10 +21,22 @@
 # THE SOFTWARE.
 
 
-api_endpoint_default        <- "https://studio.azureml.net"
-management_endpoint_default <- "https://management.azureml.net"
-studioapi_default           <- "https://studioapi.azureml.net/api"
-baseuri_default             <- "https://studio.azureml.net/api"
+default_api_prod <- list(
+  api_endpoint        = "https://studioapi.azureml.net",
+  management_endpoint = "https://management.azureml.net",
+  studioapi           = "https://studioapi.azureml.net/api"
+  # baseuri             = "https://studioapi.azureml.net/api"
+)
+
+default_api_int <- list(
+  api_endpoint        = "https://studio.azureml-int.net",
+  management_endpoint = "https://management.azureml-int.net",
+  studioapi           = "https://studioapi.azureml-int.net/api"
+  # baseuri             = "https://studioapi.azureml-int.net/api"
+)
+
+default_api <- default_api_int
+
 
 #' Create a reference to an AzureML Studio workspace.
 #'
@@ -87,8 +99,8 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
       management_endpoint <- s[["workspace"]][["management_endpoint"]]
     }
   }
-  if(is.null(api_endpoint)) api_endpoint <- api_endpoint_default
-  if(is.null(management_endpoint)) management_endpoint <- management_endpoint_default
+  if(is.null(api_endpoint)) api_endpoint <- default_api[["api_endpoint"]]
+  if(is.null(management_endpoint)) management_endpoint <- default_api[["management_endpoint"]]
   
   # test to see if api_endpoint is a valid url
   resp <- tryCatch(
@@ -110,8 +122,8 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   e$.auth <- auth
   e$.api_endpoint <- api_endpoint
   e$.management_endpoint <- management_endpoint
-  e$.studioapi <- studioapi_default
-  e$.studiobase <- baseuri_default
+  e$.studioapi <- default_api[["studioapi"]]
+#   e$.studiobase <- default_api[["baseuri"]]
   e$.headers <- list(
     `User-Agent` = "R",
     `Content-Type` = "application/json;charset=UTF8",

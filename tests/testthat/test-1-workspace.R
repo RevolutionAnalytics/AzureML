@@ -43,8 +43,8 @@ test_that("Add api_endpoint and management_endpoint if missing from config", {
   makeConfig("x", "y", file = tf)
   ws <- workspace(config = tf)
   expect_equal(ws$id, "x")
-  expect_equal(ws$.api_endpoint, api_endpoint_default)
-  expect_equal(ws$.management_endpoint, management_endpoint_default)
+  expect_equal(ws$.api_endpoint, default_api[["api_endpoint"]])
+  expect_equal(ws$.management_endpoint, default_api[["management_endpoint"]])
 })
 
 test_that("Add api_endpoint and management_endpoint if missing from config", {

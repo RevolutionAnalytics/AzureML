@@ -25,35 +25,36 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 {
   if(is.Service(endpoint))
   {
-    if(nrow(endpoint) > 1) endpoint = endpoint[1,]
-    default = endpoint$DefaultEndpointName
-    endpoint = endpoints(attr(endpoint, "workspace"), endpoint)
-    endpoint = subset(endpoint, Name=default)
+    if(nrow(endpoint) > 1) endpoint = endpoint[1, ]
+    default <- endpoint$DefaultEndpointName
+    endpoint <- endpoints(attr(endpoint, "workspace"), endpoint)
+    endpoint <- subset(endpoint, Name = default)
   }
   
-  if(!is.Endpoint(endpoint)) stop("Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint.")
+  if(!is.Endpoint(endpoint)) {
+    msg <- "Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint." 
+    stop(msg)
+  }
 
-  apiKey = endpoint$PrimaryKey
-  requestUrl = endpoint$ApiLocation
+  apiKey <- endpoint$PrimaryKey
+  requestUrl <- endpoint$ApiLocation
   
   if(missing(globalParam)) {
     globalParam = setNames(list(), character(0))
   }
   # Store variable number of lists entered as a list of lists
   requestsLists = list(...)
-  if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]]))
-  {
+  if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]])) {
     requestsLists = requestsLists[[1]]
-  } else
-  {
+  } else {
     if(!is.list(requestsLists[[1]])) requestsLists = list(requestsLists)
   }
   # Make API call with parameters
-  result = callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
   if(inherits(result, "error")) stop("AzureML returned error code")
+  
   # Access output by converting from JSON into list and indexing into Results
-  if(!is.null(output) && output == "output1") 
-  {
+  if(!is.null(output) && output == "output1") {
     help = endpointHelp(endpoint)$definitions$output1Item
     ans = data.frame(result$Results$output1)
     nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
@@ -62,8 +63,9 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
     if(length(logi) > 0) for(j in logi) ans[,j] = as.logical(ans[,j])
     return(ans)
   }
-  if(!is.null(output) && output == "output2") 
+  if(!is.null(output) && output == "output2") {
     return(fromJSON(result$Results$output2[[1]]))
+  }
   result$Results
 }
 
@@ -84,30 +86,28 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 #' @importFrom jsonlite toJSON
 #' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
 #' @keywords internal
-callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10)
-{
+callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10) {
   # Set number of tries and HTTP status to 0
-  result = NULL
+  result <- NULL
   # Construct request payload
-  req = list(
+  req <- list(
     Inputs = list(input1 = keyvalues), 
     GlobalParameters = globalParam
   )
-  body = charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
-  h = new_handle()
-  headers = list(`User-Agent`="R",
-                 `Content-Type`="application/json",
-                 `Authorization`=sprintf("Bearer %s", apiKey))
-  handle_setheaders(h, .list=headers)
+  body <- charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
+  h <- new_handle()
+  headers <- list(`User-Agent` = "R",
+                 `Content-Type` = "application/json",
+                 `Authorization` = sprintf("Bearer %s", apiKey))
+  handle_setheaders(h, .list = headers)
   handle_setopt(h, .list = list(
-    post=TRUE, 
-    postfieldsize=length(body), 
-    postfields=body)
+    post = TRUE, 
+    postfieldsize = length(body), 
+    postfields = body)
   )
-  r = try_fetch(requestUrl, h, delay=retryDelay)
+  r = try_fetch(requestUrl, h, delay = retryDelay)
   result = fromJSON(rawToChar(r$content))
-  if(r$status_code >= 400)
-  {
+  if(r$status_code >= 400)  {
     stop(paste(capture.output(result), collapse="\n"))
   }
   result
