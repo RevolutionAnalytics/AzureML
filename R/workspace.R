@@ -21,8 +21,31 @@
 # THE SOFTWARE.
 
 
-api_endpoint_default <- "https://studio.azureml.net"
-management_endpoint_default <- "https://management.azureml.net"
+
+default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
+  defaults <- list(
+    
+    "https://studioapi.azureml.net" = list(
+      api_endpoint        = "https://studioapi.azureml.net",
+      management_endpoint = "https://management.azureml.net",
+      studioapi           = "https://studioapi.azureml.net/api"
+      
+    ), "https://studioapi.azureml-int.net" = list(
+      
+      api_endpoint        = "https://studio.azureml-int.net",
+      management_endpoint = "https://management.azureml-int.net",
+      studioapi           = "https://studioapi.azureml-int.net/api"
+      
+    )
+  )
+  
+  
+  if(api_endpoint %in% names(defaults)){
+    defaults[api_endpoint][[1]]
+  } else {
+    stop("api_endpoint not recognized")
+  }
+}
 
 #' Create a reference to an AzureML Studio workspace.
 #'
@@ -59,27 +82,39 @@ management_endpoint_default <- "https://management.azureml.net"
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 workspace <- function(id, auth, api_endpoint, management_endpoint,
-                     config="~/.azureml/settings.json")
+                      config="~/.azureml/settings.json")
 {
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
   {
-    if(!file.exists(config))  stop("missing file ", config)
-    s = fromJSON(file(config))
+    if(!file.exists(config))  stop(sprintf("config file is missing: '%s'", config))
+    settings = tryCatch(fromJSON(file(config)),
+                        error = function(e)e
+    )
+    if(inherits(settings, "error")) {
+      msg <- sprintf("Your config file contains invalid json", config)
+      msg <- paste(msg, settings$message, sep = "\n\n")
+      stop(msg, call. = FALSE)
+    }
     if(missing(id)){
-      id <- s[["workspace"]][["id"]]
+      id <- settings[["workspace"]][["id"]]
     }
     if(missing(auth)){
-      auth <- s[["workspace"]][["authorization_token"]]
+      auth <- settings[["workspace"]][["authorization_token"]]
     }
     if(missing(api_endpoint)){
-      api_endpoint <- s[["workspace"]][["api_endpoint"]]
+      api_endpoint <- settings[["workspace"]][["api_endpoint"]]
     }
     if(missing(management_endpoint)){
-      management_endpoint <- s[["workspace"]][["management_endpoint"]]
+      management_endpoint <- settings[["workspace"]][["management_endpoint"]]
     }
   }
-  if(!exists("api_endpoint")) api_endpoint <- api_endpoint_default
-  if(!exists("management_endpoint")) management_endpoint <- management_endpoint_default
+  default_api <- if(is.null(api_endpoint)) {
+     default_api()
+  } else {
+    default_api(api_endpoint)
+  }
+  if(is.null(api_endpoint)) api_endpoint <- default_api[["api_endpoint"]]
+  if(is.null(management_endpoint)) management_endpoint <- default_api[["management_endpoint"]]
   
   # test to see if api_endpoint is a valid url
   resp <- tryCatch(
@@ -95,17 +130,19 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   )
   if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
   
-  e = new.env()
-  class(e) = "Workspace"
-  e$id = id
-  e$.auth = auth
-  e$.api_endpoint = api_endpoint
-  e$.management_endpoint = management_endpoint
-  e$.baseuri = urlconcat(api_endpoint, "api")
-  e$.headers = list(`User-Agent`="R",
-                    `Content-Type`="application/json;charset=UTF8",
-                    `x-ms-client-session-id`="DefaultSession",
-                    `x-ms-metaanalytics-authorizationtoken`=auth)
+  e <- new.env()
+  class(e) <- "Workspace"
+  e$id <- id
+  e$.auth <- auth
+  e$.api_endpoint <- api_endpoint
+  e$.management_endpoint <- management_endpoint
+  e$.studioapi <- default_api[["studioapi"]]
+  e$.headers <- list(
+    `User-Agent` = "R",
+    `Content-Type` = "application/json;charset=UTF8",
+    `x-ms-client-session-id` = "DefaultSession",
+    `x-ms-metaanalytics-authorizationtoken` = auth
+  )
   delayedAssign("experiments", get_experiments(e), assign.env=e)
   delayedAssign("datasets", get_datasets(e), assign.env=e)
   delayedAssign("services", services(e), assign.env=e)
@@ -125,9 +162,9 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
 refresh <- function(ws, what=c("everything", "datasets", "experiments", "services"))
 {
   what = match.arg(what)
-  if(what %in% c("everything", "experiments")) ws$experiments = get_experiments(ws)
-  if(what %in% c("everything", "datasets")) ws$datasets    = get_datasets(ws)
-  if(what %in% c("everything", "services")) ws$services    = services(ws)
+  if(what %in% c("everything", "experiments")) ws$experiments <-  get_experiments(ws)
+  if(what %in% c("everything", "datasets")) ws$datasets <- get_datasets(ws)
+  if(what %in% c("everything", "services")) ws$services <- services(ws)
   invisible()
 }
 
@@ -148,6 +185,7 @@ refresh <- function(ws, what=c("everything", "datasets", "experiments", "service
 #' @example inst/examples/example_datasets.R
 datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 {
+  stopIfNotWorkspace(ws)
   filter = match.arg(filter)
   if(filter == "all") return(ws$datasets)
   samples = filter == "samples"

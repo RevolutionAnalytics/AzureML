@@ -60,9 +60,9 @@
 #' @export
 services <- function(ws, service_id, name, host = ws$.management_endpoint)
 {
-  if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
-  h = new_handle()
-  headers = list(`User-Agent`="R",
+  stopIfNotWorkspace(ws)
+  h <- new_handle()
+  headers <- list(`User-Agent`="R",
                  `Content-Type`="application/json;charset=UTF8",
                  `Authorization`=sprintf("Bearer %s",ws$.auth),
                  `Accept`="application/json")
@@ -71,12 +71,12 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
   if(missing(service_id)) service_id = ""
   else service_id = sprintf("/%s", service_id)
   
-  r = curl(
+  r <- curl(
     sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
-    handle=h
+    handle = h
   )
   on.exit(close(r))
-  ans = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=function(e) NULL)
+  ans <- tryCatch(fromJSON(readLines(r, warn = FALSE)), error = function(e) NULL)
   attr(ans, "workspace") = ws
   if(!missing(name)) {
     ans = ans[ans$Name == name,]
@@ -91,7 +91,7 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
 
 #' @rdname services
 #' @export
-getWebServices = services
+getWebServices <- services
 
 #' List AzureML Web Service Endpoints
 #'
@@ -144,7 +144,7 @@ getWebServices = services
 #' @export
 endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 {
-  if(!is.Workspace(ws)) stop("ws must be an AzureML Workspace object")
+  stopIfNotWorkspace(ws)
   # if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
   if(is.Service(service_id)) service_id = service_id$Id[1]
   
@@ -217,16 +217,19 @@ endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","
 {
   type = match.arg(type)
   rsnip = FALSE
-  if(type=="r-snippet")
-  {
+  if(type=="r-snippet") {
     type = "score"
     rsnip = TRUE
   }
   uri = e$HelpLocation[1]
+  
   # XXX This is totally nuts, and not documented, but help hosts vary depending on type.
   # Arrghhh...
-  if(type == "apidocument")
+  if(type == "apidocument"){
     uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
+    uri = gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
+  }
+  
   pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
   con = curl(paste(uri, type, sep="/"))
   text = paste(
@@ -239,10 +242,9 @@ endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","
     collapse="\n"
   )
   close(con)
-  if(rsnip)
-  {
+  if(rsnip) {
     text = substr(text, 
-                  grepRaw("code-snippet-r",text)+nchar("code-snippet-r")+2,nchar(text)
+                  grepRaw("code-snippet-r", text) + nchar("code-snippet-r") + 2, nchar(text)
     )
   }
   if(type == "apidocument") text = fromJSON(text)

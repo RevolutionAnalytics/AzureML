@@ -95,10 +95,12 @@ download.datasets <- function(source, name, ...)
 #' @export
 #' @family dataset functions
 #' @family experiment functions
-download.intermediate.dataset <- function(ws, experiment, node_id, port_name="Results dataset", data_type_id="GenericCSV", ...)
+download.intermediate.dataset <- function(ws, experiment, node_id, 
+                                          port_name = "Results dataset", 
+                                          data_type_id = "GenericCSV", ...)
 {
   url = sprintf("%s/workspaces/%s/experiments/%s/outputdata/%s/%s",
-                ws$.baseuri, curl_escape(ws$id),
+                ws$.studioapi, curl_escape(ws$id),
                 curl_escape(experiment), curl_escape(node_id),
                 curl_escape(port_name))
   h = new_handle()
@@ -128,7 +130,7 @@ download.intermediate.dataset <- function(ws, experiment, node_id, port_name="Re
 #' @example inst/examples/example_upload.R
 upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 {
-  if(!is.Workspace(ws)) stop("ws must be a Workspace object")
+  stopIfNotWorkspace(ws)
   if(name %in% datasets(ws)$Name) {
     msg <- sprintf("A dataset with the name '%s' already exists in AzureML", name)
     stop(msg)
@@ -141,7 +143,7 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
   # Step 1
   tsv = capture.output(write.table(x, file = "", sep = "\t", row.names = FALSE, ...))
   url = sprintf("%s/resourceuploads/workspaces/%s/?userStorage=true&dataTypeId=GenericTSV",
-                ws$.baseuri, curl_escape(ws$id))
+                ws$.studioapi, curl_escape(ws$id))
   h = new_handle()
   hdr = ws$.headers
   hdr["Content-Type"] = "text/plain"
@@ -169,7 +171,7 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
       ClientPoll =  TRUE), auto_unbox=TRUE)
   
   url = sprintf("%s/workspaces/%s/datasources",
-                ws$.baseuri, curl_escape(ws$id))
+                ws$.studioapi, curl_escape(ws$id))
   handle_reset(h)                               # Preserves connection, cookies
   handle_setheaders(h, .list=ws$.headers)
   body = charToRaw(paste(metadata, collapse="\n"))
@@ -185,6 +187,8 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
   ws$datasets[ws$datasets$Id == id, ]
 }
 
+
+
 #' Delete datasets from an AzureML workspace.
 #'
 #' @inheritParams refresh
@@ -193,25 +197,28 @@ upload.dataset <- function(x, ws, name, description = "", family_id="", ...)
 #' @return A data frame with columns Name, Deleted, status_code indicating the HTTP status code and success/failure result of the delete operation for each dataset.
 #' @family dataset functions
 #' @export
-delete.datasets <- function(ws, name, host="https://studioapi.azureml.net/api")
-{
+delete.datasets <- function(ws, name, host){
+  stopIfNotWorkspace(ws)
   # https://studioapi.azureml.net/api/workspaces/<workspaceId>/datasources/family/<familyId> HTTP/1.1
-  datasets = name
+  datasets <-  name
   refresh(ws, "datasets")
-  if(!inherits(datasets, "Datasets"))
-  {
-    datasets = datasets(ws)
-    datasets = datasets[datasets$Name %in% name, ]
+  if(!inherits(datasets, "Datasets")){
+    datasets <-  datasets(ws)
+    datasets <-  datasets[datasets$Name %in% name, ]
   }
-  h = new_handle()
-  handle_setheaders(h, .list=ws$.headers)
-  handle_setopt(h, customrequest="DELETE")
-  status_code = vapply(datasets$FamilyId, function(familyId)
-  {
-    uri = sprintf("%s/workspaces/%s/datasources/family/%s", host,
-                  curl_escape(ws$id), curl_escape(familyId))
-    try_fetch(uri, h)$status_code
-  }, 1, USE.NAMES=FALSE)
+  h <- new_handle()
+  handle_setheaders(h, .list = ws$.headers)
+  handle_setopt(h, customrequest = "DELETE")
+  status_code <- vapply(datasets$FamilyId, 
+                        function(familyId){
+                          uri <- sprintf("%s/workspaces/%s/datasources/family/%s", 
+                                         ws$.studioapi,
+                                         curl_escape(ws$id),
+                                         curl_escape(familyId)
+                          )
+                          try_fetch(uri, h)$status_code
+                        }, 1, USE.NAMES = FALSE
+  )
   ans = data.frame(
     Name = datasets$Name, 
     Deleted=status_code < 300, 

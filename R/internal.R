@@ -32,21 +32,33 @@ date_origin = "1970-1-1"
 #' @param delay in seconds between retries, subject to exponent
 #' @param exponent increment each successive delay by delay^exponent
 #' @return the result of curl_fetch_memory(uri, handle)
-try_fetch <- function(uri, handle, retry_on=c(503,504,509,400,401,440), tries=3, delay=10, exponent=1.2)
+try_fetch <- function(uri, handle, 
+                      retry_on = c(400, 401, 440, 503, 504, 509), 
+                      tries = 6, 
+                      delay = 1, exponent = 2)
 {
-  i = 0
-  while(i < tries)
-  {
+  collisions = 1
+  while(collisions < tries) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) return(r)
-    if(i == 0)
-      message(sprintf("Request failed with status %s. Retrying request...", r$status_code))
-    Sys.sleep(delay)
-    delay = delay^exponent
-    i = i + 1
+    wait_time = delay * (2 ^ collisions - 1)
+    wait_time <- ceiling(runif(1, min = 0.001, max = wait_time))
+    message(sprintf("Request failed with status %s. Waiting %s seconds before retry", 
+                    r$status_code,
+                    wait_time))
+    for(i in 1:wait_time){
+      message(".", appendLF = FALSE)
+      Sys.sleep(1)
+    }
+    message("\n")
+    collisions = collisions + 1
   }
   r
 }
+
+# urlAPIinsert <- function(x, text = "api"){
+#   gsub("(http.*?)(\\..*)", sprintf("\\1%s\\2", text), x)
+# }
 
 urlconcat <- function(a,b)
 {
@@ -66,23 +78,25 @@ get_datasets <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.baseuri, ws$id), handle=h)
+  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id), handle=h)
   on.exit(close(r))
   x = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=invisible)
-  if(is.null(x) || is.na(x$Name[1]))
-  {
+  if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
     class(x) = c("Datasets", "data.frame")
     return(x)
   }
   # Use strict variable name matching to look up data
   d = x[,"DownloadLocation"]
-  x$DownloadLocation = paste(d[,"BaseUri"], d[,"Location"],
+  x$DownloadLocation = paste(d[,"BaseUri"], 
+                             d[,"Location"],
                              d[,"AccessCredential"], sep="")
   d = x[,"VisualizeEndPoint"]
-  x$VisualizeEndPoint = paste(d[,"BaseUri"], d[,"AccessCredential"], sep="")
+  x$VisualizeEndPoint = paste(d[,"BaseUri"], 
+                              d[,"AccessCredential"], sep="")
   d = x[,"SchemaEndPoint"]
-  x$SchemaEndPoint = paste(d[,"BaseUri"], d[,"Location"],
+  x$SchemaEndPoint = paste(d[,"BaseUri"], 
+                           d[,"Location"],
                            d[,"AccessCredential"], sep="")
   class(x) = c("Datasets", "data.frame")
   x
@@ -109,7 +123,7 @@ get_experiments <- function(ws)
 {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.baseuri, ws$id), handle=h)
+  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id), handle=h)
   on.exit(close(r))
   x = fromJSON(readLines(r, warn=FALSE))
   # Use strict variable name matching to look up data
@@ -204,7 +218,7 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
   }
 
   z = try({
-    zip(zipfile="export.zip", files=dir())
+    zip(zipfile="export.zip", files=dir(), flags = "-r9Xq")
   })
   if(inherits(z, "error") || z > 0) stop("Unable to create zip file")
   setwd(cwd)

@@ -151,7 +151,7 @@ publishWebService <- function(ws, fun, name,
                              version="3.1.0", serviceId, host = ws$.management_endpoint)
 {
   # Perform validation on inputs
-  if(!is.Workspace(ws)) stop("ws must be a workspace object")
+  stopIfNotWorkspace(ws)
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(is.character(fun)) stop("You must specify 'fun' as a function, not a character")
   if(!is.function(fun)) stop("The argument 'fun' must be a function.")
@@ -263,7 +263,7 @@ deleteWebService <- function(ws, name, refresh = TRUE)
 {
   #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
   
-  if(!is.Workspace(ws)) stop("Invalid ws. Please provide a workspace object")
+  stopIfNotWorkspace(ws)
   if(is.data.frame(name) || is.list(name)){
     name = name$Id[1]
   } else {

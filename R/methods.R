@@ -21,13 +21,28 @@
 # THE SOFTWARE.
 
 
-#' @title Test if an object is an Azure ML workspace.
+stopIfNotWorkspace <- function(x){
+  if(!is.Workspace(x)) {
+    msg <- paste0("Error in ", as.character(sys.call(-1))[1], "()\n",
+                 "ws must be a Workspace object. See ?workspace"
+    )
+    stop(msg, call. = FALSE)
+  }
+}
+
+
+#' Test if an object is an Azure ML workspace.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
 #' @export
-is.Workspace <- function(x) "Workspace" %in% class(x)
+is.Workspace <- function(x){
+  inherits(x, "Workspace")
+}
 
-#' @title Test if an object is an Azure ML Service.
+
+#' Test if an object is an Azure ML Service.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service
 #' @export
@@ -35,7 +50,8 @@ is.Service <- function(x){
   inherits(x, "Service")
 }
 
-#' @title Test if an object is an Azure ML Endpoint
+#' Test if an object is an Azure ML Endpoint.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service endpoint
 #' @export
@@ -44,11 +60,15 @@ is.Endpoint <- function(x){
 }
 
 #' @export
-print.Workspace =  function(x, ...)
+print.Workspace =  function(x, detail = FALSE, ...)
 {
   cat("AzureML Workspace\n")
-  cat("Workspace ID: ", x$id, "\n")
-  cat("API endpoint:", x$.api_endpoint, "\n")
+  cat("Workspace ID :", x$id, "\n")
+  cat("API endpoint :", x$.api_endpoint, "\n")
+  if(detail){
+    cat("Studio API          :", x$.studioapi, "\n")
+    cat("Management endpoint :", x$.management_endpoint, "\n")
+  }
 }
 
 #' @export

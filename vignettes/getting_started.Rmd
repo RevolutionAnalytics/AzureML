@@ -412,7 +412,8 @@ gbm1 <- gbm(medv ~ .,
             n.minobsinnode = 1,
             shrinkage = 0.01,
             cv.folds = 5,
-            data = Boston)
+            data = Boston,
+            n.cores = 1) # You can set this to n.cores = NULL to use all cores
 best.iter <- gbm.perf(gbm1, method="cv", plot=FALSE)
 
 mypredict <- function(newdata)
