@@ -31,13 +31,18 @@ stopIfNotWorkspace <- function(x){
 }
 
 
-#' @title Test if an object is an Azure ML workspace.
+#' Test if an object is an Azure ML workspace.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
 #' @export
-is.Workspace <- function(x) "Workspace" %in% class(x)
+is.Workspace <- function(x){
+  inherits(x, "Workspace")
+}
 
-#' @title Test if an object is an Azure ML Service.
+
+#' Test if an object is an Azure ML Service.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service
 #' @export
@@ -45,7 +50,8 @@ is.Service <- function(x){
   inherits(x, "Service")
 }
 
-#' @title Test if an object is an Azure ML Endpoint
+#' Test if an object is an Azure ML Endpoint.
+#' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML web service endpoint
 #' @export
