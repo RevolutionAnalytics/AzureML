@@ -5,6 +5,11 @@ if(file.exists(settingsFile))
 {
   context("Upload and delete dataset")
   ws <- workspace()
+
+  test_that("datasets(ws) returns results", {
+    x <- datasets(ws)
+    expect_is(x, "data.frame")
+  })
   
   timestamped_name <- paste0("dataset-test-upload-",
                              format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
