@@ -106,8 +106,9 @@ test_that("updateWebService works with simple function", {
 test_that("publishWebService works with data frame input", {
   timestamped_name <- paste0("webservice-test-publish-",
                              format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
+  
+  if(!require("lme4")) skip("You need to install lme4 to run this test")
 
-  library(lme4)
   set.seed(1)
   train <- sleepstudy[sample(nrow(sleepstudy), 120),]
   m <- lm(Reaction ~ Days + Subject, data = train)
