@@ -31,7 +31,7 @@ stopIfNotWorkspace <- function(x){
 }
 
 
-#' Test if an object is an Azure ML workspace.
+#' Test if an object is an Azure ML Workspace.
 #' 
 #' @param x an R object
 #' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
