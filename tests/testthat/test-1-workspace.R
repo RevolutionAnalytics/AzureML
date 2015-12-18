@@ -1,45 +1,36 @@
 if(interactive()) library("testthat")
 
-skip_if_missing_config <- function(f){
-  if(!file.exists(settingsFile)) {
-    msg <- paste("To run tests, add a file ~/.azureml/settings.json containing AzureML keys.",
-                 "See ?workspace for help",
-                 sep = "\n")
-    message(msg)
-    skip("settings.json file is missing")
-  }
-}
 
 settingsFile <- AzureML.config.default
 
-  context("Connect to workspace")
+context("Connect to workspace")
 
-  test_that("Can connect to workspace with supplied id and auth", {
-    skip_if_missing_config(settingsFile)
-    
-    js <- jsonlite::fromJSON(settingsFile)
-    id <- js$workspace$id
-    auth <- js$workspace$authorization_token
-    
-    expect_true(!is.null(id))
-    expect_true(!is.null(auth))
-    
-    ws <- workspace(id, auth)
-    
-    expect_is(ws, c("Workspace"))
-    expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
-    expect_equal(ws$id, id)
-  })
+test_that("Can connect to workspace with supplied id and auth", {
+  AzureML:::skip_if_missing_config(settingsFile)
   
-  test_that("Can connect to workspace with config file", {
-    skip_if_missing_config(settingsFile)
+  js <- jsonlite::fromJSON(settingsFile)
+  id <- js$workspace$id
+  auth <- js$workspace$authorization_token
+  
+  expect_true(!is.null(id))
+  expect_true(!is.null(auth))
+  
+  ws <- workspace(id, auth)
+  
+  expect_is(ws, c("Workspace"))
+  expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
+  expect_equal(ws$id, id)
+})
 
-    ws <- workspace()
-    
-    expect_is(ws, c("Workspace"))
-    expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
-  })
+test_that("Can connect to workspace with config file", {
+  AzureML:::skip_if_missing_config(settingsFile)
   
+  ws <- workspace()
+  
+  expect_is(ws, c("Workspace"))
+  expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
+})
+
 context("Reading from settings.json file")
 
 test_that("Add api_endpoint and management_endpoint if missing from config", {
