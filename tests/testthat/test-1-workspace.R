@@ -1,11 +1,22 @@
 if(interactive()) library("testthat")
 
+skip_if_missing_config <- function(f){
+  if(!file.exists(settingsFile)) {
+    msg <- paste("To run tests, add a file ~/.azureml/settings.json containing AzureML keys.",
+                 "See ?workspace for help",
+                 sep = "\n")
+    message(msg)
+    skip("settings.json file is missing")
+  }
+}
+
 settingsFile <- AzureML.config.default
-if(file.exists(settingsFile))
-{
+
   context("Connect to workspace")
-  
+
   test_that("Can connect to workspace with supplied id and auth", {
+    skip_if_missing_config(settingsFile)
+    
     js <- jsonlite::fromJSON(settingsFile)
     id <- js$workspace$id
     auth <- js$workspace$authorization_token
@@ -21,20 +32,14 @@ if(file.exists(settingsFile))
   })
   
   test_that("Can connect to workspace with config file", {
-    skip_on_cran()
-    skip_on_travis()
-    
+    skip_if_missing_config(settingsFile)
+
     ws <- workspace()
     
     expect_is(ws, c("Workspace"))
     expect_equal(ls(ws), c("datasets", "experiments", "id", "services"))
   })
   
-} else {
-  message("To run tests, add a file ~/.azureml/settings.json containing AzureML keys, see ?workspace for help")
-  message("No tests ran")
-}
-
 context("Reading from settings.json file")
 
 test_that("Add api_endpoint and management_endpoint if missing from config", {
@@ -47,7 +52,7 @@ test_that("Add api_endpoint and management_endpoint if missing from config", {
   expect_equal(ws$.management_endpoint, default_api(ws$.api_endpoint)[["management_endpoint"]])
 })
 
-test_that("Add api_endpoint and management_endpoint if missing from config", {
+test_that("Throw helpful error if config file does not exist", {
   expect_error(workspace(config = "file_does_not_exist"),
                "config file is missing: 'file_does_not_exist'")
 })
