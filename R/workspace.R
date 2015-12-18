@@ -86,15 +86,32 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
 {
   if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
   {
-    if(!file.exists(config))  stop(sprintf("config file is missing: '%s'", config))
+    # Stop if the config file is missing
+    if(!file.exists(config)) stop(sprintf("config file is missing: '%s'", config))
+    
+    # Stop if the config is a directory, not a file
+    if(file.info(config)$isdir){
+      msg <- paste(
+        "The config argument should point to a file.",
+        sprintf(" You provided a directory (%s)", 
+                normalizePath(config, winslash = "/", mustWork = FALSE)
+        ), sep = "\n"
+      )
+      stop(msg)
+    }
+    
+    # Read the JSON
     settings = tryCatch(fromJSON(file(config)),
                         error = function(e)e
     )
+    
+    # Error check the settings file for invalid JSON
     if(inherits(settings, "error")) {
       msg <- sprintf("Your config file contains invalid json", config)
       msg <- paste(msg, settings$message, sep = "\n\n")
       stop(msg, call. = FALSE)
     }
+    
     if(missing(id)){
       id <- settings[["workspace"]][["id"]]
     }
@@ -108,13 +125,21 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
       management_endpoint <- settings[["workspace"]][["management_endpoint"]]
     }
   }
+  
+  # Assign a default api_endpoint if this was not provided
   default_api <- if(is.null(api_endpoint)) {
-     default_api()
+    default_api()
   } else {
     default_api(api_endpoint)
   }
-  if(is.null(api_endpoint)) api_endpoint <- default_api[["api_endpoint"]]
-  if(is.null(management_endpoint)) management_endpoint <- default_api[["management_endpoint"]]
+  if(is.null(api_endpoint)){
+    api_endpoint <- default_api[["api_endpoint"]]
+  }
+
+  # Assign a default management_endpoint if this was not provided
+  if(is.null(management_endpoint)){
+    management_endpoint <- default_api[["management_endpoint"]]
+  }
   
   # test to see if api_endpoint is a valid url
   resp <- tryCatch(
@@ -123,12 +148,14 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   )
   if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
   
-  # test to see if api_endpoint is a valid url
+  # test to see if management_endpoint is a valid url
   resp <- tryCatch(
     suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
     error = function(e)e
   )
   if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  
+  # It seems all checks passed. Now construct the Workspace object
   
   e <- new.env()
   class(e) <- "Workspace"
@@ -143,9 +170,9 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
     `x-ms-client-session-id` = "DefaultSession",
     `x-ms-metaanalytics-authorizationtoken` = auth
   )
-  delayedAssign("experiments", get_experiments(e), assign.env=e)
-  delayedAssign("datasets", get_datasets(e), assign.env=e)
-  delayedAssign("services", services(e), assign.env=e)
+  delayedAssign("experiments", get_experiments(e), assign.env = e)
+  delayedAssign("datasets", get_datasets(e), assign.env = e)
+  delayedAssign("services", services(e), assign.env = e)
   e
 }
 
