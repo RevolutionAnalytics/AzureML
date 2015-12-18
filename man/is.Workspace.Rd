@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{is.Workspace}
 \alias{is.Workspace}
-\title{Test if an object is an Azure ML workspace.}
+\title{Test if an object is an Azure ML Workspace.}
 \usage{
 is.Workspace(x)
 }
@@ -13,6 +13,6 @@ is.Workspace(x)
 logical value, TRUE if \code{x} represents an Azure ML workspace.
 }
 \description{
-Test if an object is an Azure ML workspace.
+Test if an object is an Azure ML Workspace.
 }
 
