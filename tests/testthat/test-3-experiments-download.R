@@ -4,7 +4,7 @@
 
 if(interactive()) library("testthat")
 
-settingsFile <- "~/.azureml/settings.json"
+settingsFile <- AzureML.config.default
 if(file.exists(settingsFile))
 {
  context("Read dataset from experiment")

@@ -1,6 +1,6 @@
 if(interactive()) library("testthat")
 
-settingsFile <- "~/.azureml/settings.json"
+settingsFile <- AzureML.config.default
 if(file.exists(settingsFile))
 {
   context("Download one file of each DataTypeId")
