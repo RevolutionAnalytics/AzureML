@@ -84,33 +84,13 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 workspace <- function(id, auth, api_endpoint, management_endpoint,
                       config = getOption("AzureML.config"))
 {
-  if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
-  {
-    # Stop if the config file is missing
-    if(!file.exists(config)) stop(sprintf("config file is missing: '%s'", config))
-    
-    # Stop if the config is a directory, not a file
-    if(file.info(config)$isdir){
-      msg <- paste(
-        "The config argument should point to a file.",
-        sprintf(" You provided a directory (%s)", 
-                normalizePath(config, winslash = "/", mustWork = FALSE)
-        ), sep = "\n"
-      )
-      stop(msg)
-    }
-    
-    # Read the JSON
-    settings = tryCatch(fromJSON(file(config)),
-                        error = function(e)e
-    )
-    
-    # Error check the settings file for invalid JSON
-    if(inherits(settings, "error")) {
-      msg <- sprintf("Your config file contains invalid json", config)
-      msg <- paste(msg, settings$message, sep = "\n\n")
-      stop(msg, call. = FALSE)
-    }
+  
+  
+  # If workspace_id or auth are missing, read from config. Stop if unavailable.
+  if(missing(id) || missing(auth)) {
+    x <- validate.AzureML.config(config, stopOnError = TRUE)
+    if(inherits(x, "error")) stop(x$message)
+    settings <- read.AzureML.config(config)
     
     if(missing(id)){
       id <- settings[["workspace"]][["id"]]
@@ -118,37 +98,46 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
     if(missing(auth)){
       auth <- settings[["workspace"]][["authorization_token"]]
     }
-    if(missing(api_endpoint)){
-      api_endpoint <- settings[["workspace"]][["api_endpoint"]]
-    }
-    if(missing(management_endpoint)){
-      management_endpoint <- settings[["workspace"]][["management_endpoint"]]
+  }
+  
+  # If workspace_id or auth are missing, read from config, if available.
+  if(missing(api_endpoint) || missing(management_endpoint)){
+    x <- validate.AzureML.config(config, stopOnError = FALSE)
+    if(!inherits(x, "error")){
+      settings <- read.AzureML.config(config)
+      
+      if(missing(api_endpoint)){
+        api_endpoint <- settings[["workspace"]][["api_endpoint"]]
+      }
+      if(missing(management_endpoint)){
+        management_endpoint <- settings[["workspace"]][["management_endpoint"]]
+      }
     }
   }
   
   # Assign a default api_endpoint if this was not provided
-  default_api <- if(is.null(api_endpoint)) {
+  default_api <- if(missing(api_endpoint) || is.null(api_endpoint)) {
     default_api()
   } else {
     default_api(api_endpoint)
   }
-  if(is.null(api_endpoint)){
+  if(missing(api_endpoint) || is.null(api_endpoint)){
     api_endpoint <- default_api[["api_endpoint"]]
   }
-
+  
   # Assign a default management_endpoint if this was not provided
-  if(is.null(management_endpoint)){
+  if(missing(management_endpoint) || is.null(management_endpoint)){
     management_endpoint <- default_api[["management_endpoint"]]
   }
   
-  # test to see if api_endpoint is a valid url
+  # Test to see if api_endpoint is a valid url
   resp <- tryCatch(
     suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
     error = function(e)e
   )
   if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
   
-  # test to see if management_endpoint is a valid url
+  # Test to see if management_endpoint is a valid url
   resp <- tryCatch(
     suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
     error = function(e)e

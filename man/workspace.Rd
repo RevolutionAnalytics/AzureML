@@ -5,7 +5,7 @@
 \title{Create a reference to an AzureML Studio workspace.}
 \usage{
 workspace(id, auth, api_endpoint, management_endpoint,
-  config = options(AzureML.config))
+  config = getOption("AzureML.config"))
 }
 \arguments{
 \item{id}{Optional workspace id from ML studio -> settings -> WORKSPACE ID}
