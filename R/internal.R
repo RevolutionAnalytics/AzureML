@@ -77,27 +77,32 @@ urlconcat <- function(a,b)
 get_datasets <- function(ws)
 {
   h = new_handle()
-  handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id), handle=h)
-  on.exit(close(r))
-  x = tryCatch(fromJSON(readLines(r, warn=FALSE)), error=invisible)
+  handle_setheaders(h, .list = ws$.headers)
+  uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+  if(inherits(r, "error")){
+    msg <- paste("No results returned from datasets(ws).", 
+                 "Please check your workspace credentials and api_endpoint are correct.")
+    stop(msg)
+  }
+  x <- fromJSON(rawToChar(r$content))
   if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
     class(x) = c("Datasets", "data.frame")
     return(x)
   }
   # Use strict variable name matching to look up data
-  d = x[,"DownloadLocation"]
-  x$DownloadLocation = paste(d[,"BaseUri"], 
-                             d[,"Location"],
-                             d[,"AccessCredential"], sep="")
+  d = x[, "DownloadLocation"]
+  x$DownloadLocation = paste0(d[, "BaseUri"], 
+                              d[, "Location"],
+                              d[, "AccessCredential"])
   d = x[,"VisualizeEndPoint"]
-  x$VisualizeEndPoint = paste(d[,"BaseUri"], 
-                              d[,"AccessCredential"], sep="")
+  x$VisualizeEndPoint = paste0(d[, "BaseUri"], 
+                               d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
-  x$SchemaEndPoint = paste(d[,"BaseUri"], 
-                           d[,"Location"],
-                           d[,"AccessCredential"], sep="")
+  x$SchemaEndPoint = paste0(d[, "BaseUri"], 
+                           d[, "Location"],
+                           d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
@@ -158,18 +163,18 @@ get_dataset <- function(x, h, quote = "\"", ...)
   if(tolower(x$DataTypeId) == "zip") conn = "rb"
   uri = curl(x$DownloadLocation, handle=h, open=conn)
   on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
-
-   # Existence of DataTypeId, DowloadLocation guaranteed by caller
-   switch(tolower(x$DataTypeId),
-     arff = read.arff(uri),
-     plaintext = paste(readLines(uri, warn=FALSE), collapse="\n"),
-     generictsvnoheader = read.table(uri, sep="\t", header=FALSE, quote, ...),
-     generictsv = read.table(uri, sep="\t", header=TRUE, quote, ...),
-     genericcsvnoheader = read.table(uri, sep=",", header=FALSE, quote, ...),
-     genericcsv = read.table(uri, sep=",", header=TRUE, quote, ...),
-     zip = readBin(uri, what="raw", n=x$Size, ...),
-     stop("unsupported data type: '",x$DataTypeId,"'")
-   )
+  
+  # Existence of DataTypeId, DowloadLocation guaranteed by caller
+  switch(tolower(x$DataTypeId),
+         arff = read.arff(uri),
+         plaintext = paste(readLines(uri, warn=FALSE), collapse="\n"),
+         generictsvnoheader = read.table(uri, sep="\t", header=FALSE, quote, ...),
+         generictsv = read.table(uri, sep="\t", header=TRUE, quote, ...),
+         genericcsvnoheader = read.table(uri, sep=",", header=FALSE, quote, ...),
+         genericcsv = read.table(uri, sep=",", header=TRUE, quote, ...),
+         zip = readBin(uri, what="raw", n=x$Size, ...),
+         stop("unsupported data type: '",x$DataTypeId,"'")
+  )
 }
 
 
@@ -205,7 +210,7 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
   setwd(d)
   # save export environment to an RData file
   save(exportenv, file="env.RData")
-
+  
   # Package up dependencies
   if(!is.null(packages))
   {
@@ -214,9 +219,9 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
     p = paste(d,"packages",sep="/")
     tryCatch(dir.create(p), warning=function(e) stop(e))
     tryCatch(makeRepo(pkgDep(packages, repos=re, suggests=FALSE), path=p, re, type="win.binary", Rversion=version),
-      error=function(e) stop(e))
+             error=function(e) stop(e))
   }
-
+  
   z = try({
     zip(zipfile="export.zip", files=dir(), flags = "-r9Xq")
   })

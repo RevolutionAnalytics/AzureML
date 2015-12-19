@@ -5,7 +5,7 @@
 \title{Create a reference to an AzureML Studio workspace.}
 \usage{
 workspace(id, auth, api_endpoint, management_endpoint,
-  config = "~/.azureml/settings.json")
+  config = getOption("AzureML.config"))
 }
 \arguments{
 \item{id}{Optional workspace id from ML studio -> settings -> WORKSPACE ID}
@@ -16,7 +16,7 @@ workspace(id, auth, api_endpoint, management_endpoint,
 
 \item{management_endpoint}{Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.}
 
-\item{config}{Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}.}
+\item{config}{Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}}
 }
 \value{
 An R environment of class \code{Workspace} containing at least the following objects:

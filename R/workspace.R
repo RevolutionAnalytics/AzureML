@@ -25,17 +25,20 @@
 default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
   defaults <- list(
     
+    "https://studio.azureml.net" = list(
+      api_endpoint        = "https://studioapi.azureml.net",
+      management_endpoint = "https://management.azureml.net",
+      studioapi           = "https://studioapi.azureml.net/api"
+    ), 
     "https://studioapi.azureml.net" = list(
       api_endpoint        = "https://studioapi.azureml.net",
       management_endpoint = "https://management.azureml.net",
       studioapi           = "https://studioapi.azureml.net/api"
-      
-    ), "https://studioapi.azureml-int.net" = list(
-      
+    ),
+    "https://studioapi.azureml-int.net" = list(
       api_endpoint        = "https://studio.azureml-int.net",
       management_endpoint = "https://management.azureml-int.net",
       studioapi           = "https://studioapi.azureml-int.net/api"
-      
     )
   )
   
@@ -55,7 +58,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS
 #' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.
 #' @param management_endpoint Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.
-#' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}.
+#' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}
 #'
 #' @note If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
 #'  {"workspace":{
@@ -82,53 +85,69 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 workspace <- function(id, auth, api_endpoint, management_endpoint,
-                      config="~/.azureml/settings.json")
+                      config = getOption("AzureML.config"))
 {
-  if(missing(id) || missing(auth) || missing(api_endpoint) || missing(management_endpoint))
-  {
-    if(!file.exists(config))  stop(sprintf("config file is missing: '%s'", config))
-    settings = tryCatch(fromJSON(file(config)),
-                        error = function(e)e
-    )
-    if(inherits(settings, "error")) {
-      msg <- sprintf("Your config file contains invalid json", config)
-      msg <- paste(msg, settings$message, sep = "\n\n")
-      stop(msg, call. = FALSE)
-    }
+  
+  
+  # If workspace_id or auth are missing, read from config. Stop if unavailable.
+  if(missing(id) || missing(auth)) {
+    x <- validate.AzureML.config(config, stopOnError = TRUE)
+    if(inherits(x, "error")) stop(x$message)
+    settings <- read.AzureML.config(config)
+    
     if(missing(id)){
       id <- settings[["workspace"]][["id"]]
     }
     if(missing(auth)){
       auth <- settings[["workspace"]][["authorization_token"]]
     }
-    if(missing(api_endpoint)){
-      api_endpoint <- settings[["workspace"]][["api_endpoint"]]
-    }
-    if(missing(management_endpoint)){
-      management_endpoint <- settings[["workspace"]][["management_endpoint"]]
+  }
+  
+  # If workspace_id or auth are missing, read from config, if available.
+  if(missing(api_endpoint) || missing(management_endpoint)){
+    x <- validate.AzureML.config(config, stopOnError = FALSE)
+    if(!inherits(x, "error")){
+      settings <- read.AzureML.config(config)
+      
+      if(missing(api_endpoint)){
+        api_endpoint <- settings[["workspace"]][["api_endpoint"]]
+      }
+      if(missing(management_endpoint)){
+        management_endpoint <- settings[["workspace"]][["management_endpoint"]]
+      }
     }
   }
-  default_api <- if(is.null(api_endpoint)) {
-     default_api()
+  
+  # Assign a default api_endpoint if this was not provided
+  default_api <- if(missing(api_endpoint) || is.null(api_endpoint)) {
+    default_api()
   } else {
     default_api(api_endpoint)
   }
-  if(is.null(api_endpoint)) api_endpoint <- default_api[["api_endpoint"]]
-  if(is.null(management_endpoint)) management_endpoint <- default_api[["management_endpoint"]]
+  if(missing(api_endpoint) || is.null(api_endpoint)){
+    api_endpoint <- default_api[["api_endpoint"]]
+  }
   
-  # test to see if api_endpoint is a valid url
+  # Assign a default management_endpoint if this was not provided
+  if(missing(management_endpoint) || is.null(management_endpoint)){
+    management_endpoint <- default_api[["management_endpoint"]]
+  }
+  
+  # Test to see if api_endpoint is a valid url
   resp <- tryCatch(
     suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
     error = function(e)e
   )
   if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
   
-  # test to see if api_endpoint is a valid url
+  # Test to see if management_endpoint is a valid url
   resp <- tryCatch(
     suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
     error = function(e)e
   )
   if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  
+  # It seems all checks passed. Now construct the Workspace object
   
   e <- new.env()
   class(e) <- "Workspace"
@@ -143,9 +162,9 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
     `x-ms-client-session-id` = "DefaultSession",
     `x-ms-metaanalytics-authorizationtoken` = auth
   )
-  delayedAssign("experiments", get_experiments(e), assign.env=e)
-  delayedAssign("datasets", get_datasets(e), assign.env=e)
-  delayedAssign("services", services(e), assign.env=e)
+  delayedAssign("experiments", get_experiments(e), assign.env = e)
+  delayedAssign("datasets", get_datasets(e), assign.env = e)
+  delayedAssign("services", services(e), assign.env = e)
   e
 }
 
