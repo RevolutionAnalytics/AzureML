@@ -47,22 +47,29 @@ read.AzureML.config <- function(config = getOption("AzureML.config")){
 #' Writes settings to configuration file.
 #' 
 #' @inheritParams workspace
+#' @param file either a character string naming a file or a connection open for writing. "" indicates output to the console.
+#' 
 #' @rdname read.AzureML.config
 #' 
 #' @export
 #' @seealso write.AzureML.config
 #' @seealso workspace
-write.AzureML.config <- function(id = NULL, authorization_token = NULL, 
-                           api_endpoint = NULL, management_endpoint = NULL, file){
+write.AzureML.config <- function(id = NULL, auth = NULL, 
+                           api_endpoint = NULL, 
+                           management_endpoint = NULL, 
+                           file = ""){
+  # Construct list
   x <- list(
     id = id, 
-    authorization_token = authorization_token, 
+    authorization_token = auth, 
     api_endpoint = api_endpoint, 
     management_endpoint = management_endpoint
   )
+  # Remove null values
   conf <- list(
     workspace = x[!sapply(x, is.null)]
   )
+  # Convert to JSON
   js <- jsonlite::toJSON(conf, pretty = TRUE)
   if(!missing(file) && !is.null(file)) {
     writeLines(js, con = file)
