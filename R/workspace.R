@@ -25,17 +25,20 @@
 default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
   defaults <- list(
     
+    "https://studio.azureml.net" = list(
+      api_endpoint        = "https://studioapi.azureml.net",
+      management_endpoint = "https://management.azureml.net",
+      studioapi           = "https://studioapi.azureml.net/api"
+    ), 
     "https://studioapi.azureml.net" = list(
       api_endpoint        = "https://studioapi.azureml.net",
       management_endpoint = "https://management.azureml.net",
       studioapi           = "https://studioapi.azureml.net/api"
-      
-    ), "https://studioapi.azureml-int.net" = list(
-      
+    ),
+    "https://studioapi.azureml-int.net" = list(
       api_endpoint        = "https://studio.azureml-int.net",
       management_endpoint = "https://management.azureml-int.net",
       studioapi           = "https://studioapi.azureml-int.net/api"
-      
     )
   )
   
