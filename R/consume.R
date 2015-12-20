@@ -214,20 +214,30 @@ discoverSchema <- function(helpURL, scheme = "https",
   for(i in 1:length(inputExample)) {
     if(is.character(inputExample[[i]])) {
       if(firstWarning) {
-        cat("Warning! The sample input does not contain sample values for characters.",
-            "Please input valid strings for these fields", "\n")
+        msg <- paste("The sample input does not contain sample values for characters.",
+                     "Please input valid strings for these fields:", 
+                     sep = "\n")
+        message(msg)
       }
-      cat("   ", names(inputExample)[[i]], "\n")
+      message(" - ", names(inputExample)[[i]])
       firstWarning = FALSE
     }
   }
   
   #Returns what was discovered in the form of a list
-  list(requestUrl = requestUrl, 
+  z <- list(requestUrl = requestUrl, 
        columnNames = columnNames, 
        sampleInput = inputExample, 
        inputSchema = inputSchema
   )
+  class(z) <- "discoverSchema"
+  z
+}
+
+#' @export
+print.discoverSchema <- function(x, ...){
+  str(x, ...)
+  invisible()
 }
 
 

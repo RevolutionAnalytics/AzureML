@@ -77,6 +77,11 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
   )
   on.exit(close(r))
   ans <- tryCatch(fromJSON(readLines(r, warn = FALSE)), error = function(e) NULL)
+  if(inherits(ans, "error") || is.null(ans)) {
+    msg <- "service not found"
+    warning(msg, immediate. = TRUE)
+    return(simpleError(msg))
+  }
   attr(ans, "workspace") = ws
   if(!missing(name)) {
     ans = ans[ans$Name == name,]
