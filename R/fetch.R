@@ -75,10 +75,12 @@ try_fetch <- function(uri, handle,
     if(!(r$status_code %in% retry_on)) return(r)
     wait_time = delay * (2 ^ collisions - 1)
     wait_time <- runif(1, min = 0.001, max = wait_time)
+    printed_message <- FALSE
     if(wait_time > no_message_threshold){
       message(sprintf("Request failed with status %s. Waiting %3.1f seconds before retry", 
                       r$status_code,
                       wait_time))
+      printed_message <- TRUE
       wait_time <- ceiling(wait_time)
       for(i in 1:wait_time){
         message(".", appendLF = FALSE)
@@ -89,7 +91,7 @@ try_fetch <- function(uri, handle,
     }
     collisions = collisions + 1
   }
-  message("\n")
+  if(printed_message) message("\n")
   validate_response(r)
   r
 }
