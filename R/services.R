@@ -76,12 +76,12 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
   
   uri <- sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
-#   if(inherits(r, "error")){
-#     msg <- paste("No results returned from datasets(ws).", 
-#                  "Please check your workspace credentials and api_endpoint are correct.")
-#     stop(msg)
-#   }
-
+  #   if(inherits(r, "error")){
+  #     msg <- paste("No results returned from datasets(ws).", 
+  #                  "Please check your workspace credentials and api_endpoint are correct.")
+  #     stop(msg)
+  #   }
+  
   ans <- fromJSON(rawToChar(r$content))
   if(inherits(ans, "error") || is.null(ans)) {
     msg <- "service not found"
@@ -177,15 +177,15 @@ endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoin
                  service_id, 
                  endpoint_id
   )
-  r = curl(uri, handle=h)
-  on.exit(close(r))
-  ans = fromJSON(readLines(r, warn=FALSE))
+  
+  r <- try_fetch(uri, handle = h)
+  ans <- fromJSON(rawToChar(r$content))
+  
+  
   # Adjust the returned API location for completeness:
-  if(length(ans)>0)
-  {
-    ans$ApiLocation = paste(ans$ApiLocation, 
-                            "/execute?api-version=2.0&details=true&format=swagger", 
-                            sep="")
+  if(length(ans) > 0) {
+    suffix <- "/execute?api-version=2.0&details=true&format=swagger"
+    ans$ApiLocation <- paste0(ans$ApiLocation, suffix)
   }
   class(ans) <- c("Endpoint", "data.frame")
   ans
@@ -194,6 +194,7 @@ endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoin
 #' @rdname endpoints
 #' @export
 getEndpoints = endpoints
+
 
 #' Display AzureML Web Service Endpoint Help Screens
 #'
@@ -208,7 +209,7 @@ getEndpoints = endpoints
 #' @examples
 #' \dontrun{
 #' workspace_id <- ""          # Your AzureML workspace id
-#' authorization_token <- ""   # Your AsureML authorization token
+#' authorization_token <- ""   # Your AzureML authorization token
 #'
 #' ws <- workspace(
 #'   id = workspace_id,
