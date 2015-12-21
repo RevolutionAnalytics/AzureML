@@ -228,3 +228,39 @@ delete.datasets <- function(ws, name, host){
   refresh(ws, "datasets")
   ans
 }
+
+#' Update an existing R data frame in an AzureML workspace.
+#'
+#' Update an existing R data frame to an AzureML workspace using the \code{GenericTSV} format.
+#' 
+#' @inheritParams refresh
+#' @param x An R data frame object
+#' @param name A character name for an existing AzureML dataset
+#' @param description An optional character description of the dataset, description for the existing dataset will be used if none provided here
+#' @param family_id An optional AzureML family identifier, family identifier for the existing dataset will be used if none provided here
+#' @param ... Optional additional options passed to \code{write.table}
+#' @note The additional \code{\link[utils]{write.table}} options may not include \code{sep} or \code{row.names} or \code{file}, but any other options are accepted.
+#' 
+#' @return A single-row data frame of "Datasets" class that corresponds to the updated object now available in ws$datasets.
+#' @importFrom curl curl_escape new_handle handle_setheaders handle_reset handle_setopt curl_fetch_memory
+#' @importFrom jsonlite fromJSON
+#' @export
+#' @family dataset functions
+#' @example inst/examples/example_update.R
+
+update.dataset <- function(x, ws, name, description = "", family_id="", ...)
+{
+  # use description and family_id from the existing dataset if no new values are provided
+  if (description == "") description = ws$datasets$Description[ws$datasets$Name == name]
+  if (family_id == "") family_id = ws$datasets$FamilyId[ws$datasets$Name == name]
+  
+  # delete existing data and save status
+  dr <- delete.datasets(ws, name)
+  
+  # take care of exceptions from delete: dataset does not exist or it's Microsoft dataset
+  if (dim(dr)[1] == 0) stop("The dataset named '", name, "' does not exist")
+  else if (dr$Deleted == FALSE) stop("Update not allowed for Microsoft default datasets") 
+  
+  # upload
+  upload.dataset(x, ws, name, description, family_id)
+}
