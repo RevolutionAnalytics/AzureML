@@ -59,6 +59,8 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.
 #' @param management_endpoint Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.
 #' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}
+#' @param, ... ignored
+#' @param .validate If TRUE
 #'
 #' @note If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
 #'  {"workspace":{
@@ -85,7 +87,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 workspace <- function(id, auth, api_endpoint, management_endpoint,
-                      config = getOption("AzureML.config"))
+                      config = getOption("AzureML.config"), ..., .validate = TRUE)
 {
   
   
@@ -165,8 +167,15 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   delayedAssign("experiments", get_experiments(e), assign.env = e)
   delayedAssign("datasets", get_datasets(e), assign.env = e)
   delayedAssign("services", services(e), assign.env = e)
+  
+  if(.validate){
+    d <- get_datasets(e)
+    e$datasets <- d
+  }
+  
   e
 }
+
 
 #'  Refresh data in an AzureML workspace object.
 #'
