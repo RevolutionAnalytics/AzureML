@@ -32,7 +32,7 @@ if(file.exists(settingsFile))
       getDetailsFromUrl(url)
     )
     
-    capture.output(schema <- discoverSchema(schemaUrl))
+    schema <- discoverSchema(schemaUrl)
     schema$sampleInput$Gender <- "male"
     schema$sampleInput$PortEmbarkation <- "C"
     
@@ -107,7 +107,10 @@ if(file.exists(settingsFile))
   deleteWebService(ws, timestamped_name)
   
   test_that("Discovery function handles error correctly", {
-    expect_warning(services(ws, "foo-does-not-exist"))
+    expect_error(
+      services(ws, "foo-does-not-exist"), 
+      "Invalid web service ID provided. Verify the web service ID is correct and try again."
+    )
   })
   
 } else

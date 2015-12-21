@@ -64,42 +64,40 @@ discoverSchema <- function(helpURL, scheme = "https",
   endpointId = getDetailsFromUrl(helpURL)[3]
   # Construct swagger document URL using parameters
   # Use paste method without separator
-  swaggerURL = paste0(scheme,"://", host, 
-                      "/workspaces/", workspaceId, 
-                      "/services/", endpointId,
-                      "/swagger.json")
+  uri = paste0(scheme,"://", host, 
+               "/workspaces/", workspaceId, 
+               "/services/", endpointId,
+               "/swagger.json")
   
   # parses the content and gets the swagger document
-  r = curl(swaggerURL)
-  on.exit(close(r))
-  
-  r <- try_fetch(r)
-  swagger = fromJSON(readLines(r,warn=FALSE))
+  r <- try_fetch(uri, handle = new_handle())
+  swagger <- fromJSON(rawToChar(r$content))
   
   # Accesses the input schema in the swagger document
-  inputSchema = swagger$definition$input1Item
-  #Accesses the example in the swagger document and converts it to JSON
-  exampleJson = toJSON(swagger$definitions$ExecutionRequest$example)
+  inputSchema <- swagger$definition$input1Item
   
-  #Accesses a single specific JSON object and formats it to be a request inputted as a list in R
-  inputExample = as.list((fromJSON((exampleJson)))$Inputs$input1)
+  # Accesses the example in the swagger document and converts it to JSON
+  exampleJson <- toJSON(swagger$definitions$ExecutionRequest$example)
   
-  for(i in 1:length(inputExample)) {
-    if(typeof(inputExample[[i]]) == "character") {
-      inputExample[i] = "Please input valid String"
-    }
-  }
+  # Accesses a single specific JSON object and formats it to be a request inputted as a list in R
+  inputExample <- as.list((fromJSON((exampleJson)))$Inputs$input1)
+  idx <- sapply(inputExample, class, USE.NAMES = FALSE) == "character"
+  inputExample[idx] <- "Please input valid String"
+  
   # Accesses the names of the columns in the example
   # and stores it in a list of column names
-  columnNames = list()
-  for(i in 1:length(inputExample)) {
-    columnNames[[i]] = names(inputExample)[[i]]
-  }
-  # Uses multiple nested loops to access the various paths in the 
+#   columnNames <- vector("list", length = length(inputExample))
+#   columnNames <- list()
+#   for(i in seq_along(inputExample)) {
+#     columnNames[[i]] = names(inputExample)[i]
+#   }
+  columnNames <- lapply(seq_along(inputExample), function(i)names(inputExample[i]))
+
+    # Uses multiple nested loops to access the various paths in the 
   # swagger document and find the execution path
   foundExecPath = FALSE
   pathNo = 0
-  execPathNo= -1
+  execPathNo = -1
   for(execPath in swagger$paths) {
     pathNo = pathNo + 1
     for(operationpath in execPath) {
@@ -122,21 +120,20 @@ discoverSchema <- function(helpURL, scheme = "https",
   }
   
   # Stores the execution path
-  if(foundExecPath) {
-    executePath = names(swagger$paths)[[execPathNo]]
-  } else{
-    executePath = "Path not found"
-  }
+  executePath <- if(foundExecPath) names(swagger$paths)[[execPathNo]] 
+  else "Path not found"
+  
   # Constructs the request URL with the parameters as well as execution path found. 
   # The separator is set to an empty string
-  requestUrl = paste0(scheme,"://", host, 
-                      "/workspaces/", workspaceId, 
-                      "/services/", endpointId, 
-                      executePath)
+  requestUrl <- paste0(scheme,"://", host, 
+                       "/workspaces/", workspaceId, 
+                       "/services/", endpointId, 
+                       executePath)
   
   # Access the HTTP method type e.g. GET/ POST and constructs an example request
-  httpMethod = toupper(names(swagger$paths[[2]]))
-  httpRequest = paste(httpMethod,requestUrl)
+  httpMethod <- toupper(names(swagger$paths[[2]]))
+  httpRequest <- paste(httpMethod,requestUrl)
+  
   # Warns user of characters and urges them to enter valid strings for them
   firstWarning = TRUE
   for(i in 1:length(inputExample)) {
