@@ -52,12 +52,17 @@ download.datasets <- function(source, name, ...)
   if(! missing(name) && is.Workspace(source)) datasets = datasets(source)
   # Coerce to data frame, if for example presented as a list.
   if(is.null(dim(datasets))) datasets = as.data.frame(datasets)
-  if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets)))
-  {
+  if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets))) {
     stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
   }
   # check for dataset name filter
-  if(!missing(name)) datasets = datasets[datasets$Name %in% name, ]
+  if(!missing(name)){
+    if(!name %in% datasets[["Name"]]){
+      msg <- "You specified a dataset name that is not in the workspace"
+      stop(msg)
+    }
+    datasets <- datasets[datasets$Name %in% name, ]
+  } 
   ans = lapply(1:nrow(datasets), 
                function(j) get_dataset(datasets[j,], ...)
   )
