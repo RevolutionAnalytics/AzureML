@@ -24,7 +24,7 @@
 #' Download one or more datasets from an AzureML workspace.
 #'
 #' Download one or more datasets from an AzureML workspace into local R data frame or raw binary objects.
-#' @param source Either one or more rows from a \code{\link{datasets}} data frame in a workspace,
+#' @param dataset Either one or more rows from a \code{\link{datasets}} data frame in a workspace,
 #'  or just a workspace from \code{\link{workspace}}. When \code{source} is a workspace, then
 #'  the \code{name} parameter must also be specified.
 #' @param name Optional character vector of one or more dataset names to filter the \code{datasets}
@@ -46,10 +46,10 @@
 #' \code{\link{download.intermediate.dataset}}
 #' @export
 #' @example inst/examples/example_download.R
-download.datasets <- function(source, name, ...)
+download.datasets <- function(dataset, name, ...)
 {
-  datasets = source
-  if(! missing(name) && is.Workspace(source)) datasets = datasets(source)
+  # datasets = source
+  if(! missing(name) && is.Workspace(dataset)) datasets = datasets(dataset)
   # Coerce to data frame, if for example presented as a list.
   if(is.null(dim(datasets))) datasets = as.data.frame(datasets)
   if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets))) {
@@ -57,7 +57,7 @@ download.datasets <- function(source, name, ...)
   }
   # check for dataset name filter
   if(!missing(name)){
-    if(!name %in% datasets[["Name"]]){
+    if(inherits(name, "character") && !name %in% datasets[["Name"]]){
       msg <- "You specified a dataset name that is not in the workspace"
       stop(msg)
     }
