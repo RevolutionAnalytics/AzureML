@@ -62,26 +62,33 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
 {
   stopIfNotWorkspace(ws)
   h <- new_handle()
-  headers <- list(`User-Agent`="R",
-                 `Content-Type`="application/json;charset=UTF8",
-                 `Authorization`=sprintf("Bearer %s",ws$.auth),
-                 `Accept`="application/json")
-  handle_setheaders(h, .list=headers)
-  
-  if(missing(service_id)) service_id = ""
-  else service_id = sprintf("/%s", service_id)
-  
-  r <- curl(
-    sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
-    handle = h
+  headers <- c(ws$.headers,
+               `Authorization` = sprintf("Bearer %s",ws$.auth),
+               `Accept` = "application/json"
   )
-  on.exit(close(r))
-  ans <- tryCatch(fromJSON(readLines(r, warn = FALSE)), error = function(e) NULL)
+  handle_setheaders(h, .list = headers)
+  
+  if(missing(service_id)) {
+    service_id <- ""
+  } else {
+    service_id <- sprintf("/%s", service_id)
+  }
+  
+  uri <- sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+#   if(inherits(r, "error")){
+#     msg <- paste("No results returned from datasets(ws).", 
+#                  "Please check your workspace credentials and api_endpoint are correct.")
+#     stop(msg)
+#   }
+
+  ans <- fromJSON(rawToChar(r$content))
   if(inherits(ans, "error") || is.null(ans)) {
     msg <- "service not found"
     warning(msg, immediate. = TRUE)
     return(simpleError(msg))
   }
+  
   attr(ans, "workspace") = ws
   if(!missing(name)) {
     ans = ans[ans$Name == name,]
