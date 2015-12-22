@@ -45,6 +45,7 @@
 #' @seealso \code{\link{workspace}}, \code{\link{datasets}}, \code{\link{read.table}},
 #' \code{\link{download.intermediate.dataset}}
 #' @export
+#' @example inst/examples/preamble.R
 #' @example inst/examples/example_download.R
 download.datasets <- function(dataset, name, ...)
 {
