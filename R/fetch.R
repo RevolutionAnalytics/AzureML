@@ -26,9 +26,13 @@ date_origin = "1970-1-1"
 
 
 validate_response <- function(r){
-  if(r$status_code != 200){
+  if(r$status_code >= 400){
+    # Some functions return response in JSON format, others not
     body <- tryCatch(fromJSON(rawToChar(r$content)), error = function(e)e)
-    if(!inherits(body, "error")){
+    response_is_json <- !inherits(body, "error")
+    
+    if(response_is_json){
+      # If response is JSON, then we have a list wiwh status code and error message
       msg <- paste(
         "AzureML returns error code:",
         sprintf("HTTP status code : %s", r$status_code),
@@ -38,13 +42,20 @@ validate_response <- function(r){
         sep = "\n"
       )
     } else {
+      # Response is plain text, with not list structure
+      body <- rawToChar(r$content)
       msg <- switch(
         as.character(r$status_code),
         "400" = "400 (Bad request). Please check your workspace ID, auth and api_endpoint.",
         "401" = "401 (Unauthorised).  Please check your workspace ID and auth codes.",
         "403" = "403 (Forbidden).",
-        sprintf("Request failed with response %s", r$status_code)
+        paste(
+          "AzureML returns error code:",
+          sprintf("HTTP status code : %s", r$status_code),
+          sep = "\n"
+        )
       )
+      msg <- paste(msg, body, sep = "\n")
     }
     stop(msg, call. = FALSE)
   }
@@ -72,7 +83,10 @@ try_fetch <- function(uri, handle,
   collisions = 1
   while(collisions < tries) {
     r = curl_fetch_memory(uri, handle)
-    if(!(r$status_code %in% retry_on)) return(r)
+    if(!(r$status_code %in% retry_on)) {
+      validate_response(r)
+      return(r)
+    }
     wait_time = delay * (2 ^ collisions - 1)
     wait_time <- runif(1, min = 0.001, max = wait_time)
     printed_message <- FALSE
