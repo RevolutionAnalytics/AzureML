@@ -86,6 +86,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' @family publishing functions
 #' @seealso \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
 #'          \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
+#' @example inst/examples/example_workspace.R
 workspace <- function(id, auth, api_endpoint, management_endpoint,
                       config = getOption("AzureML.config"), ..., .validate = TRUE)
 {
