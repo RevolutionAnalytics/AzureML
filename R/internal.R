@@ -21,45 +21,6 @@
 # THE SOFTWARE.
 
 
-# Used in experiment date parsing
-date_origin = "1970-1-1"
-
-#' Try to fetch a uri/handle, retrying on certain returned status codes after a timeout
-#' @param uri the uri to fetch
-#' @param handle a curl handle
-#' @param retry_on HTTP status codes that result in retry
-#' @param tries number of tries before failing
-#' @param delay in seconds between retries, subject to exponent
-#' @param exponent increment each successive delay by delay^exponent
-#' @return the result of curl_fetch_memory(uri, handle)
-try_fetch <- function(uri, handle, 
-                      retry_on = c(400, 401, 440, 503, 504, 509), 
-                      tries = 6, 
-                      delay = 1, exponent = 2)
-{
-  collisions = 1
-  while(collisions < tries) {
-    r = curl_fetch_memory(uri, handle)
-    if(!(r$status_code %in% retry_on)) return(r)
-    wait_time = delay * (2 ^ collisions - 1)
-    wait_time <- ceiling(runif(1, min = 0.001, max = wait_time))
-    message(sprintf("Request failed with status %s. Waiting %s seconds before retry", 
-                    r$status_code,
-                    wait_time))
-    for(i in 1:wait_time){
-      message(".", appendLF = FALSE)
-      Sys.sleep(1)
-    }
-    message("\n")
-    collisions = collisions + 1
-  }
-  r
-}
-
-# urlAPIinsert <- function(x, text = "api"){
-#   gsub("(http.*?)(\\..*)", sprintf("\\1%s\\2", text), x)
-# }
-
 urlconcat <- function(a,b)
 {
   ans = paste(gsub("/$", "", a), b, sep="/")
@@ -101,8 +62,8 @@ get_datasets <- function(ws)
                                d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
-                           d[, "Location"],
-                           d[, "AccessCredential"])
+                            d[, "Location"],
+                            d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
@@ -126,12 +87,13 @@ convertToDate <- function(x){
 #' @keywords Internal
 get_experiments <- function(ws)
 {
-  h = new_handle()
-  handle_setheaders(h, .list=ws$.headers)
-  r = curl(sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id), handle=h)
-  on.exit(close(r))
-  x = fromJSON(readLines(r, warn=FALSE))
-  # Use strict variable name matching to look up data
+  h <- new_handle()
+  handle_setheaders(h, .list = ws$.headers)
+  
+  uri <- sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+  
+  x <- fromJSON(rawToChar(r$content))
   x = cbind(x, x[,"Status"])
   
   x$Status = c()
@@ -156,24 +118,25 @@ get_dataset <- function(x, h, quote = "\"", ...)
 {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
-  opts = options(stringsAsFactors=FALSE)
+  opts = options(stringsAsFactors = FALSE)
   on.exit(options(opts))
   if(missing(h)) h = new_handle()
   conn = "r"
   if(tolower(x$DataTypeId) == "zip") conn = "rb"
-  uri = curl(x$DownloadLocation, handle=h, open=conn)
-  on.exit(tryCatch(close(uri), error=invisible), add=TRUE)
+  uri = curl(x$DownloadLocation, handle = h, open = conn)
+  on.exit(tryCatch(close(uri), error = invisible), add = TRUE)
   
   # Existence of DataTypeId, DowloadLocation guaranteed by caller
-  switch(tolower(x$DataTypeId),
-         arff = read.arff(uri),
-         plaintext = paste(readLines(uri, warn=FALSE), collapse="\n"),
-         generictsvnoheader = read.table(uri, sep="\t", header=FALSE, quote, ...),
-         generictsv = read.table(uri, sep="\t", header=TRUE, quote, ...),
-         genericcsvnoheader = read.table(uri, sep=",", header=FALSE, quote, ...),
-         genericcsv = read.table(uri, sep=",", header=TRUE, quote, ...),
-         zip = readBin(uri, what="raw", n=x$Size, ...),
-         stop("unsupported data type: '",x$DataTypeId,"'")
+  switch(
+    tolower(x$DataTypeId),
+    arff               = read.arff(uri),
+    plaintext          = paste(readLines(uri, warn = FALSE), collapse="\n"),
+    generictsvnoheader = read.table(uri, sep = "\t", header = FALSE, quote, ...),
+    generictsv         = read.table(uri, sep = "\t", header = TRUE, quote, ...),
+    genericcsvnoheader = read.table(uri, sep = ",", header = FALSE, quote, ...),
+    genericcsv         = read.table(uri, sep = ",", header = TRUE, quote, ...),
+    zip                = readBin(uri, what = "raw", n = x$Size, ...),
+    stop("unsupported data type: '",x$DataTypeId,"'")
   )
 }
 
@@ -181,7 +144,7 @@ get_dataset <- function(x, h, quote = "\"", ...)
 # Checks if zip is available on system.
 # Required for packageEnv()
 zipAvailable <- function(){
-  z = unname(Sys.which("zip"))
+  z <- unname(Sys.which("zip"))
   z != ""
 }
 
@@ -201,7 +164,7 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
 {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
-  d = tempfile(pattern="dir")
+  d <- tempfile(pattern="dir")
   on.exit(unlink(d, recursive=TRUE))
   tryCatch(dir.create(d), warning=function(e) stop(e))
   # zip, unfortunately a zip file is apparently an AzureML requirement.

@@ -2,6 +2,7 @@ if(interactive()) library("testthat")
 
 
 settingsFile <- AzureML.config.default
+workspace <- function(..., .validate = FALSE) AzureML::workspace(..., .validate = .validate)
 
 #  ------------------------------------------------------------------------
 
@@ -49,6 +50,29 @@ test_that("Can connect to workspace with no config file", {
   expect_equal({ws <- workspace("x", "y"); ls(ws)}, 
                c("datasets", "experiments", "id", "services"))
 })
+
+
+test_that("workspace() throws helpful 401 error with invalid id", {
+  # AzureML:::skip_if_missing_config(settingsFile)
+  
+  .catchError <- function(expr){
+    tryCatch(expr, error = function(e)e)$message
+  }
+  .expect_error_in <- function(object, msgs){
+    if(missing(object) || is.null(object)) return(FALSE)
+    ptn <- sprintf("[%s]", paste(sprintf("(%s)", msgs), collapse = "|"))
+    grepl(ptn, object)
+  }
+  
+  m <- .catchError(workspace(id = "x", auth = "y", .validate = TRUE))
+  msg <- c("invalid workspaceId", 
+           "401 (Unauthorised).  Please check your workspace ID and auth codes."
+  )
+  
+  .expect_error_in(m, msg = msg)
+  
+})
+
 
 
 

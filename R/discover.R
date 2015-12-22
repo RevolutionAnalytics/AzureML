@@ -21,232 +21,146 @@
 # THE SOFTWARE.
 
 
-#' List Available Web Services.
+#' Helper function to extract information from a help page URL
 #'
-#' Return a list of web services available to the specified Microsoft Azure Machine Learning workspace.
-#' The result is cached in the workspace environment similarly to datasets and experiments.
+#' Given a Microsoft Azure Machine Learning web service endpoint, extracts the endpoint ID and the workspace ID
 #'
-#' @inheritParams refresh
-#' @param service_id optional web service id. If supplied, return the web service information for just the specified service id. Leave undefined to return a data.frame of all services.
-#' @param name optional web service name. If supplied, return the web service information for services with matching names. Leave undefined to return all services.
-#' @param host the AzureML web services URI
-#' 
-#' @return Returns a data.frame with variables:
-#' \itemize{
-#'   \item Id
-#'   \item Name
-#'   \item Description
-#'   \item CreationTime
-#'   \item WorkspaceId
-#'   \item DefaultEndpointName
-#' }
-#' Each row of the returned data.frame corresponds to a service.
-#' @note \code{getWebServices} is an alias for \code{services}.
-#' @family discovery functions
-#' @examples
-#' \dontrun{
-#' workspace_id <- ""          # Your AzureML workspace id
-#' authorization_token <- ""   # Your AzureML authorization token
+#' @param url the URL of a help page
+#' @return a vector containing the workspace ID, webservices ID and endpoint ID
 #'
-#' ws <- workspace(
-#'   id = workspace_id,
-#'   auth = authorization_token
-#' )
-#'
-#' # Equivalent:
-#' services(ws)
-#' getWebServices(ws)
-#' }
-#' @export
-services <- function(ws, service_id, name, host = ws$.management_endpoint)
-{
-  stopIfNotWorkspace(ws)
-  h <- new_handle()
-  headers <- list(`User-Agent`="R",
-                 `Content-Type`="application/json;charset=UTF8",
-                 `Authorization`=sprintf("Bearer %s",ws$.auth),
-                 `Accept`="application/json")
-  handle_setheaders(h, .list=headers)
-  
-  if(missing(service_id)) service_id = ""
-  else service_id = sprintf("/%s", service_id)
-  
-  r <- curl(
-    sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id), 
-    handle = h
+#' @keywords internal
+getDetailsFromUrl <- function(url) {
+  ptn = ".*?/workspaces/([[:alnum:]]*)/webservices/([[:alnum:]]*)/endpoints/([[:alnum:]]*)/*.*$"
+  if(!grepl(ptn, url)) stop("Invalid url")
+  c(
+    gsub(ptn, "\\1", url),
+    gsub(ptn, "\\2", url),
+    gsub(ptn, "\\3", url)
+    
   )
-  on.exit(close(r))
-  ans <- tryCatch(fromJSON(readLines(r, warn = FALSE)), error = function(e) NULL)
-  attr(ans, "workspace") = ws
-  if(!missing(name)) {
-    ans = ans[ans$Name == name,]
-  }
-  if(is.null(ans)) ans = data.frame()
-  class(ans) = c("Service", "data.frame")
-  # Cache the result in the workspace
-  if(service_id == "") ws$services = ans
-  ans
 }
 
 
-#' @rdname services
-#' @export
-getWebServices <- services
-
-#' List AzureML Web Service Endpoints
+#' Discover web service schema.
 #'
-#' Return a list of web services endpoints for the specified web service id.
+#' Discover the expected input to a web service specified by a web service ID ng the workspace ID and web service ID, information specific to the consumption functions
 #'
-#' @inheritParams refresh
-#' @param host The AzureML web services URI
-#' @param service_id A web service Id, for example returned by \code{\link{services}}; alternatively a row from the services data frame identifying the service.
-#' @param endpoint_id An optional endpoint id. If supplied, return the endpoint information for just that id. Leave undefined to return a data.frame of all end points associated with the service.
+#' @param helpURL URL of the help page of the web service
+#' @param scheme the URI scheme
+#' @param host optional parameter that defaults to ussouthcentral.services.azureml.net
+#' @param api_version AzureML API version
 #' 
-#' @return Returns a data.frame with variables:
-#' \itemize{
-#'  \item Name
-#'  \item Description
-#'  \item CreationTime
-#'  \item WorkspaceId
-#'  \item WebServiceId
-#'  \item HelpLocation
-#'  \item PrimaryKey
-#'  \item SecondaryKey
-#'  \item ApiLocation
-#'  \item Version
-#'  \item MaxConcurrentCalls
-#'  \item DiagnosticsTraceLevel
-#'  \item ThrottleLevel
-#'  }
-#' Each row of the data.frame corresponds to an end point.
-#' @note \code{getEndPoints} is an alias for \code{endpoints}.
+#' @return List containing the request URL of the webservice, column names of the data, sample input as well as the input schema
+#'
+#' @seealso \code{\link{publishWebService}} \code{\link{consume}} \code{\link{workspace}} \code{link{services}} \code{\link{endpoints}} \code{\link{endpointHelp}}
+#' 
 #' @family discovery functions
-#' @examples
-#' \dontrun{
-#' workspace_id <- ""          # Your AzureML workspace id
-#' authorization_token <- ""   # Your AsureML authorization token
-#'
-#' ws <- workspace(
-#'   id = workspace_id,
-#'   auth = authorization_token
-#' )
-#'
-#' s <- services(ws)
-#' endpoints(ws, s$Id[1])
-#' 
-#' # Note that you can alternatively just use the entire row that
-#' # describes the service.
-#' endpoints(ws, s[1,])
-#'
-#' # Equivalent:
-#' getEndpoints(ws, s$Id[1])
-#' }
 #' @export
-endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoint)
+discoverSchema <- function(helpURL, scheme = "https", 
+                           host = "ussouthcentral.services.azureml.net", 
+                           api_version = "2.0")
 {
-  stopIfNotWorkspace(ws)
-  # if(is.list(service_id) || is.data.frame(service_id)) service_id = service_id$Id[1]
-  if(is.Service(service_id)) service_id = service_id$Id[1]
+  workspaceId = getDetailsFromUrl(helpURL)[1]
+  endpointId = getDetailsFromUrl(helpURL)[3]
+  # Construct swagger document URL using parameters
+  # Use paste method without separator
+  uri = paste0(scheme,"://", host, 
+               "/workspaces/", workspaceId, 
+               "/services/", endpointId,
+               "/swagger.json")
   
-  h = new_handle()
-  headers = list(`User-Agent`="R",
-                 `Content-Type`="application/json;charset=UTF8",
-                 `Authorization`=sprintf("Bearer %s", ws$.auth),
-                 `Accept`="application/json")
-  handle_setheaders(h, .list=headers)
+  # parses the content and gets the swagger document
+  r <- try_fetch(uri, handle = new_handle())
+  swagger <- fromJSON(rawToChar(r$content))
   
-  if(missing(endpoint_id)) endpoint_id = ""
-  else endpoint_id = sprintf("/%s", endpoint_id)
+  # Accesses the input schema in the swagger document
+  inputSchema <- swagger$definition$input1Item
   
-  # if(is.list(service_id)) service_id = service_id$Id[1]
-  uri <- sprintf("%s/workspaces/%s/webservices/%s/endpoints%s", 
-                 host, 
-                 ws$id, 
-                 service_id, 
-                 endpoint_id
-  )
-  r = curl(uri, handle=h)
-  on.exit(close(r))
-  ans = fromJSON(readLines(r, warn=FALSE))
-  # Adjust the returned API location for completeness:
-  if(length(ans)>0)
-  {
-    ans$ApiLocation = paste(ans$ApiLocation, 
-                            "/execute?api-version=2.0&details=true&format=swagger", 
-                            sep="")
+  # Accesses the example in the swagger document and converts it to JSON
+  exampleJson <- toJSON(swagger$definitions$ExecutionRequest$example)
+  
+  # Accesses a single specific JSON object and formats it to be a request inputted as a list in R
+  inputExample <- as.list((fromJSON((exampleJson)))$Inputs$input1)
+  idx <- sapply(inputExample, class, USE.NAMES = FALSE) == "character"
+  inputExample[idx] <- "Please input valid String"
+  
+  # Accesses the names of the columns in the example
+  # and stores it in a list of column names
+#   columnNames <- vector("list", length = length(inputExample))
+#   columnNames <- list()
+#   for(i in seq_along(inputExample)) {
+#     columnNames[[i]] = names(inputExample)[i]
+#   }
+  columnNames <- lapply(seq_along(inputExample), function(i)names(inputExample[i]))
+
+    # Uses multiple nested loops to access the various paths in the 
+  # swagger document and find the execution path
+  foundExecPath = FALSE
+  pathNo = 0
+  execPathNo = -1
+  for(execPath in swagger$paths) {
+    pathNo = pathNo + 1
+    for(operationpath in execPath) {
+      for(operation in operationpath) {
+        # Goes through the characteristcs in every operation e.g. operationId
+        for(charac in operation) {
+          # Finds the path in which the 
+          # operationId (characteristic of the path) == execute 
+          # and sets the execution path number
+          if(charac[1] == "execute")
+          {
+            #Sets found execution path to true
+            foundExecPath = TRUE
+            execPathNo = pathNo
+            break
+          }
+        }
+      }
+    }
   }
-  class(ans) <- c("Endpoint", "data.frame")
-  ans
+  
+  # Stores the execution path
+  executePath <- if(foundExecPath) names(swagger$paths)[[execPathNo]] 
+  else "Path not found"
+  
+  # Constructs the request URL with the parameters as well as execution path found. 
+  # The separator is set to an empty string
+  requestUrl <- paste0(scheme,"://", host, 
+                       "/workspaces/", workspaceId, 
+                       "/services/", endpointId, 
+                       executePath)
+  
+  # Access the HTTP method type e.g. GET/ POST and constructs an example request
+  httpMethod <- toupper(names(swagger$paths[[2]]))
+  httpRequest <- paste(httpMethod,requestUrl)
+  
+  # Warns user of characters and urges them to enter valid strings for them
+  firstWarning = TRUE
+  for(i in 1:length(inputExample)) {
+    if(is.character(inputExample[[i]])) {
+      if(firstWarning) {
+        msg <- paste("The sample input does not contain sample values for characters.",
+                     "Please input valid strings for these fields:", 
+                     sep = "\n")
+        message(msg)
+      }
+      message(" - ", names(inputExample)[[i]])
+      firstWarning = FALSE
+    }
+  }
+  
+  #Returns what was discovered in the form of a list
+  z <- list(requestUrl = requestUrl, 
+            columnNames = columnNames, 
+            sampleInput = inputExample, 
+            inputSchema = inputSchema
+  )
+  class(z) <- "discoverSchema"
+  z
 }
 
-#' @rdname endpoints
 #' @export
-getEndpoints = endpoints
-
-#' Display AzureML Web Service Endpoint Help Screens
-#'
-#' Download and return help for the specified AzureML web service endpoint.
-#'
-#' @param e an AzureML web service endpoint from the \code{\link{endpoints}} function.
-#' @param type the type of help to display.
-#' 
-#' @return The help text is returned. If \code{type="apidocument"}, then the help
-#' is returned as a list from a parsed JSON document describing the service.
-#' @family discovery functions
-#' @examples
-#' \dontrun{
-#' workspace_id <- ""          # Your AzureML workspace id
-#' authorization_token <- ""   # Your AsureML authorization token
-#'
-#' ws <- workspace(
-#'   id = workspace_id,
-#'   auth = authorization_token
-#' )
-#'
-#' s <- services(ws)
-#' e <- endpoints(ws, s[1,])
-#' endpointHelp(e[1,])
-#'
-#' Particularly useful way to see expected service input and output:
-#' endpointHelp(e[1,])$definitions
-#' 
-#' 
-#' }
-#' @export
-endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","update"))
-{
-  type = match.arg(type)
-  rsnip = FALSE
-  if(type=="r-snippet") {
-    type = "score"
-    rsnip = TRUE
-  }
-  uri = e$HelpLocation[1]
-  
-  # XXX This is totally nuts, and not documented, but help hosts vary depending on type.
-  # Arrghhh...
-  if(type == "apidocument"){
-    uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
-    uri = gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
-  }
-  
-  pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
-  con = curl(paste(uri, type, sep="/"))
-  text = paste(
-    gsub(
-      "&.?quot;", "'", 
-      gsub(pattern, "\\1", 
-           readLines(con, warn = FALSE)
-      )
-    ),
-    collapse="\n"
-  )
-  close(con)
-  if(rsnip) {
-    text = substr(text, 
-                  grepRaw("code-snippet-r", text) + nchar("code-snippet-r") + 2, nchar(text)
-    )
-  }
-  if(type == "apidocument") text = fromJSON(text)
-  text
+print.discoverSchema <- function(x, ...){
+  str(x, ...)
+  invisible()
 }
