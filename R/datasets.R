@@ -248,18 +248,22 @@ delete.datasets <- function(ws, name, host){
 #' @family dataset functions
 #' @example inst/examples/example_update.R
 
-update.dataset <- function(x, ws, name, description = "", family_id="", ...)
+update.dataset <- function(x, ws, name, description = "", family_id = "", ...)
 {
+
+  # take care of exceptions from delete: it's Microsoft dataset or dataset does not exist
+  if (name %in% datasets(ws, filter = "samples")$Name) stop("Update not allowed for Microsoft sample datasets.") 
+  else if (!(name %in% datasets(ws, filter = "my datasets")$Name)) stop("The dataset named '", name, "' does not exist.")
+  
+  # check to make sure the existing file is in GenericTSV format
+  if (tolower(ws$datasets$DataTypeId[ws$datasets$Name == name]) != "generictsv") stop("The existing dataset is not of type GenericTSV.")
+  
   # use description and family_id from the existing dataset if no new values are provided
   if (description == "") description = ws$datasets$Description[ws$datasets$Name == name]
   if (family_id == "") family_id = ws$datasets$FamilyId[ws$datasets$Name == name]
   
-  # delete existing data and save status
+  # delete existing data
   dr <- delete.datasets(ws, name)
-  
-  # take care of exceptions from delete: dataset does not exist or it's Microsoft dataset
-  if (dim(dr)[1] == 0) stop("The dataset named '", name, "' does not exist")
-  else if (dr$Deleted == FALSE) stop("Update not allowed for Microsoft default datasets") 
   
   # upload
   upload.dataset(x, ws, name, description, family_id)
