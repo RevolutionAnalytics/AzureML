@@ -8,40 +8,57 @@ workspace(id, auth, api_endpoint, management_endpoint,
   config = getOption("AzureML.config"), ..., .validate = TRUE)
 }
 \arguments{
-\item{id}{Optional workspace id from ML studio -> settings -> WORKSPACE ID}
+\item{id}{Optional workspace id from ML studio -> settings -> WORKSPACE ID. See the section "Finding your AzureML credentials" for more details.}
 
-\item{auth}{Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS}
+\item{auth}{Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.}
 
-\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.}
+\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \url{https://studioap.azureml.net} if not provided and not specified in config.  See note.}
 
 \item{management_endpoint}{Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.}
 
-\item{config}{Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}}
+\item{config}{Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}. See the section "Using a settings.json file" for more details.}
 
 \item{...}{ignored}
 
-\item{.validate}{If TRUE}
+\item{.validate}{If TRUE, makes a request to the AzureML API to retrieve some data. This validates whether the workspace id and authorization token are valid. Specifically, the function calls \code{\link{datasets}}. This should normally be set to TRUE. Set this to FALSE for testing, or if you know that your credentials are correct and you don't want to retrieve the datasets.}
 }
 \value{
 An R environment of class \code{Workspace} containing at least the following objects:
-\describe{
-  \item{experiments}{Collection of experiments in the workspace represented as an \code{Experiments} data.frame}
-  \item{datasets}{Collection of datasets in the workspace represented as a \code{Datasets} data.frame}
-  \item{services}{Collection of web services in the workspace represented as a data.frame}
+\itemize{
+  \item{experiments: Collection of experiments in the workspace represented as an \code{Experiments} object. See \code{\link{experiments}}}
+  \item{datasets: Collection of datasets in the workspace represented as a \code{Datasets} object. See \code{\link{datasets}}}
+  \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{Services}}}
 }
 }
 \description{
 Create a reference to an AzureML Studio workspace, returning a \code{Workspace} object that is an R environment containing details and data associated with the AzureML work space. Data corresponding to services, experiments, and datasets in the workspace are cached in the result object environment. See \code{\link{refresh}} about updating cached data.
 }
-\note{
-If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
+\section{Finding your AzureML credentials}{
+
+You can find your Azure Machine Learning \code{workspace id} and \code{authorization token} in the Azure Machine Learning Studio interface.
+
+Workspace ID
+
+\if{html}{\figure{workspace_id.png}{options: width="60\%" alt="Figure: workspace_id.png"}}
+
+
+
+Authorization token
+
+\if{html}{\figure{authorization_token.png}{options: width="60\%" alt="Figure: authorization_token.png"}}
+}
+
+\section{Using a \code{settings.json} file}{
+
+ If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:
+ \preformatted{
  {"workspace":{
-   "id": "test_id",
-   "authorization_token": "test_token",
-   "api_endpoint": "api_endpoint",
-   "management_endpoint": "management_endpoint"
+   "id": "enter your AzureML workspace id here",
+   "authorization_token": "enter your AzureML authorization token here",
+   "api_endpoint": "https://studioapi.azureml.net",
+   "management_endpoint": "https://management.azureml.net"
  }}
-} (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
+}
 }
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
