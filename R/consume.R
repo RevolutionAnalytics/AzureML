@@ -82,8 +82,8 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
     ans <- data.frame(result$Results$output1)
     nums <- which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
     logi <- which("boolean" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
-    if(length(nums) > 0) for(j in nums) ans[,nums] <- as.numeric(ans[,nums])
-    if(length(logi) > 0) for(j in logi) ans[,logi] <- as.logical(ans[,logi])
+    if(length(nums) > 0) for(j in nums) ans[,j] <- as.numeric(ans[,j])
+    if(length(logi) > 0) for(j in logi) ans[,j] <- as.logical(ans[,j])
     return(ans)
   }
   if(!is.null(output) && output == "output2") {
