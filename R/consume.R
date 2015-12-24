@@ -56,35 +56,34 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
   }
   
   if(!is.Endpoint(endpoint)) {
-    msg <- "Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint." 
-    stop(msg)
+    stop("Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint.")
   }
 
   apiKey <- endpoint$PrimaryKey
   requestUrl <- endpoint$ApiLocation
   
   if(missing(globalParam)) {
-    globalParam = setNames(list(), character(0))
+    globalParam <- setNames(list(), character(0))
   }
   # Store variable number of lists entered as a list of lists
-  requestsLists = list(...)
-  if(length(requestsLists)==1 && is.data.frame(requestsLists[[1]])) {
-    requestsLists = requestsLists[[1]]
-  } else {
-    if(!is.list(requestsLists[[1]])) requestsLists = list(requestsLists)
+  requestsLists <- list(...)
+  if(length(requestsLists) == 1 && is.data.frame(requestsLists[[1]])) {
+    requestsLists <- requestsLists[[1]]
+  } else if(!is.list(requestsLists[[1]])) {
+    requestsLists <- list(requestsLists)
   }
   # Make API call with parameters
   result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
-  if(inherits(result, "error")) stop("AzureML returned error code")
+  if(inherits(result, "error")) stop("AzureML returned an error code")
   
   # Access output by converting from JSON into list and indexing into Results
   if(!is.null(output) && output == "output1") {
-    help = endpointHelp(endpoint)$definitions$output1Item
-    ans = data.frame(result$Results$output1)
-    nums = which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
-    logi = which("boolean" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
-    if(length(nums) > 0) for(j in nums) ans[,j] = as.numeric(ans[,j])
-    if(length(logi) > 0) for(j in logi) ans[,j] = as.logical(ans[,j])
+    help <- endpointHelp(endpoint)$definitions$output1Item
+    ans <- data.frame(result$Results$output1)
+    nums <- which("number" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    logi <- which("boolean" == unlist(help)[grepl("\\.type$", names(unlist(help)))])
+    if(length(nums) > 0) for(j in nums) ans[,nums] <- as.numeric(ans[,nums])
+    if(length(logi) > 0) for(j in logi) ans[,logi] <- as.logical(ans[,logi])
     return(ans)
   }
   if(!is.null(output) && output == "output2") {
@@ -129,16 +128,10 @@ callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10) 
     postfieldsize = length(body), 
     postfields = body)
   )
-  r = try_fetch(requestUrl, h, delay = retryDelay)
-  result = fromJSON(rawToChar(r$content))
+  r <- try_fetch(requestUrl, h, delay = retryDelay)
+  result <- fromJSON(rawToChar(r$content))
   if(r$status_code >= 400)  {
     stop(paste(capture.output(result), collapse="\n"))
   }
-  result
+  return(result)
 }
-
-
-
-
-
-
