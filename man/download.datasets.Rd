@@ -36,7 +36,7 @@ Conversion modules to convert data to a supported format. Data with DataTypeId "
 in a raw binary R vector, which could then be passed through \code{unzip}, for example.
 }
 \examples{
-# When the workspace function is called with no parameters, it will
+# When the workspace function is called with no arguments, it will
 # look for the file ~/.azureml/settings.json and extract the workspace
 # id, authorization # token, api endpoint, and management endpoint
 # from the # file. Otherwise you # must pass these values as parameters

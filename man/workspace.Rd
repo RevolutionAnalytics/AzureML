@@ -44,7 +44,7 @@ If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_en
 } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 }
 \examples{
-# When the workspace function is called with no parameters, it will
+# When the workspace function is called with no arguments, it will
 # look for the file ~/.azureml/settings.json and extract the workspace
 # id, authorization # token, api endpoint, and management endpoint
 # from the # file. Otherwise you # must pass these values as parameters
