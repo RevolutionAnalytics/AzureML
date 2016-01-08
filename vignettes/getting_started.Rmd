@@ -141,7 +141,7 @@ explicitly in the `workspace()` function as outlined above. All of the examples
 require this step.
 
 ```{r}
-library(AzureML)
+library('AzureML')
 ws <- workspace()
 ws
 ```

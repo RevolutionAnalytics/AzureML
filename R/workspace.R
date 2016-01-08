@@ -54,9 +54,9 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #'
 #' Create a reference to an AzureML Studio workspace, returning a \code{Workspace} object that is an R environment containing details and data associated with the AzureML work space. Data corresponding to services, experiments, and datasets in the workspace are cached in the result object environment. See \code{\link{refresh}} about updating cached data.
 #' 
-#' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID
-#' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS
-#' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studio.azureml.net} if not provided and not specified in config.  See note.
+#' @param id Optional workspace id from ML Studio -> Settings -> Workspace Id
+#' @param auth Optional authorization token from ML Studio -> Settings -> Authorization Tokens
+#' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studioapi.azureml.net} if not provided and not specified in config.  See note.
 #' @param management_endpoint Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.
 #' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}
 #' @param ... ignored
@@ -64,10 +64,10 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #'
 #' @note If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
 #'  {"workspace":{
-#'    "id": "test_id",
-#'    "authorization_token": "test_token",
-#'    "api_endpoint": "api_endpoint",
-#'    "management_endpoint": "management_endpoint"
+#'    "id"                  : "test_id",
+#'    "authorization_token" : "test_token",
+#'    "api_endpoint"        : "api_endpoint",
+#'    "management_endpoint" : "management_endpoint"
 #'  }}
 #' } (see \url{https://github.com/RevolutionAnalytics/azureml/issues/13}).
 #' 
