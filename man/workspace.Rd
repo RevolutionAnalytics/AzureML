@@ -35,9 +35,9 @@ Create a reference to an AzureML Studio workspace, returning a \code{Workspace} 
 }
 \details{
 Before using the package, it is necessary to first obtain the security credentials to your Azure Machine Learning workspace. You can find this be logging in at https://studio.azureml.net. If you do not have an account, you can create a free account (not guest) to use these APIs. Once logged in, you will be brought to the Studio landing page. Using the left-hand menu, navigate to the 'Settings' tab to find your Workspace ID. Note this, or copy it into your R session and store it is a variable, e.g. myWsID.
-\cr \figure{man/figures/workspace_name.png}{[Figure: Azure ML Workspace Image]} \cr
+\cr \figure{figures/workspace_name.png}{[Figure: Azure ML Workspace Image]} \cr
 Next, within the 'Settings' tab, use the overhead menu to navigate to the 'Authorization Tokens' tab and similarly note your Primary Authorization Token.
-\cr \figure{man/figures/authorization_tokey.png}{[Figure: Azure ML Workspace Image]} \cr
+\cr \figure{figures/authorization_tokey.png}{[Figure: Azure ML Workspace Image]} \cr
 }
 \note{
 If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format: \preformatted{
