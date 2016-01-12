@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="date" content="2016-01-07" />
+<meta name="date" content="2016-01-12" />
 
 <title>Getting Started with the AzureML Package</title>
 
@@ -62,7 +62,7 @@ img {
 
 <div id="header">
 <h1 class="title">Getting Started with the AzureML Package</h1>
-<h4 class="date"><em>2016-01-07</em></h4>
+<h4 class="date"><em>2016-01-12</em></h4>
 </div>
 
 
@@ -177,9 +177,9 @@ ws</code></pre>
 ##  [3] &quot;R&quot;                     &quot;R&quot;                    
 ##  [5] &quot;R&quot;                     &quot;R&quot;                    
 ##  [7] &quot;R&quot;                     &quot;R&quot;                    
-##  [9] &quot;Microsoft Corporation&quot; &quot;Microsoft Corporation&quot;
-## [11] &quot;apiTestUser&quot;           &quot;apiTestUser&quot;          
-## [13] &quot;apiTestUser&quot;           &quot;apiTestUser&quot;          
+##  [9] &quot;R&quot;                     &quot;R&quot;                    
+## [11] &quot;R&quot;                     &quot;Microsoft Corporation&quot;
+## [13] &quot;Microsoft Corporation&quot; &quot;apiTestUser&quot;          
 ## [15] &quot;apiTestUser&quot;           &quot;apiTestUser&quot;          
 ## [17] &quot;apiTestUser&quot;           &quot;apiTestUser&quot;          
 ## [19] &quot;apiTestUser&quot;           &quot;apiTestUser&quot;</code></pre>
@@ -228,9 +228,12 @@ head(download.datasets(ws, name = &quot;Air quality&quot;))</code></pre>
 ## 6    28      NA 14.9   66     5   6</code></pre>
 <p>Delete one or more AzureML datasets with <code>delete.datasets()</code>:</p>
 <pre class="r"><code>delete.datasets(ws, name=&quot;Air quality&quot;)</code></pre>
-<pre><code>## Request failed with status 400. Waiting 5.3 seconds before retry
-## ......Request failed with status 400. Waiting 9.2 seconds before retry
-## ..........</code></pre>
+<pre><code>## Request failed with status 400. Waiting 2.0 seconds before retry</code></pre>
+<pre><code>## ..</code></pre>
+<pre><code>## Request failed with status 400. Waiting 4.7 seconds before retry</code></pre>
+<pre><code>## .....</code></pre>
+<pre><code>## Request failed with status 400. Waiting 14.7 seconds before retry</code></pre>
+<pre><code>## ...............</code></pre>
 <pre><code>##          Name Deleted status_code
 ## 1 Air quality    TRUE         204</code></pre>
 </div>
@@ -311,7 +314,7 @@ api &lt;- publishWebService(
 <p>The new web service will show up on the ‘Web Services’ tab of the Studio interface, and the service will have a help page for each endpoint, e.g.</p>
 <p>Note that AzureML allows multiple services to have the same name.</p>
 <pre class="r"><code>(helpPageUrl &lt;- api$HelpLocation)</code></pre>
-<pre><code>## [1] &quot;https://studio.azureml-int.net/apihelp/workspaces/31514eda29584a7986ca222b01f52a5f/webservices/09633868b5bf11e5adb8a0b3ccf70e36/endpoints/81b5f502b7674396b19131ce125afdd9&quot;</code></pre>
+<pre><code>## [1] &quot;https://studio.azureml-int.net/apihelp/workspaces/31514eda29584a7986ca222b01f52a5f/webservices/a73c6952b96f11e5ac16a0b3ccf70e36/endpoints/acef5f057709414698a140ff8735c6bc&quot;</code></pre>
 <p>Once published, you can update a web service using the <code>updateWebService()</code> or <code>publishWebService()</code> functions. The <code>updateWebService()</code> function is just an alias for <code>publishWebService()</code>, except that the argument <code>serviceId</code> is compulsory.</p>
 <pre class="r"><code>api &lt;- updateWebService(
   ws,
@@ -332,11 +335,11 @@ api &lt;- publishWebService(
 <p>Use the <code>services()</code> function to list in detail all of the available services in your AzureML workspace, or filter by web service name as shown below:</p>
 <pre class="r"><code>(webservices &lt;- services(ws, name = &quot;AzureML-vignette-silly&quot;))</code></pre>
 <pre><code>##                                 Id                   Name
-## 2 09633868b5bf11e5adb8a0b3ccf70e36 AzureML-vignette-silly
+## 3 a73c6952b96f11e5ac16a0b3ccf70e36 AzureML-vignette-silly
 ##               CreationTime                      WorkspaceId
-## 2 2016-01-08T04:19:41.226Z 31514eda29584a7986ca222b01f52a5f
+## 3 2016-01-12T21:01:31.841Z 31514eda29584a7986ca222b01f52a5f
 ##   DefaultEndpointName EndpointCount
-## 2             default             1</code></pre>
+## 3             default             1</code></pre>
 <p>Given a service, use the <code>endpoints()</code> function to list the AzureML service endpoints for the service:</p>
 <pre class="r"><code>ep &lt;- endpoints(ws, webservices[1, ])
 class(ep)</code></pre>
@@ -381,11 +384,11 @@ consume(ep, df)</code></pre>
 <pre class="r"><code>library(AzureML)
 library(MASS)
 library(gbm)</code></pre>
-<pre><code>## Loading required package: survival
-## Loading required package: lattice
-## Loading required package: splines
-## Loading required package: parallel
-## Loaded gbm 2.1.1</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loaded gbm 2.1.1</code></pre>
 <pre class="r"><code>ws &lt;- workspace()
 test &lt;- Boston[1:5, 1:13]
 
@@ -416,10 +419,8 @@ ep &lt;- publishWebService(ws = ws, fun = mypredict, name = &quot;AzureML-vignet
 
 # Consume test data, comparing with result above
 print(consume(ep, test))</code></pre>
-<pre><code>## Request failed with status 401. Waiting 6.7 seconds before retry
-## .......Request failed with status 401. Waiting 1.3 seconds before retry
-## ..Request failed with status 401. Waiting 58.5 seconds before retry
-## ...........................................................</code></pre>
+<pre><code>## Request failed with status 401. Waiting 6.7 seconds before retry</code></pre>
+<pre><code>## .......</code></pre>
 <pre><code>##        ans
 ## 1 24.54431
 ## 2 21.15155
