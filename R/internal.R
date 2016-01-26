@@ -21,6 +21,45 @@
 # THE SOFTWARE.
 
 
+# Used in experiment date parsing
+date_origin = "1970-1-1"
+
+#' Try to fetch a uri/handle, retrying on certain returned status codes after a timeout
+#' @param uri the uri to fetch
+#' @param handle a curl handle
+#' @param retry_on HTTP status codes that result in retry
+#' @param tries number of tries before failing
+#' @param delay in seconds between retries, subject to exponent
+#' @param exponent increment each successive delay by delay^exponent
+#' @return the result of curl_fetch_memory(uri, handle)
+try_fetch <- function(uri, handle, 
+                      retry_on = c(400, 401, 440, 503, 504, 509), 
+                      tries = 6, 
+                      delay = 1, exponent = 2)
+{
+  collisions = 1
+  while(collisions < tries) {
+    r = curl_fetch_memory(uri, handle)
+    if(!(r$status_code %in% retry_on)) return(r)
+    wait_time = delay * (2 ^ collisions - 1)
+    wait_time <- ceiling(runif(1, min = 0.001, max = wait_time))
+    message(sprintf("Request failed with status %s. Waiting %s seconds before retry", 
+                    r$status_code,
+                    wait_time))
+    for(i in 1:wait_time){
+      message(".", appendLF = FALSE)
+      Sys.sleep(1)
+    }
+    message("\n")
+    collisions = collisions + 1
+  }
+  r
+}
+
+# urlAPIinsert <- function(x, text = "api"){
+#   gsub("(http.*?)(\\..*)", sprintf("\\1%s\\2", text), x)
+# }
+
 urlconcat <- function(a,b)
 {
   ans = paste(gsub("/$", "", a), b, sep="/")
@@ -35,17 +74,17 @@ urlconcat <- function(a,b)
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_datasets <- function(ws)
-{
+get_datasets <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list = ws$.headers)
   uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
-  if(inherits(r, "error")){
-    msg <- paste("No results returned from datasets(ws).", 
-                 "Please check your workspace credentials and api_endpoint are correct.")
-    stop(msg)
-  }
+
+  msg <- paste("No results returned from datasets(ws).", 
+               "Please check your workspace credentials and api_endpoint are correct.")
+  if(inherits(r, "error")){ stop(msg) }
+  if(r$status_code >= 400){ stop(msg) }
+
   x <- fromJSON(rawToChar(r$content))
   if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
@@ -62,6 +101,8 @@ get_datasets <- function(ws)
                                d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
+                           d[, "Location"],
+                           d[, "AccessCredential"])
                             d[, "Location"],
                             d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
@@ -69,7 +110,7 @@ get_datasets <- function(ws)
 }
 
 
-convertToDate <- function(x){
+convertToDate <- function(x) {
   x = as.numeric(gsub("[^-0-9]", "", x)) /1000
   x = ifelse(x >= 0, x, NA)
   suppressWarnings(
@@ -85,14 +126,18 @@ convertToDate <- function(x){
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_experiments <- function(ws)
-{
-  h <- new_handle()
-  handle_setheaders(h, .list = ws$.headers)
-  
-  uri <- sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
+get_experiments <- function(ws) {
+  h = new_handle()
+  handle_setheaders(h, .list=ws$.headers)
+  uri = sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
   
+  msg <- paste("No results returned from experiments(ws).", 
+               "Please check your workspace credentials and api_endpoint are correct.")
+  if(inherits(r, "error")){ stop(msg) }
+  if(r$status_code >= 400){ stop(msg) }
+  
+  # Use strict variable name matching to look up data
   x <- fromJSON(rawToChar(r$content))
   x = cbind(x, x[,"Status"])
   
@@ -114,8 +159,7 @@ get_experiments <- function(ws)
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
 #' @keywords Internal
-get_dataset <- function(x, h, quote = "\"", ...)
-{
+get_dataset <- function(x, h, quote = "\"", ...) {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
   opts = options(stringsAsFactors = FALSE)
@@ -160,8 +204,7 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 #' @keywords Internal
-packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
-{
+packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
   d <- tempfile(pattern="dir")
