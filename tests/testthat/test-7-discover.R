@@ -87,7 +87,7 @@ if(file.exists(settingsFile))
     expect_is(testEP_1, "Endpoint")
     
     expect_true(nrow(ss) >= 1)
-    expect_equal(length(testWS), 6)
+    expect_true(length(testWS) >= 6)
     expect_equal(length(endpoints), 1)
     
     expect_identical(testEP_1, testEP_2)
