@@ -46,7 +46,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
   if(api_endpoint %in% names(defaults)){
     defaults[api_endpoint][[1]]
   } else {
-    stop("api_endpoint not recognized")
+    defaults[[1]]
   }
 }
 
@@ -132,7 +132,7 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   
   # If workspace_id or auth are missing, read from config, if available.
   if(missing(api_endpoint) || missing(management_endpoint)){
-    x <- validate.AzureML.config(config, stopOnError = FALSE)
+    x <- try(validate.AzureML.config(config, stopOnError = FALSE))
     if(!inherits(x, "error")){
       settings <- read.AzureML.config(config)
       
@@ -240,7 +240,7 @@ datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   stopIfNotWorkspace(ws)
   filter = match.arg(filter)
-  if(filter == "all") return(ws$datasets)
+  if(filter == "all") return(suppressWarnings(ws$datasets))
   samples = filter == "samples"
   i = grep(paste("^", ws$id, sep=""), ws$datasets[,"Id"], invert=samples)
   ws$datasets[i, ]
@@ -262,7 +262,7 @@ datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 experiments <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
-  if(filter == "all") return(ws$experiments)
+  if(filter == "all") return(suppressWarnings(ws$experiments))
   samples = filter == "samples"
   i = grep(paste("^", ws$id, sep=""), ws$experiments[,"ExperimentId"], invert=samples)
   ws$experiments[i, ]
