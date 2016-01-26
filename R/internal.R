@@ -21,45 +21,6 @@
 # THE SOFTWARE.
 
 
-# Used in experiment date parsing
-date_origin = "1970-1-1"
-
-#' Try to fetch a uri/handle, retrying on certain returned status codes after a timeout
-#' @param uri the uri to fetch
-#' @param handle a curl handle
-#' @param retry_on HTTP status codes that result in retry
-#' @param tries number of tries before failing
-#' @param delay in seconds between retries, subject to exponent
-#' @param exponent increment each successive delay by delay^exponent
-#' @return the result of curl_fetch_memory(uri, handle)
-try_fetch <- function(uri, handle, 
-                      retry_on = c(400, 401, 440, 503, 504, 509), 
-                      tries = 6, 
-                      delay = 1, exponent = 2)
-{
-  collisions = 1
-  while(collisions < tries) {
-    r = curl_fetch_memory(uri, handle)
-    if(!(r$status_code %in% retry_on)) return(r)
-    wait_time = delay * (2 ^ collisions - 1)
-    wait_time <- ceiling(runif(1, min = 0.001, max = wait_time))
-    message(sprintf("Request failed with status %s. Waiting %s seconds before retry", 
-                    r$status_code,
-                    wait_time))
-    for(i in 1:wait_time){
-      message(".", appendLF = FALSE)
-      Sys.sleep(1)
-    }
-    message("\n")
-    collisions = collisions + 1
-  }
-  r
-}
-
-# urlAPIinsert <- function(x, text = "api"){
-#   gsub("(http.*?)(\\..*)", sprintf("\\1%s\\2", text), x)
-# }
-
 urlconcat <- function(a,b)
 {
   ans = paste(gsub("/$", "", a), b, sep="/")
@@ -103,8 +64,6 @@ get_datasets <- function(ws) {
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
                            d[, "Location"],
                            d[, "AccessCredential"])
-                            d[, "Location"],
-                            d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
