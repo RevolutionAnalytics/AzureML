@@ -35,23 +35,6 @@ test_that("Can connect to workspace with config file", {
 })
 
 
-test_that("Can connect to workspace with no config file", {
-  # AzureML:::skip_if_missing_config(settingsFile)
-  
-  opts <- getOption("AzureML.config")
-  options(AzureML.config = tempfile(fileext = ".tmp"))
-  on.exit(options(AzureML.config = opts))
-  
-  expect_error(
-    ws <- workspace(), 
-    "config file is missing"
-  )
-  expect_is(workspace("x", "y"), "Workspace")
-  expect_equal({ws <- workspace("x", "y"); ls(ws)}, 
-               c("datasets", "experiments", "id", "services"))
-})
-
-
 test_that("workspace() throws helpful 401 error with invalid id", {
   # AzureML:::skip_if_missing_config(settingsFile)
   
