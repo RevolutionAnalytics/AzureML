@@ -27,7 +27,7 @@ An R environment of class \code{Workspace} containing at least the following obj
 \itemize{
   \item{experiments: Collection of experiments in the workspace represented as an \code{Experiments} object. See \code{\link{experiments}}}
   \item{datasets: Collection of datasets in the workspace represented as a \code{Datasets} object. See \code{\link{datasets}}}
-  \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{Services}}}
+  \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{services}}}
 }
 }
 \description{
