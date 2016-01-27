@@ -4,10 +4,10 @@
 
 if(interactive()) library("testthat")
 
-settingsFile <- AzureML.config.default
 context("Read dataset from experiment")
 
 test_that("Can read intermediate dataset from workspace", {
+  settingsFile <- AzureML:::AzureML.config.default
   AzureML:::skip_if_missing_config(settingsFile)
   js <- jsonlite::fromJSON(settingsFile)
   id <- js$workspace$id
@@ -37,10 +37,11 @@ test_that("Can read intermediate dataset from workspace", {
   expect_is(experiment, "Experiments")
   expect_is(experiment, "data.frame")
   
-  frame = download.intermediate.dataset(ws, experiment = exp_id, node_id = node_id,
+  frame <- download.intermediate.dataset(ws, experiment = exp_id, node_id = node_id,
                                         port_name='Results dataset',
                                         data_type_id='GenericCSV')
   
   expect_is(frame, "data.frame")
   expect_true(nrow(frame) > 1)
 })
+
