@@ -23,31 +23,34 @@
 
 
 default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
-  defaults <- list(
-    
-    "https://studio.azureml.net" = list(
-      api_endpoint        = "https://studioapi.azureml.net",
-      management_endpoint = "https://management.azureml.net",
-      studioapi           = "https://studioapi.azureml.net/api"
-    ), 
-    "https://studioapi.azureml.net" = list(
-      api_endpoint        = "https://studioapi.azureml.net",
-      management_endpoint = "https://management.azureml.net",
-      studioapi           = "https://studioapi.azureml.net/api"
-    ),
-    "https://studioapi.azureml-int.net" = list(
-      api_endpoint        = "https://studio.azureml-int.net",
-      management_endpoint = "https://management.azureml-int.net",
-      studioapi           = "https://studioapi.azureml-int.net/api"
+  x <- api_endpoint
+  
+  api_endpoint <- function(x){
+    switch(x, 
+           "https://studio.azureml.net"     = "https://studioapi.azureml.net",
+           "https://studioapi.azureml.net"  = "https://studioapi.azureml.net",
+           "https://studio.azureml-int.net"    = "https://studio.azureml-int.net",
+           "https://studioapi.azureml-int.net" = "https://studio.azureml-int.net",
+           x
     )
-  )
-  
-  
-  if(api_endpoint %in% names(defaults)){
-    defaults[api_endpoint][[1]]
-  } else {
-    defaults[[1]]
   }
+  
+  mgt_api <- function(x){
+    if(api_endpoint(x) == "https://studio.azureml-int.net")
+      "https://management.azureml-int.net"
+    else
+      sub("studio(.*?).azureml(.*?).net", "management.azureml.net", x)
+  }
+  
+  defaults <- list(
+    api_endpoint        = api_endpoint(x),
+    management_endpoint = mgt_api(x),
+    studioapi           = if(api_endpoint(x) == "https://studio.azureml-int.net")
+      "https://studioapi.azureml-int.net/api"
+    else
+      paste0(api_endpoint(x), "/api")
+  )
+  defaults
 }
 
 #' Create a reference to an AzureML Studio workspace.
@@ -166,18 +169,20 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   }
   
   # Test to see if api_endpoint is a valid url
-  resp <- tryCatch(
-    suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
-    error = function(e)e
-  )
-  if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
-  
-  # Test to see if management_endpoint is a valid url
-  resp <- tryCatch(
-    suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
-    error = function(e)e
-  )
-  if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  if(.validate){
+    resp <- tryCatch(
+      suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
+      error = function(e)e
+    )
+    if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
+    
+    # Test to see if management_endpoint is a valid url
+    resp <- tryCatch(
+      suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
+      error = function(e)e
+    )
+    if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  }
   
   # It seems all checks passed. Now construct the Workspace object
   
