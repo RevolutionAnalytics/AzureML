@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Microsoft Corporation
+# Copyright (c) 2015-2016 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
@@ -105,3 +105,17 @@ print.Datasets <- function(x, ...)
   cat(paste(capture.output(names(x)),collapse="\n"),"\n")
   d
 }
+
+#' @export
+str.Workspace <- function(object, ...){
+  NextMethod(object)
+  cat("list with elements:\n")
+  cat(ls(ws, all.names = TRUE))
+  cat("\n\n")
+  cat("Values:\n")
+  cat("$ id :", object$id, "\n")
+  cat("$ .api_endpoint        :", object$.api_endpoint, "\n")
+  cat("$ .studioapi           :", object$.studioapi, "\n")
+  cat("$ .management_endpoint :", object$.management_endpoint, "\n")
+}
+

@@ -6,6 +6,6 @@ skip_if_missing_config <- function(f){
                  "See ?workspace for help",
                  sep = "\n")
     message(msg)
-    skip("settings.json file is missing")
+    testthat::skip("settings.json file is missing")
   }
 }

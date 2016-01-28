@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Microsoft Corporation
+# Copyright (c) 2015-2016 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
@@ -58,6 +58,15 @@
 #'    \item Publish an R function as a web service: \code{\link{publishWebService}}
 #'    \item Update an existing web service: \code{\link{updateWebService}}
 #'    \item List web service endpoints: \code{\link{endpoints}}
+#' }
+#' 
+#' 5. Configure a settings file with your AzureML secrets
+#' 
+#' The \code{\link{workspace}} function optionally reads your AzureML credentials from a settings file located at \code{~/.azureml/settings.json}. You can read and write this file using:
+#' 
+#' \itemize{
+#'    \item Write: \code{\link{write.AzureML.config}}
+#'    \item Read: \code{\link{read.AzureML.config}}
 #' }
 #' 
 #' @name AzureML-package

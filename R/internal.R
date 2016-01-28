@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Microsoft Corporation
+# Copyright (c) 2015-2016 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
@@ -35,17 +35,17 @@ urlconcat <- function(a,b)
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_datasets <- function(ws)
-{
+get_datasets <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list = ws$.headers)
   uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
-  if(inherits(r, "error")){
-    msg <- paste("No results returned from datasets(ws).", 
-                 "Please check your workspace credentials and api_endpoint are correct.")
-    stop(msg)
-  }
+
+  msg <- paste("No results returned from datasets(ws).", 
+               "Please check your workspace credentials and api_endpoint are correct.")
+  if(inherits(r, "error")){ stop(msg) }
+  if(r$status_code >= 400){ stop(msg) }
+
   x <- fromJSON(rawToChar(r$content))
   if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
@@ -62,14 +62,14 @@ get_datasets <- function(ws)
                                d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
-                            d[, "Location"],
-                            d[, "AccessCredential"])
+                           d[, "Location"],
+                           d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
 
 
-convertToDate <- function(x){
+convertToDate <- function(x) {
   x = as.numeric(gsub("[^-0-9]", "", x)) /1000
   x = ifelse(x >= 0, x, NA)
   suppressWarnings(
@@ -85,14 +85,18 @@ convertToDate <- function(x){
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
 #' @keywords Internal
-get_experiments <- function(ws)
-{
-  h <- new_handle()
-  handle_setheaders(h, .list = ws$.headers)
-  
-  uri <- sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
+get_experiments <- function(ws) {
+  h = new_handle()
+  handle_setheaders(h, .list=ws$.headers)
+  uri = sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
   
+  msg <- paste("No results returned from experiments(ws).", 
+               "Please check your workspace credentials and api_endpoint are correct.")
+  if(inherits(r, "error")){ stop(msg) }
+  if(r$status_code >= 400){ stop(msg) }
+  
+  # Use strict variable name matching to look up data
   x <- fromJSON(rawToChar(r$content))
   x = cbind(x, x[,"Status"])
   
@@ -114,8 +118,7 @@ get_experiments <- function(ws)
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
 #' @keywords Internal
-get_dataset <- function(x, h, quote = "\"", ...)
-{
+get_dataset <- function(x, h, quote = "\"", ...) {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
   opts = options(stringsAsFactors = FALSE)
@@ -160,8 +163,7 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 #' @keywords Internal
-packageEnv <- function(exportenv, packages=NULL, version="3.1.0")
-{
+packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
   d <- tempfile(pattern="dir")

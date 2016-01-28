@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Microsoft Corporation
+# Copyright (c) 2015-2016 Microsoft Corporation
 # All rights reserved.
 #   
 # The MIT License (MIT)
@@ -23,31 +23,34 @@
 
 
 default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
-  defaults <- list(
-    
-    "https://studio.azureml.net" = list(
-      api_endpoint        = "https://studioapi.azureml.net",
-      management_endpoint = "https://management.azureml.net",
-      studioapi           = "https://studioapi.azureml.net/api"
-    ), 
-    "https://studioapi.azureml.net" = list(
-      api_endpoint        = "https://studioapi.azureml.net",
-      management_endpoint = "https://management.azureml.net",
-      studioapi           = "https://studioapi.azureml.net/api"
-    ),
-    "https://studioapi.azureml-int.net" = list(
-      api_endpoint        = "https://studio.azureml-int.net",
-      management_endpoint = "https://management.azureml-int.net",
-      studioapi           = "https://studioapi.azureml-int.net/api"
+  x <- api_endpoint
+  
+  api_endpoint <- function(x){
+    switch(x, 
+           "https://studio.azureml.net"     = "https://studioapi.azureml.net",
+           "https://studioapi.azureml.net"  = "https://studioapi.azureml.net",
+           "https://studio.azureml-int.net"    = "https://studio.azureml-int.net",
+           "https://studioapi.azureml-int.net" = "https://studio.azureml-int.net",
+           x
     )
-  )
-  
-  
-  if(api_endpoint %in% names(defaults)){
-    defaults[api_endpoint][[1]]
-  } else {
-    stop("api_endpoint not recognized")
   }
+  
+  mgt_api <- function(x){
+    if(api_endpoint(x) == "https://studio.azureml-int.net")
+      "https://management.azureml-int.net"
+    else
+      sub("studio(.*?).azureml(.*?).net", "management.azureml.net", x)
+  }
+  
+  defaults <- list(
+    api_endpoint        = api_endpoint(x),
+    management_endpoint = mgt_api(x),
+    studioapi           = if(api_endpoint(x) == "https://studio.azureml-int.net")
+      "https://studioapi.azureml-int.net/api"
+    else
+      paste0(api_endpoint(x), "/api")
+  )
+  defaults
 }
 
 #' Create a reference to an AzureML Studio workspace.
@@ -99,7 +102,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' \itemize{
 #'   \item{experiments: Collection of experiments in the workspace represented as an \code{Experiments} object. See \code{\link{experiments}}}
 #'   \item{datasets: Collection of datasets in the workspace represented as a \code{Datasets} object. See \code{\link{datasets}}}
-#'   \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{Services}}}
+#'   \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{services}}}
 #' }
 #' 
 #' @importFrom jsonlite fromJSON
@@ -114,6 +117,11 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 workspace <- function(id, auth, api_endpoint, management_endpoint,
                       config = getOption("AzureML.config"), ..., .validate = TRUE)
 {
+  
+  args <- list(...)
+  if(!is.null(args$validate)) {
+    message("You used an argument 'validate'. Did you mean '.validate'?\nIgnoring this argument.")
+  }
   
   
   # If workspace_id or auth are missing, read from config. Stop if unavailable.
@@ -132,7 +140,7 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   
   # If workspace_id or auth are missing, read from config, if available.
   if(missing(api_endpoint) || missing(management_endpoint)){
-    x <- validate.AzureML.config(config, stopOnError = FALSE)
+    x <- try(validate.AzureML.config(config, stopOnError = FALSE))
     if(!inherits(x, "error")){
       settings <- read.AzureML.config(config)
       
@@ -161,18 +169,20 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
   }
   
   # Test to see if api_endpoint is a valid url
-  resp <- tryCatch(
-    suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
-    error = function(e)e
-  )
-  if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
-  
-  # Test to see if management_endpoint is a valid url
-  resp <- tryCatch(
-    suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
-    error = function(e)e
-  )
-  if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  if(.validate){
+    resp <- tryCatch(
+      suppressWarnings(curl::curl_fetch_memory(api_endpoint)),
+      error = function(e)e
+    )
+    if(inherits(resp, "error")) stop("Invalid api_endpoint: ", api_endpoint)
+    
+    # Test to see if management_endpoint is a valid url
+    resp <- tryCatch(
+      suppressWarnings(curl::curl_fetch_memory(management_endpoint)),
+      error = function(e)e
+    )
+    if(inherits(resp, "error")) stop("Invalid management_endpoint: ", management_endpoint)
+  }
   
   # It seems all checks passed. Now construct the Workspace object
   
@@ -240,7 +250,7 @@ datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   stopIfNotWorkspace(ws)
   filter = match.arg(filter)
-  if(filter == "all") return(ws$datasets)
+  if(filter == "all") return(suppressWarnings(ws$datasets))
   samples = filter == "samples"
   i = grep(paste("^", ws$id, sep=""), ws$datasets[,"Id"], invert=samples)
   ws$datasets[i, ]
@@ -262,7 +272,7 @@ datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 experiments <- function(ws, filter=c("all", "my datasets", "samples"))
 {
   filter = match.arg(filter)
-  if(filter == "all") return(ws$experiments)
+  if(filter == "all") return(suppressWarnings(ws$experiments))
   samples = filter == "samples"
   i = grep(paste("^", ws$id, sep=""), ws$experiments[,"ExperimentId"], invert=samples)
   ws$experiments[i, ]
