@@ -115,6 +115,11 @@ workspace <- function(id, auth, api_endpoint, management_endpoint,
                       config = getOption("AzureML.config"), ..., .validate = TRUE)
 {
   
+  args <- list(...)
+  if(!is.null(args$validate)) {
+    message("You used an argument 'validate'. Did you mean '.validate'?\nIgnoring this argument.")
+  }
+  
   
   # If workspace_id or auth are missing, read from config. Stop if unavailable.
   if(missing(id) || missing(auth)) {
