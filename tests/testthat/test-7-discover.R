@@ -40,7 +40,7 @@ if(file.exists(settingsFile))
     expect_equal(length(endpoints), 1)
     
     expect_identical(testEP_1, testEP_2)
-    expect_equal(length(testEP_1), 13)
+    expect_true(length(testEP_1) >= 13)
     expect_equal(testWS$Id, testEP_1$WebServiceId)
   })
   
