@@ -1,6 +1,6 @@
 Package: AzureML
 Type: Package
-Title: Interface with Azure Machine Learning datasets and web services
+Title: Interface with Azure Machine Learning Datasets, Experiments and Web Services
 Description: Functions and datasets to support Azure Machine Learning. This
     allows you to interact with datasets, as well as publish and consume R functions
     as API services.
