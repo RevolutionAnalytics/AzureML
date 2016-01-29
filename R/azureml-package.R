@@ -73,4 +73,8 @@
 #' @aliases AzureML
 #' @docType package
 #' @keywords package
+#' 
+#' @importFrom stats runif setNames
+#' @importFrom utils capture.output head read.table str write.table zip
 NULL
+
