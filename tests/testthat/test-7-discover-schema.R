@@ -1,8 +1,7 @@
 if(interactive()) library(testthat)
 
-context("Discover API")
+context("Discover API schema")
 
-ws <- workspace()
 
 test_that("discoverSchema() returns help page information", {
   
