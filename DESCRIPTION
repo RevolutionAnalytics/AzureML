@@ -30,6 +30,7 @@ Imports:
 Suggests:
     testthat,
     knitr,
+    rmarkdown,
     lme4,
     gbm,
     MASS
