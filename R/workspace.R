@@ -89,8 +89,8 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' 
 #' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID. See the section "Finding your AzureML credentials" for more details.
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.
-#' @param api_endpoint Optional AzureML API web service URI. Defaults to \url{https://studioap.azureml.net} if not provided and not specified in config.  See note.
-#' @param management_endpoint Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.
+#' @param api_endpoint Optional AzureML API web service URI. Defaults to \code{https://studioap.azureml.net} if not provided and not specified in config.  See note.
+#' @param management_endpoint Optional AzureML management web service URI. Defaults to \code{https://management.azureml.net} if not provided and not specified in config.  See note.
 #' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}. See the section "Using a settings.json file" for more details.
 #' @param ... ignored
 #' @param .validate If TRUE, makes a request to the AzureML API to retrieve some data. This validates whether the workspace id and authorization token are valid. Specifically, the function calls \code{\link{datasets}}. This should normally be set to TRUE. Set this to FALSE for testing, or if you know that your credentials are correct and you don't want to retrieve the datasets.
