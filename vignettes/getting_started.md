@@ -1,14 +1,5 @@
----
-title: "Getting Started with the AzureML Package"
-date: "`r Sys.Date()`"
-output:
-
-  html_document: 
-    keep_md: yes
-vignette: >
-  %\VignetteIndexEntry{Getting Started with the AzureML package}
-  %\VignetteEngine{knitr::rmarkdown}
----
+# Getting Started with the AzureML Package
+`r Sys.Date()`  
 
 Use this package to upload and download datasets to and from AzureML, to
 interrogate experiments, to publish R functions as AzureML web services, and to
@@ -68,13 +59,13 @@ your AzureML sessions.
 ## Obtaining AzureML Credentials
 
 Before using the package, it is necessary to first obtain the security
-credentials to your Azure Machine Learning workspace. You can find this by
-logging in at the [AzureML Studio](https://studio.azureml.net). If you do not
+credentials to your Azure Machine Learning workspace. You can find this be
+logging in at [Azure ML web site](http://studio.azureml.net). If you do not
 have an account, you can create a free account (not guest) to use these APIs.
 
 Once logged in, you will be brought to the Studio landing page. Using the
 left-hand menu, navigate to the 'Settings' tab to find your Workspace ID. Note
-this, or copy it into your R session and store it is a variable, e.g. `myWsID`.
+this, or copy it into your R session and store it is a variable, e.g. myWsID.
 
 <img src="workspaceID.png" width="80%">
 
