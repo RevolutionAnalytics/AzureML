@@ -110,7 +110,7 @@ print.Datasets <- function(x, ...)
 str.Workspace <- function(object, ...){
   NextMethod(object)
   cat("list with elements:\n")
-  cat(ls(ws, all.names = TRUE))
+  cat(ls(object, all.names = TRUE))
   cat("\n\n")
   cat("Values:\n")
   cat("$ id :", object$id, "\n")

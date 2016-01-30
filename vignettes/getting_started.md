@@ -1,14 +1,5 @@
----
-title: "Getting Started with the AzureML Package"
-date: "`r Sys.Date()`"
-output:
-
-  html_document: 
-    keep_md: yes
-vignette: >
-  %\VignetteIndexEntry{Getting Started with the AzureML package}
-  %\VignetteEngine{knitr::rmarkdown}
----
+# Getting Started with the AzureML Package
+`r Sys.Date()`  
 
 Use this package to upload and download datasets to and from AzureML, to
 interrogate experiments, to publish R functions as AzureML web services, and to

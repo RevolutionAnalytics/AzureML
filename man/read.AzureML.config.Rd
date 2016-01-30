@@ -17,9 +17,9 @@ write.AzureML.config(id = NULL, auth = NULL, api_endpoint = NULL,
 
 \item{auth}{Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.}
 
-\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \url{https://studioap.azureml.net} if not provided and not specified in config.  See note.}
+\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \code{https://studioap.azureml.net} if not provided and not specified in config.  See note.}
 
-\item{management_endpoint}{Optional AzureML management web service URI. Defaults to \url{https://management.azureml.net} if not provided and not specified in config.  See note.}
+\item{management_endpoint}{Optional AzureML management web service URI. Defaults to \code{https://management.azureml.net} if not provided and not specified in config.  See note.}
 
 \item{file}{either a character string naming a file or a connection open for writing. "" indicates output to the console.}
 }

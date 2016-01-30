@@ -214,20 +214,20 @@ delete.datasets <- function(ws, name, host){
   h <- new_handle()
   handle_setheaders(h, .list = ws$.headers)
   handle_setopt(h, customrequest = "DELETE")
-  status_code <- vapply(datasets$FamilyId, 
-                        function(familyId){
-                          uri <- sprintf("%s/workspaces/%s/datasources/family/%s", 
-                                         ws$.studioapi,
-                                         curl_escape(ws$id),
-                                         curl_escape(familyId)
-                          )
-                          try_fetch(uri, h)$status_code
-                        }, 1, USE.NAMES = FALSE
-  )
+  delete_one <- function(familyId){
+    uri <- sprintf("%s/workspaces/%s/datasources/family/%s", 
+                   ws$.studioapi,
+                   curl_escape(ws$id),
+                   curl_escape(familyId)
+    )
+    z <- try_fetch(uri, h, tries = 3, delay = 2)
+    z$status_code
+  }
+  status_code <- vapply(datasets$FamilyId, delete_one, FUN.VALUE = numeric(1), USE.NAMES = FALSE)
   ans = data.frame(
-    Name = datasets$Name, 
-    Deleted=status_code < 300, 
-    status_code=status_code,
+    Name        = datasets$Name, 
+    Deleted     = status_code < 300, 
+    status_code = status_code,
     stringsAsFactors = FALSE
   )
   refresh(ws, "datasets")

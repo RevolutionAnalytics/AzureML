@@ -32,7 +32,7 @@ test_that("Uploading dataset with duplicate name gives helpful error", {
 
 test_that("Can download dataset", {
   AzureML:::skip_if_missing_config(settingsFile)
-  dl <- download.datasets(ws, name=timestamped_name)
+  dl <- download.datasets(ws, name = timestamped_name)
   expect_equal(dl, airquality)
 })
 
