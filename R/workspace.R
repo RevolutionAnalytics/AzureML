@@ -64,15 +64,14 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' Workspace ID
 #' 
 #' \if{html}{\figure{workspace_id.png}{options: width="60\%" alt="Figure: workspace_id.png"}}
+#' \if{latex}{\figure{workspaceId.pdf}{options: width=7cm}}
 #' 
 #' 
 #' 
 #' Authorization token
 #' 
 #' \if{html}{\figure{authorization_token.png}{options: width="60\%" alt="Figure: authorization_token.png"}}
-#' 
-#' 
-# \if{latex}{\figure{mai.pdf}{options: width=7cm}}
+#' \if{latex}{\figure{authorizationToken.pdf}{options: width=7cm}}
 #'
 #' @section Using a \code{settings.json} file:
 #'  If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:

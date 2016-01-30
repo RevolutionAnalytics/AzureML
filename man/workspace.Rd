@@ -40,12 +40,14 @@ You can find your Azure Machine Learning \code{workspace id} and \code{authoriza
 Workspace ID
 
 \if{html}{\figure{workspace_id.png}{options: width="60\%" alt="Figure: workspace_id.png"}}
+\if{latex}{\figure{workspaceId.pdf}{options: width=7cm}}
 
 
 
 Authorization token
 
 \if{html}{\figure{authorization_token.png}{options: width="60\%" alt="Figure: authorization_token.png"}}
+\if{latex}{\figure{authorizationToken.pdf}{options: width=7cm}}
 }
 
 \section{Using a \code{settings.json} file}{
