@@ -28,13 +28,13 @@ urlconcat <- function(a,b)
   ans
 }
 
-#' Internal function that retrieves datasets.
-#'
-#' @param ws A workspace object
-#' @return a data.frame
+# Internal function that retrieves datasets.
+#
+# @param ws A workspace object
+# @return a data.frame
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
-#' @keywords Internal
+# @keywords Internal
 get_datasets <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list = ws$.headers)
@@ -78,13 +78,13 @@ convertToDate <- function(x) {
 }
 
 
-#' Internal function that retrieves experiments.
-#'
-#' @param ws A workspace object
-#' @return a data.frame
+# Internal function that retrieves experiments.
+#
+# @param ws A workspace object
+# @return a data.frame
 #' @importFrom curl handle_setheaders curl new_handle
 #' @importFrom jsonlite fromJSON
-#' @keywords Internal
+# @keywords Internal
 get_experiments <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
@@ -108,16 +108,16 @@ get_experiments <- function(ws) {
   x
 }
 
-#' Internal function that retrieves a dataset from AzureML.
-#'
-#' @param x a list or data.frame with \code{DownloadLocation} and \code{DataTypeId} fields
-#' @param h optional curl handle
-#' @param quote passed to \code{\link[utils]{read.table}}
-#' @param ... additional parameters to pass to \code{read.table}
-#' @return a data.frame
+# Internal function that retrieves a dataset from AzureML.
+#
+# @param x a list or data.frame with \code{DownloadLocation} and \code{DataTypeId} fields
+# @param h optional curl handle
+# @param quote passed to \code{\link[utils]{read.table}}
+# @param ... additional parameters to pass to \code{read.table}
+# @return a data.frame
 #' @importFrom foreign read.arff
 #' @importFrom curl new_handle curl
-#' @keywords Internal
+# @keywords Internal
 get_dataset <- function(x, h, quote = "\"", ...) {
   # Set default stringsAsFactors to FALSE, but allow users to override in ...
   # Restore the option on function exit.
@@ -153,16 +153,17 @@ zipAvailable <- function(){
 
 zipNotAvailableMessage = "Requires external zip utility. Please install zip, ensure it's on your path and try again."
 
-#' Package a Function and Dependencies into an Environment
-#'
-#' @param exportenv R environment to package
-#' @param packages a character vector of required R package dependencies
-#' @param version optional R version
-#' @return A base64-encoded zip file containing the saved 'exportenv' environment
+
+# Package a Function and Dependencies into an Environment
+#
+# @param exportenv R environment to package
+# @param packages a character vector of required R package dependencies
+# @param version optional R version
+# @return A base64-encoded zip file containing the saved 'exportenv' environment
 #' @import codetools
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
-#' @keywords Internal
+# @keywords Internal
 packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
