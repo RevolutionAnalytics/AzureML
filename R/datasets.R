@@ -48,6 +48,7 @@
 #' @example inst/examples/example_download.R
 download.datasets <- function(dataset, name, ...)
 {
+  if(missing(name)) stop("Must specify both a workspace and dataset name")
   # datasets = source
   if(! missing(name) && is.Workspace(dataset)) datasets = datasets(dataset)
   # Coerce to data frame, if for example presented as a list.
