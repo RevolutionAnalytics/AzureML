@@ -45,15 +45,14 @@ test_wrapper <- function(inputDF, wrapper, fun, output_names, `data.frame`)
   eval(parse(text=wrapper), envir=environment())
 }
 
-
-#' Convert input schema to API expected format.
-#'
-#' Helper function to convert the user-friendly input and output schema parameters to the publishWebService() function to the format expected by the API.
-#'
-#' @param argList list of expected input parameters in the format expected by \code{\link{publishWebService}}
-#' @return list of the format expected by the API
-#'
-#' @keywords internal
+# Convert input schema to API expected format.
+#
+# Helper function to convert the user-friendly input and output schema parameters to the publishWebService() function to the format expected by the API.
+#
+# @param argList list of expected input parameters in the format expected by \code{\link{publishWebService}}
+# @return list of the format expected by the API
+#
+# @keywords internal
 azureSchema <- function(argList) {
   form = list()
   for (arg in names(argList)) {
@@ -83,6 +82,7 @@ azureSchema <- function(argList) {
   }
   return(form)
 }
+
 
 
 #' Publish a function as a Microsoft Azure Web Service.
