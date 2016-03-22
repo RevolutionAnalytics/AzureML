@@ -70,7 +70,7 @@ discoverSchema <- function(helpURL, scheme = "https",
                "/swagger.json")
   
   # parses the content and gets the swagger document
-  r <- try_fetch(uri, handle = new_handle())
+  r <- try_fetch(uri, handle = new_handle(), retry_on = "404")
   swagger <- fromJSON(rawToChar(r$content))
   
   # Accesses the input schema in the swagger document
