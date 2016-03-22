@@ -4,7 +4,8 @@
 \alias{callAPI}
 \title{Framework for making an Azure ML web service API call.}
 \usage{
-callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay = 10)
+callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay = 10,
+  tries = 5)
 }
 \arguments{
 \item{apiKey}{primary API key}
@@ -16,6 +17,8 @@ callAPI(apiKey, requestUrl, keyvalues, globalParam, retryDelay = 10)
 \item{globalParam}{the global parameters for the web service}
 
 \item{retryDelay}{number of seconds to wait after failing (max 3 tries) to try again}
+
+\item{tries}{the number of retry attempts}
 }
 \value{
 result the response

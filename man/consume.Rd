@@ -4,7 +4,8 @@
 \alias{consume}
 \title{Use a web service to score data in list (key=value) format}
 \usage{
-consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
+consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1",
+  tries = 5)
 }
 \arguments{
 \item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
