@@ -86,7 +86,8 @@ try_fetch <- function(uri, handle,
     return(r)
   }
   collisions = 1
-  while(collisions <= (tries + 1)) {
+  printed_message <- FALSE
+  while(collisions < (tries)) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) {
       validate_response(r)
