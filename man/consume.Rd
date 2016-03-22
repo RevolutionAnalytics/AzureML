@@ -2,14 +2,13 @@
 % Please edit documentation in R/consume.R
 \name{consume}
 \alias{consume}
-\title{Use a web service to score data in list (key=value) format}
+\title{Use a web service to score data in list (key=value) format.}
 \usage{
 consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1",
   tries = 5)
 }
 \arguments{
-\item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
-simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.}
+\item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.}
 
 \item{...}{variable number of requests entered as lists in key-value format; optionally a single data frame argument.}
 
@@ -23,8 +22,7 @@ simply an AzureML web service from \code{\link{services}}; in the latter case th
 data frame containing results returned from web service call
 }
 \description{
-Score data represented as lists where each list key represents
-a parameter of the web service.
+Score data represented as lists where each list key represents a parameter of the web service.
 }
 \note{
 Set \code{...} to a list of key/value pairs corresponding to web service inputs. Optionally, set \code{...} to a single data frame with columns corresponding to web service variables. The data frame approach returns output from the evaluation of each row of the data frame (see the examples).

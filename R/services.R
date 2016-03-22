@@ -220,6 +220,7 @@ getEndpoints = endpoints
 #' @export
 endpointHelp <- function(ep, type = c("apidocument", "r-snippet", "score", "jobs", "update"))
 {
+  if(!inherits(ep, "Endpoint")) stop("Object ep must be an endpoint")
   type <- match.arg(type)
   rsnip <- FALSE
   if(type == "r-snippet") {
@@ -235,10 +236,10 @@ endpointHelp <- function(ep, type = c("apidocument", "r-snippet", "score", "jobs
     uri <- gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
   }
   
-  on.exit(close(res))
-  res <- curl(paste(uri, type, sep = "/"))
+  uri <- paste(uri, type, sep = "/")
+  r <- try_fetch(uri, handle = new_handle())
+  txt = rawToChar(r$content)
   
-  txt <- readLines(res, warn = FALSE)
   pattern <- "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
   txt <- gsub(pattern, "\\1", txt)
   txt <- gsub("&.?quot;", "'", txt)
@@ -253,4 +254,10 @@ endpointHelp <- function(ep, type = c("apidocument", "r-snippet", "score", "jobs
   } else {
     txt
   }
+}
+
+endpointInputDefinition <- function(ep, input = "input1"){
+  help <- endpointHelp(ep, type = "apidocument")
+  help$definitions$ExecutionRequest$example$Inputs[[input]]
+  help$definitions$output1Item
 }
