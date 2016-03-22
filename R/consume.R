@@ -22,16 +22,14 @@
 
 
 
-#' Use a web service to score data in list (key=value) format
+#' Use a web service to score data in list (key=value) format.
 #'
-#' Score data represented as lists where each list key represents
-#' a parameter of the web service.
+#' Score data represented as lists where each list key represents a parameter of the web service.
 #'
 #' @export
 #'
 #' @inheritParams refresh
-#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
-#' simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
+#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
 #' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
