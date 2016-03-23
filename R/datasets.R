@@ -46,29 +46,61 @@
 #' \code{\link{download.intermediate.dataset}}
 #' @export
 #' @example inst/examples/example_download.R
+
 download.datasets <- function(dataset, name, ...)
 {
-  # datasets = source
-  if(! missing(name) && is.Workspace(dataset)) datasets = datasets(dataset)
-  # Coerce to data frame, if for example presented as a list.
-  if(is.null(dim(datasets))) datasets = as.data.frame(datasets)
-  if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(datasets))) {
-    stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
-  }
-  # check for dataset name filter
-  if(!missing(name)){
-    if(inherits(name, "character") && !name %in% datasets[["Name"]]){
-      msg <- "You specified a dataset name that is not in the workspace"
-      stop(msg)
+ 
+  # Common functionality refactored here: 
+  processDatasets <- function()   # mydatasets object gets instantiated in the main 
+                                  # body of the function.
+  {
+    if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(mydatasets))) {
+      stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
     }
-    datasets <- datasets[datasets$Name %in% name, ]
-  } 
-  ans = lapply(1:nrow(datasets), 
-               function(j) get_dataset(datasets[j,], ...)
-  )
-  if(length(ans)==1) return(ans[[1]])
-  names(ans) = datasets$Name
-  ans
+    
+    ans = lapply(1:nrow(mydatasets), function(j) get_dataset(mydatasets[j,], ...) )
+    if(length(ans)==1) return(ans[[1]])
+    names(ans) = mydatasets$Name
+    return(ans) 
+  }
+  
+  # Case 1:  1st arg (dataset) is ws, 2nd arg (name) is character vector
+  # Case 2:  1st arg is a Datasets object
+  # Case 3:  arg is a Datasets object (subset of datasets(ws))
+  
+  # Note: name is expected to be a vector of character strings
+  if(missing(dataset)) stop("Must specify at least a dataset argument: see help file for `download.datasets`")
+
+  ## Case 3
+  if(missing(name))   
+  {
+    mydatasets <- dataset     # same as datasets(ws) above -- this is the argument in this case
+    
+    processDatasets()
+  } else {
+  
+      ## Case 1   # OK
+    if(is.Workspace(dataset) && is.character(name)) {     #  && inherits(name, "character") ?
+      ws <- dataset   # make it clear it is a workspace
+      mydatasets = datasets(ws)
+      mydatasets <- mydatasets[mydatasets$Name %in% name, ]
+      
+      processDatasets()
+    }     
+    ## Case 2    # Get the error if this case is added
+    else if ((is(dataset) == "Datasets") && is.character(name)) {   # && inherits(name, "character") ?
+        mydatasets <- dataset     # same as datasets(ws) above -- this is the argument in this case
+        mydatasets <- mydatasets[mydatasets$Name %in% name, ]   # duplicate code -- factor out?
+  
+        processDatasets()
+        
+    }
+  
+    else {
+        stop("Argument types incorrect: see help file for `download.datasets`")
+    }
+    
+  }
 }
 
 #' Download a dataset from an AzureML experiment module.
