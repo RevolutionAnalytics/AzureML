@@ -94,22 +94,22 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 
 
 
-#' Framework for making an Azure ML web service API call.
-#'
-#' Helper function that constructs and send the API call to a Microsoft Azure
-#' Machine Learning web service, then receives and returns the response in JSON format.
-#'
-#' @param apiKey primary API key
-#' @param requestUrl API URL
-#' @param keyvalues the data to be passed to the web service
-#' @param globalParam the global parameters for the web service
-#' @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
-#' @param tries the number of retry attempts
-#' @return result the response
-#'
-#' @importFrom jsonlite toJSON
-#' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
-#' @keywords internal
+# Framework for making an Azure ML web service API call.
+#
+# Helper function that constructs and send the API call to a Microsoft Azure
+# Machine Learning web service, then receives and returns the response in JSON format.
+#
+# @param apiKey primary API key
+# @param requestUrl API URL
+# @param keyvalues the data to be passed to the web service
+# @param globalParam the global parameters for the web service
+# @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
+# @param tries the number of retry attempts
+# @return result the response
+#
+# @importFrom jsonlite toJSON
+# @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
+# @keywords internal
 callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, retryDelay=10, tries = 5) {
   # Set number of tries and HTTP status to 0
   result <- NULL
