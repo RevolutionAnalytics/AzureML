@@ -69,20 +69,16 @@ wrapper <- paste(as.character(body(wrapperFunction)[-1]),
 # @param data.frame i/o format
 # @examples
 # foo <- function(dat)head(dat, 10)
-# e <- test_wrapper(iris, wrapper, foo, names(iris), TRUE)
-# ls(envir = e)
-
-test_wrapper <- function(inputDF, wrapper, fun, output_names, `data.frame`)
+# test_wrapper(foo, iris)
+test_wrapper <- function(fun = function(x)head(x, 3), inputDF = iris, `data.frame` = TRUE)
 {
   exportenv = new.env()
   maml.mapInputPort <- function(x) inputDF
   maml.mapOutputPort <- function(x) get(x)
   load <- function(x) invisible()
   exportenv$..fun = fun
-  exportenv$..output_names = output_names
+  exportenv$..output_names = names(inputDF)
   exportenv$..data.frame = `data.frame`
-  e <- environment()
-  eval(wrapper, envir = e)
-  e
+  eval(parse(text = wrapper))
 }
 
