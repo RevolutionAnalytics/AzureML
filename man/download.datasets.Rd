@@ -50,6 +50,9 @@ in a raw binary R vector, which could then be passed through \code{unzip}, for e
   # Note that one can examine all the names, sizes, etc. of the datasets
   # in ws by examining d:
   d <- datasets(ws)
+  # REMARK: The subset function is currently only implemented for the case 
+  # of a single dataset.  The case of multiple datasets is scheduled as
+  # an enhancement.
   frame3 <- download.datasets(subset(d, Name == name))
 
   head(frame1)
