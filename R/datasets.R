@@ -64,36 +64,47 @@ download.datasets <- function(dataset, name, ...)
     return(ans) 
   }
   
-  # Case 1:  1st arg (dataset) is ws, 2nd arg (name) is character vector
-  # Case 2:  1st arg is a Datasets object
-  # Case 3:  arg is a Datasets object (subset of datasets(ws))
+  # *** Cases 1-3 involve both dataset and name arguments present.  Case 4 is where there
+  # is only a single argument (dataset) provided in the function call. ***
+    # Case 1:  1st arg (dataset) is ws, 2nd arg (name) is character vector
+    # Case 2:  1st arg is a Datasets object, and 2nd arg (name) is character vector
+    # Case 3:  1st arg (dataset) is ws, 2nd arg (name) is a Datasets object
+    # Case 4:  arg is a Datasets object (subset of datasets(ws))
   
   # Note: name is expected to be a vector of character strings
   if(missing(dataset)) stop("Must specify at least a dataset argument: see help file for `download.datasets`")
 
-  ## Case 3
+  ## Case 4
   if(missing(name))   
   {
     mydatasets <- dataset     # same as datasets(ws) above -- this is the argument in this case
-    
     processDatasets()
+    
   } else {
   
       ## Case 1   # OK
-    if(is.Workspace(dataset) && is.character(name)) {     #  && inherits(name, "character") ?
+    if(is.Workspace(dataset) && is.character(name)) {     
       ws <- dataset   # make it clear it is a workspace
       mydatasets = datasets(ws)
       mydatasets <- mydatasets[mydatasets$Name %in% name, ]
       
       processDatasets()
     }     
-    ## Case 2    # Get the error if this case is added
-    else if ((is(dataset) == "Datasets") && is.character(name)) {   # && inherits(name, "character") ?
-        mydatasets <- dataset     # same as datasets(ws) above -- this is the argument in this case
-        mydatasets <- mydatasets[mydatasets$Name %in% name, ]   # duplicate code -- factor out?
+    ## Case 2    
+    else if ((is(dataset) == "Datasets") && is.character(name)) {   
+        mydatasets <- dataset     
+        mydatasets <- mydatasets[mydatasets$Name %in% name, ]   
   
         processDatasets()
         
+    }
+    ## Case 3    
+    else if (is.Workspace(dataset) && (is(name) == "Datasets")) {   
+      mydatasets = datasets(ws)
+      mydatasets <- mydatasets[mydatasets$Name %in% name$Name, ]
+
+      processDatasets()
+      
     }
   
     else {
