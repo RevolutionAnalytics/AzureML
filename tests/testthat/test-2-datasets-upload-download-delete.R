@@ -53,7 +53,7 @@ test_that("Can delete dataset from workspace", {
 test_that("Can download .csv and .tsv files", {
 #  ws <- workspace()  # defined globally in 1st test above
   datasets(ws)
-  names <- c("Energy Efficiency Regression data", "Blood donation data", "MNIST Train 60k 28x28 dense")
+  names <- c("Energy Efficiency Regression data", "Blood donation data", "MNIST Test 10k 28x28 dense")
   # Case 1, as described in help description for download.datasets(.)
   frame1_mult <- download.datasets(ws, names) 
   # Case 2, as described in help description for download.datasets(.)
