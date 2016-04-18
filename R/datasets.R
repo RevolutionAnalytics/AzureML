@@ -47,6 +47,79 @@
 #' @export
 #' @example inst/examples/example_download.R
 
+# download.datasets.new <- function(ws, dataset, name, ...)
+# {
+#   # Must have either ws or dataset (with embedded ws)
+#   # ws = workspace object 
+#   # dataset = Datasets object
+#   # name = vector of particular dataset names
+#   
+#   # *** Cases 1-3 involve both dataset and name arguments present.  Case 4 is where there
+#   # is only a single argument (dataset) provided in the function call. ***
+#   # Case 1:  1st arg is ws, 2nd arg (name) is character vector
+#   # Case 2:  1st arg is a Datasets object, and 2nd arg (name) is character vector
+#   # Case 3:  1st arg is ws, 2nd arg (name) is a Datasets object
+#   # Case 4:  arg is a Datasets object (subset of datasets(ws), or possibly full datasets(ws)?)
+#   
+#   # Common functionality refactored here: 
+#   processDatasets <- function()   # mydatasets object gets instantiated in the main 
+#     # body of the function.
+#   {
+#     if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(mydatasets))) {
+#       stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
+#     }
+#     
+#     ans = lapply(1:nrow(mydatasets), function(j) get_dataset(mydatasets[j,], ...) )
+#     if(length(ans)==1) return(ans[[1]])
+#     names(ans) = mydatasets$Name
+#     return(ans) 
+#   }
+#   
+#   if(missing(ws))  {
+#     ws <<- workspace()
+#     mydatasets <- mydatasets[mydatasets$Name %in% name, ]
+#     
+#     processDatasets()
+#     
+#   }
+# }
+
+download.datasets.ws <- function(ws, name = NULL, dataset = NULL, ...)
+{
+  # Common functionality refactored here: 
+  processDatasets <- function()   # mydatasets object gets instantiated in the main 
+                                  # body of the function.
+  {
+    if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(mydatasets))) {
+      stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
+    }
+    
+    ans = lapply(1:nrow(mydatasets), function(j) get_dataset(mydatasets[j,], ...) )
+    if(length(ans)==1) return(ans[[1]])
+    names(ans) = mydatasets$Name
+    return(ans) 
+  }  
+  
+  if(!(is.null(ws)||is.null(dataset))){
+    stop("ERROR: Workspace and Datasets may not be simultaneously imput; one must be NULL.")
+  } else if (is.Workspace(ws) && (is.character(name))) {   
+    mydatasets = datasets(ws)
+    mydatasets <- mydatasets[mydatasets$Name %in% name, ]
+    
+    processDatasets()
+    
+  } else if (is.Workspace(ws) && (is(dataset) == "Datasets")) {
+    mydatasets = datasets(ws)
+    mydatasets <- mydatasets[mydatasets$Name %in% dataset$Name, ]
+    
+    processDatasets()
+  
+  } else {    # return error
+      stop("Function args must include Workspace object and vector of data source names")
+  }
+  
+}
+
 download.datasets <- function(dataset, name, ...)
 {
  
