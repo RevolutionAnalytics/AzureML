@@ -53,40 +53,58 @@ test_that("Can delete dataset from workspace", {
 test_that("Can download .csv and .tsv files", {
 #  ws <- workspace()  # defined globally in 1st test above
   datasets(ws)
-  names <- c("Energy Efficiency Regression data", "Blood donation data", "MNIST Test 10k 28x28 dense")
+  names <- c("Blood donation data", "Energy Efficiency Regression data", "MNIST Test 10k 28x28 dense")
+  
   # Case 1, as described in help description for download.datasets(.)
-  frame1_mult <- download.datasets(ws, names) 
+  frame1_mult <- download.datasets(ws, names)
+  expect_equal(names(frame1_mult), names)
+  
   # Case 2, as described in help description for download.datasets(.)
   frame2_mult <- download.datasets(datasets(ws), names)
+  expect_equal(names(frame2_mult), names)
+  
   # Case 3, as described in help description for download.datasets(.)
-  # d <- datasets(ws) 
-  # frame3_mult <- download.datasets(subset(d, Name == names))    # ERROR: under investigation
+  d <- datasets(ws) 
+  frame3_mult <- download.datasets(subset(d, Name %in% names))    
+  expect_equal(names(frame3_mult), names)                       
 })
 
 test_that("Can download .zip files", {
 #  ws <- workspace()  # defined globally in 1st test above
   datasets(ws)
   zip_names <- c("text.preprocessing.zip", "fraudTemplateUtil.zip")
+  
   # Case 1, as described in help description for download.datasets(.)
   zipframe1_mult <- download.datasets(ws, zip_names) 
+  expect_equal(names(zipframe1_mult), names)
+  
   # Case 2, as described in help description for download.datasets(.)
   zipframe2_mult <- download.datasets(datasets(ws), zip_names)
+  expect_equal(names(zipframe2_mult), names)
+  
   # Case 3, as described in help description for download.datasets(.)
-  # d <- datasets(ws) 
-  # zipframe3_mult <- download.datasets(subset(d, Name == zip_names))    # ERROR: under investigation
+  d <- datasets(ws) 
+  zipframe3_mult <- download.datasets(subset(d, Name %in% zip_names))    
+  expect_equal(names(zipframe3_mult), names)
 })
 
 test_that("Can download .arff files", {
 #  ws <- workspace()  # defined globally in 1st test above
   datasets(ws)
   arf_names <- c("Breast cancer data", "Forest fires data", "Iris Two Class Data")
+  
   # Case 1, as described in help description for download.datasets(.)
   arf_frame1_mult <- download.datasets(ws, arf_names)
+  expect_equal(names(arf_frame1_mult), names)
+  
   # Case 2, as described in help description for download.datasets(.)
   arf_frame2_mult <- download.datasets(datasets(ws), arf_names)
+  expect_equal(names(arf_frame2_mult), names)
+  
   # Case 3, as described in help description for download.datasets(.)
-  # d <- datasets(ws) 
-  # arf_frame3_mult <- download.datasets(subset(d, Name == arf_names))    # ERROR: under investigation
+  d <- datasets(ws) 
+  arf_frame3_mult <- download.datasets(subset(d, Name %in% arf_names))    
+  expect_equal(names(arf_frame3_mult), names)
 })
 
 
