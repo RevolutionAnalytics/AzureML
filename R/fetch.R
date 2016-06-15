@@ -39,6 +39,7 @@ validate_response <- function(r){
         sprintf("AzureML error code  : %s", body$error$code),
         "", 
         body$error$message,
+        body$error$details$message,
         sep = "\n"
       )
     } else {
@@ -81,6 +82,7 @@ try_fetch <- function(uri, handle,
                       no_message_threshold = 1)
 {
   r = curl_fetch_memory(uri, handle)
+  # if(r$status_code == 400) validate_response(r)
   if(!(r$status_code %in% retry_on)) {
     validate_response(r)
     return(r)

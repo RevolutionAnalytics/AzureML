@@ -81,6 +81,7 @@ inputSchemaIsDataframe <- function(x){
 # azureSchema(iris)
 # azureSchema(list(input1 = iris, input2 = cars))
 azureSchema <- function(object){
+  object_name <- substitute(object)
   if(inherits(object, "azureSchema")) return(object)
   
   # Scalar values already in azure schema format, probably hand coded
@@ -93,8 +94,9 @@ azureSchema <- function(object){
   
   # Scalar values, most likely a data frame
   if(all(sapply(object, typeof) != "list") && (!testAllowedTypes(object))){
-    message("converting inputschema to data frame")
-    object <- list(as.data.frame(object))
+    message(paste0("converting `", object_name, "` to data frame"))
+    # object <- list(as.data.frame(object))
+    object <- as.data.frame(object)
   }
   
   if(!is.list(object)) stop("object must be a list")
