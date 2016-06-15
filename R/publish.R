@@ -84,8 +84,13 @@
 #' @importFrom curl new_handle handle_setheaders handle_setopt
 publishWebService <- function(ws, fun, name,
                               inputSchema, outputSchema, `data.frame`=FALSE,
-                              export=character(0), noexport=character(0), packages,
-                              version="3.1.0", serviceId, host = ws$.management_endpoint)
+                              export=character(0), 
+                              noexport=character(0), 
+                              packages,
+                              version="3.1.0", 
+                              serviceId, 
+                              host = ws$.management_endpoint,
+                              .retry = 3)
 {
   # Perform validation on inputs
   stopIfNotWorkspace(ws)
@@ -102,45 +107,62 @@ publishWebService <- function(ws, fun, name,
                        host, ws$id, serviceId)
   # Make sure schema matches function signature
   if(inputSchemaIsDataframe(inputSchema)){
-    `data.frame` = TRUE
+    `data.frame` <- TRUE
   }
-  if(data.frame) {
-    test = match.fun(fun)(head(inputSchema))
-    inputSchema = azureSchema(inputSchema)
+  if(`data.frame`) {
+    function_output <- match.fun(fun)(head(inputSchema))
+    inputSchema <- azureSchema(inputSchema)
     if(missing(outputSchema)) {
-      if(is.data.frame(test) || is.list(test)) {
-        outputSchema = azureSchema(test)
+      if(is.data.frame(function_output) || is.list(function_output)) {
+        outputSchema <- azureSchema(function_output)
       } else {
-        outputSchema = list(ans = class(test))
+        outputSchema <- azureSchema(list(ans = class(function_output)))
       }
     }
   } else {
-    inputSchema = azureSchema(inputSchema)
-  }
-  inputSchema = azureSchema(inputSchema)
-  outputSchema = azureSchema(outputSchema)
+    # not a data frame
+    inputSchema <- azureSchema(inputSchema)
+    if(missing(outputSchema)) {
+      function_output <- match.fun(fun)(inputSchema)
+      outputSchema <- azureSchema(function_output)[[1]]
+    } else {
+      outputSchema <- azureSchema(outputSchema)
+    }
+    
+  } 
+  # inputSchema <- azureSchema(inputSchema)
+  # outputSchema <- azureSchema(outputSchema)
   # if(`data.frame`) {
   #   if(length(formals(fun)) != 1) {
   #     stop("when data.frame=TRUE fun must only take one data.frame argument")
   #   }
   # } else {
-    # if(length(formals(fun)) != length(inputSchema)) {
-    #   stop("length(inputSchema) does not match the number of function arguments")
-    # }
+  # if(length(formals(fun)) != length(inputSchema)) {
+  #   stop("length(inputSchema) does not match the number of function arguments")
+  # }
   # }
   
-  # Get and encode the dependencies
+  ### Get and encode the dependencies
+  
   if(missing(packages)) packages=NULL
   exportenv = new.env()
-  .getexports(substitute(fun), exportenv, parent.frame(), good = export, bad = noexport)
-  # Assign required objects in the export environment
+  .getexports(substitute(fun), 
+              exportenv, 
+              parent.frame(), 
+              good = export, 
+              bad = noexport
+  )
+  
+  ### Assign required objects in the export environment
+  
   assign("..fun", fun, envir = exportenv)
   assign("..output_names", names(outputSchema), envir = exportenv)
   assign("..data.frame", `data.frame`, envir = exportenv)
   
   zipString = packageEnv(exportenv, packages = packages, version = version)
   
-  # Build the body of the request
+  ### Build the body of the request
+  
   req = list(
     Name = name,
     Type = "Code",
@@ -157,7 +179,7 @@ publishWebService <- function(ws, fun, name,
   )
   h = new_handle()
   httpheader = list(
-    Authorization = paste0("Bearer ", ws$.auth),
+    Authorization = paste("Bearer ", ws$.auth),
     `Content-Type` = "application/json",
     Accept = "application/json"
   )
@@ -169,14 +191,15 @@ publishWebService <- function(ws, fun, name,
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
-  r = try_fetch(publishURL, handle = h)
+  r = try_fetch(publishURL, handle = h, tries = .retry)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)
-  # refresh the workspace cache
+  
+  ### refresh the workspace cache
   refresh(ws, "services")
   
-  # Use discovery functions to get endpoints for immediate use
+  ### Use discovery functions to get endpoints for immediate use
   endpoints(ws, newService["Id"])
 }
 
@@ -186,39 +209,3 @@ publishWebService <- function(ws, fun, name,
 updateWebService = publishWebService
 
 
-#' Delete a Microsoft Azure Web Service
-#'
-#' Delete a Microsoft Azure Machine Learning  web service from your workspace.
-#'
-#' @export
-#'
-#' @inheritParams refresh
-#' @param name Either one row from the workspace \code{services} data.frame corresponding to a service to delete, or simply a service name character string.
-#' @param refresh Set to \code{FALSE} to supress automatic updating of the workspace list of services,
-#' useful when deleting many services in bulk.
-#' @note If more than one service matches the supplied \code{name}, the first listed service will be deleted.
-#' @return The updated data.frame of workspace services is invisibly returned.
-#' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}
-#' @family publishing functions
-#' @example inst/examples/example_publish.R
-deleteWebService <- function(ws, name, refresh = TRUE)
-{
-  #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
-  
-  stopIfNotWorkspace(ws)
-  if(is.data.frame(name) || is.list(name)){
-    name = name$Id[1]
-  } else {
-    name = ws$services[ws$services$Name == name, "Id"][1]
-    if(is.na(name)) stop("service not found")
-  }
-  h = new_handle()
-  handle_setheaders(h, `Authorization`=sprintf("Bearer %s",ws$.auth), .list=ws$.headers)
-  handle_setopt(h, customrequest="DELETE")
-  uri = sprintf("%s/workspaces/%s/webservices/%s", 
-                ws$.management_endpoint, ws$id, name)
-  s = curl_fetch_memory(uri, handle=h)$status_code
-  if(s > 299) stop("HTTP error ",s)
-  if(refresh) refresh(ws, "services")
-  invisible(ws$services)
-}

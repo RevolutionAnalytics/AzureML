@@ -110,7 +110,8 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 # @importFrom jsonlite toJSON
 # @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
 # @keywords internal
-callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, retryDelay=10, tries = 5) {
+callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, 
+                    retryDelay=10, tries = 5) {
   # Set number of tries and HTTP status to 0
   result <- NULL
   # Construct request payload
@@ -119,16 +120,21 @@ callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, retryDelay=10, t
     GlobalParameters = globalParam
   )
   # message(toJSON(req, auto_unbox = TRUE, digits = 16, pretty = TRUE))
-  body <- charToRaw(paste(toJSON(req, auto_unbox = TRUE, digits = 16), collapse = "\n"))
+  body <- charToRaw(paste(
+    toJSON(req, auto_unbox = TRUE, digits = 16),
+    collapse = "\n")
+  )
   h <- new_handle()
   headers <- list(`User-Agent` = "R",
                   `Content-Type` = "application/json",
                   `Authorization` = paste0("Bearer ", apiKey))
   handle_setheaders(h, .list = headers)
-  handle_setopt(h, .list = list(
-    post = TRUE, 
-    postfieldsize = length(body), 
-    postfields = body)
+  handle_setopt(h, 
+                .list = list(
+                  post = TRUE, 
+                  postfieldsize = length(body), 
+                  postfields = body
+                )
   )
   r <- try_fetch(requestUrl, h, delay = retryDelay, tries = tries)
   result <- fromJSON(rawToChar(r$content))
