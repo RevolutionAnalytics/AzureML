@@ -39,6 +39,7 @@ validate_response <- function(r){
         sprintf("AzureML error code  : %s", body$error$code),
         "", 
         body$error$message,
+        body$error$details$message,
         sep = "\n"
       )
     } else {
@@ -80,8 +81,15 @@ try_fetch <- function(uri, handle,
                       delay = 1, exponent = 2,
                       no_message_threshold = 1)
 {
+  r = curl_fetch_memory(uri, handle)
+  # if(r$status_code == 400) validate_response(r)
+  if(!(r$status_code %in% retry_on)) {
+    validate_response(r)
+    return(r)
+  }
   collisions = 1
-  while(collisions < (tries + 1)) {
+  printed_message <- FALSE
+  while(collisions < (tries)) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) {
       validate_response(r)
@@ -100,6 +108,7 @@ try_fetch <- function(uri, handle,
         message(".", appendLF = FALSE)
         Sys.sleep(1)
       }
+      message("")
     } else {
       Sys.sleep(wait_time)
     }

@@ -22,16 +22,14 @@
 
 
 
-#' Use a web service to score data in list (key=value) format
+#' Use a web service to score data in list (key=value) format.
 #'
-#' Score data represented as lists where each list key represents
-#' a parameter of the web service.
+#' Score data represented as lists where each list key represents a parameter of the web service.
 #'
 #' @export
 #'
 #' @inheritParams refresh
-#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or
-#' simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
+#' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
 #' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
 #' @param retryDelay the time in seconds to delay before retrying in case of a server error
@@ -45,7 +43,7 @@
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
-consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "output1")
+consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "output1", tries = 5)
 {
   if(is.Service(endpoint))
   {
@@ -58,7 +56,7 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
   if(!is.Endpoint(endpoint)) {
     stop("Invalid endpoint. Use publishWebservice() or endpoints() to create or obtain a service endpoint.")
   }
-
+  
   apiKey <- endpoint$PrimaryKey
   requestUrl <- endpoint$ApiLocation
   
@@ -69,11 +67,13 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
   requestsLists <- list(...)
   if(length(requestsLists) == 1 && is.data.frame(requestsLists[[1]])) {
     requestsLists <- requestsLists[[1]]
-  } else if(!is.list(requestsLists[[1]])) {
-    requestsLists <- list(requestsLists)
+  } else {
+    if(!is.list(requestsLists[[1]])) {
+      requestsLists <- list(requestsLists)
+    }
   }
   # Make API call with parameters
-  result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay)
+  result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay, tries = tries)
   if(inherits(result, "error")) stop("AzureML returned an error code")
   
   # Access output by converting from JSON into list and indexing into Results
@@ -94,22 +94,24 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 
 
 
-#' Framework for making an Azure ML web service API call.
-#'
-#' Helper function that constructs and send the API call to a Microsoft Azure
-#' Machine Learning web service, then receives and returns the response in JSON format.
-#'
-#' @param apiKey primary API key
-#' @param requestUrl API URL
-#' @param keyvalues the data to be passed to the web service
-#' @param globalParam the global parameters for the web service
-#' @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
-#' @return result the response
-#'
-#' @importFrom jsonlite toJSON
-#' @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
-#' @keywords internal
-callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10) {
+# Framework for making an Azure ML web service API call.
+#
+# Helper function that constructs and send the API call to a Microsoft Azure
+# Machine Learning web service, then receives and returns the response in JSON format.
+#
+# @param apiKey primary API key
+# @param requestUrl API URL
+# @param keyvalues the data to be passed to the web service
+# @param globalParam the global parameters for the web service
+# @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
+# @param tries the number of retry attempts
+# @return result the response
+#
+# @importFrom jsonlite toJSON
+# @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
+# @keywords internal
+callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, 
+                    retryDelay=10, tries = 5) {
   # Set number of tries and HTTP status to 0
   result <- NULL
   # Construct request payload
@@ -117,18 +119,24 @@ callAPI <- function(apiKey, requestUrl, keyvalues,  globalParam, retryDelay=10) 
     Inputs = list(input1 = keyvalues), 
     GlobalParameters = globalParam
   )
-  body <- charToRaw(paste(toJSON(req, auto_unbox=TRUE, digits=16), collapse = "\n"))
+  # message(toJSON(req, auto_unbox = TRUE, digits = 16, pretty = TRUE))
+  body <- charToRaw(paste(
+    toJSON(req, auto_unbox = TRUE, digits = 16),
+    collapse = "\n")
+  )
   h <- new_handle()
   headers <- list(`User-Agent` = "R",
-                 `Content-Type` = "application/json",
-                 `Authorization` = sprintf("Bearer %s", apiKey))
+                  `Content-Type` = "application/json",
+                  `Authorization` = paste0("Bearer ", apiKey))
   handle_setheaders(h, .list = headers)
-  handle_setopt(h, .list = list(
-    post = TRUE, 
-    postfieldsize = length(body), 
-    postfields = body)
+  handle_setopt(h, 
+                .list = list(
+                  post = TRUE, 
+                  postfieldsize = length(body), 
+                  postfields = body
+                )
   )
-  r <- try_fetch(requestUrl, h, delay = retryDelay)
+  r <- try_fetch(requestUrl, h, delay = retryDelay, tries = tries)
   result <- fromJSON(rawToChar(r$content))
   if(r$status_code >= 400)  {
     stop(paste(capture.output(result), collapse="\n"))

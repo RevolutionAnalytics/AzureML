@@ -164,10 +164,11 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 # @keywords Internal
-packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
+packageEnv <- function(exportenv, packages=NULL, version = "3.1.0") {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
-  if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
-  d <- tempfile(pattern="dir")
+  
+  if(!is.null(packages)) assign("..packages", packages, envir = exportenv)
+  d <- tempfile(pattern = "dir")
   on.exit(unlink(d, recursive=TRUE))
   tryCatch(dir.create(d), warning=function(e) stop(e))
   # zip, unfortunately a zip file is apparently an AzureML requirement.
@@ -181,15 +182,21 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
   if(!is.null(packages))
   {
     re = getOption("repos")
-    if(is.null(re)) re = c(CRAN="http://cran.revolutionanalytics.com")
+    if(is.null(re)) re = c(CRAN = "http://cran.revolutionanalytics.com")
     p = paste(d,"packages",sep="/")
     tryCatch(dir.create(p), warning=function(e) stop(e))
-    tryCatch(makeRepo(pkgDep(packages, repos=re, suggests=FALSE), path=p, re, type="win.binary", Rversion=version),
+    tryCatch(makeRepo(pkgDep(packages, 
+                             repos = re, 
+                             suggests = FALSE),
+                      path = p, 
+                      re, 
+                      type = "win.binary", 
+                      Rversion = version),
              error=function(e) stop(e))
   }
   
   z = try({
-    zip(zipfile="export.zip", files=dir(), flags = "-r9Xq")
+    zip(zipfile = "export.zip", files = dir(), flags = "-r9Xq")
   })
   if(inherits(z, "error") || z > 0) stop("Unable to create zip file")
   setwd(cwd)
