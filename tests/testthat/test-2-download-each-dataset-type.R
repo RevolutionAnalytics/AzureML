@@ -46,3 +46,20 @@ test_that(sprintf("Can download dataset of type %s", type), {
   class(dl)
   expect_is(dl, "raw")
 })
+
+
+
+test_that("Multiple file download", {
+  multiple <- oneOfEach[order(oneOfEach$Size, decreasing = FALSE), ][1:3, ]
+  names <- multiple$Name
+  
+  res <- download.datasets(ws, names)
+  expect_equal(names(res), names)
+  
+  res <- download.datasets(datasets(ws), names)
+  expect_equal(names(res), names)
+
+  res <- download.datasets(multiple)
+  expect_equal(names(res), names)
+})
+

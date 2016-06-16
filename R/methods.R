@@ -40,6 +40,15 @@ is.Workspace <- function(x){
   inherits(x, "Workspace")
 }
 
+#' Test if an object is an Azure ML Workspace.
+#' 
+#' @param x an R object
+#' @return logical value, TRUE if \code{x} represents an Azure ML workspace.
+#' @export
+is.Dataset <- function(x){
+  inherits(x, "Datasets")
+}
+
 
 #' Test if an object is an Azure ML Service.
 #' 

@@ -49,69 +49,74 @@
 
 download.datasets <- function(dataset, name, ...)
 {
- 
-  # Common functionality refactored here: 
-  processDatasets <- function()   # mydatasets object gets instantiated in the main 
-                                  # body of the function.
-  {
-    if(!all(c("DownloadLocation", "DataTypeId", "Name") %in% names(mydatasets))) {
-      stop("`datasets` does not contain AzureML Datasets. See ?datasets for help.")
+  
+  validateAllNamesInWorkspace <- function(nm, ds){
+    z <- nm %in% ds$Name
+    if(!all(z)) {
+      nomatch <- nm[!z]
+      msg <- sprintf("Datasets not found in workspace: %s", paste(nomatch, collapse = ", "))
+      stop(msg)
     }
-    
-    ans = lapply(1:nrow(mydatasets), function(j) get_dataset(mydatasets[j,], ...) )
-    if(length(ans)==1) return(ans[[1]])
-    names(ans) = mydatasets$Name
-    return(ans) 
+    TRUE
   }
+  
+  downloadDatasets <- function(){
+    ans = lapply(1:nrow(datasets), 
+                 function(j) get_dataset(datasets[j,], ...)
+    )
+    if(length(ans)==1) return(ans[[1]])
+    names(ans) = datasets$Name
+    ans
+  }
+  
   
   # *** Cases 1-3 involve both dataset and name arguments present.  Case 4 is where there
   # is only a single argument (dataset) provided in the function call. ***
-    # Case 1:  1st arg (dataset) is ws, 2nd arg (name) is character vector
-    # Case 2:  1st arg is a Datasets object, and 2nd arg (name) is character vector
-    # Case 3:  1st arg (dataset) is ws, 2nd arg (name) is a Datasets object
-    # Case 4:  arg is a Datasets object (subset of datasets(ws))
+  # Case 1:  1st arg (dataset) is ws, 2nd arg (name) is character vector
+  # Case 2:  1st arg is a Datasets object, and 2nd arg (name) is character vector
+  # Case 3:  1st arg (dataset) is ws, 2nd arg (name) is a Datasets object
+  # Case 4:  arg is a Datasets object (subset of datasets(ws))
   
   # Note: name is expected to be a vector of character strings
-  if(missing(dataset)) stop("Must specify at least a dataset argument: see help file for `download.datasets`")
-
-  ## Case 4
-  if(missing(name))   
-  {
-    mydatasets <- dataset     # same as datasets(ws) above -- this is the argument in this case
-    processDatasets()
-    
-  } else {
-  
-      ## Case 1   # OK
-    if(is.Workspace(dataset) && is.character(name)) {     
-      ws <- dataset   # make it clear it is a workspace
-      mydatasets = datasets(ws)
-      mydatasets <- mydatasets[mydatasets$Name %in% name, ]
-      
-      processDatasets()
-    }     
-    ## Case 2    
-    else if ((is(dataset) == "Datasets") && is.character(name)) {   
-        mydatasets <- dataset     
-        mydatasets <- mydatasets[mydatasets$Name %in% name, ]   
-  
-        processDatasets()
-        
-    }
-    ## Case 3    
-    else if (is.Workspace(dataset) && (is(name) == "Datasets")) {   
-      mydatasets = datasets(ws)
-      mydatasets <- mydatasets[mydatasets$Name %in% name$Name, ]
-
-      processDatasets()
-      
-    }
-  
-    else {
-        stop("Argument types incorrect: see help file for `download.datasets`")
-    }
-    
+  if(missing(dataset)) {
+    msg <- "Specify at least a dataset argument: see help file for `download.datasets`"
+    stop(msg)
   }
+  
+  if(!missing(name) && is.Dataset(name)){
+    datasets <- name
+    return(downloadDatasets())
+  }
+  
+  if(is.Workspace(dataset)){
+    ws <- dataset   # make it clear it is a workspace
+    datasets = datasets(ws)
+    if(missing(name)){
+      msg <- "Specify the dataset names to download."
+      stop(msg)
+    }
+    validateAllNamesInWorkspace(name, datasets)  
+    # Coerce to data frame, if for example presented as a list.
+    datasets <- datasets[match(name, datasets$Name), ]
+  } 
+  
+  if(is.Dataset(dataset)){
+    datasets <- dataset
+    if(!missing(name) && is.character(name)) {
+      datasets <- datasets[match(name, datasets$Name), ]
+    } else {
+      datasets <- dataset     
+    }
+  }
+  
+  if(!is.Workspace(dataset) && !is.Dataset(dataset)) {
+    msg <- paste("You specified a dataset name that is not in the workspace.", 
+                 "See help file for `download.datasets`")
+    stop(msg)
+  }
+  
+  downloadDatasets()
+  
 }
 
 #' Download a dataset from an AzureML experiment module.
