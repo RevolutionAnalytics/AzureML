@@ -30,10 +30,13 @@ wrapperFunction <- function(){
   load('src/env.RData')
   if(!is.null(exportenv$..packages))
   {
-    install.packages(exportenv$..packages, 
-                     repos = paste0('file:///', getwd(), '/src/packages'), 
-                     lib = getwd()
-    )
+    lapply(exportenv$..packages, function(pkg){
+      if(!require(pkg, character.only = TRUE, quietly = TRUE))
+        install.packages(pkg, 
+                       repos = paste0('file:///', getwd(), '/src/packages'), 
+                       lib = getwd()
+      )
+    })
     .libPaths(new = getwd())
     lapply(exportenv$..packages, require, 
            quietly = TRUE, character.only=TRUE)
