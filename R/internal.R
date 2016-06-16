@@ -40,12 +40,12 @@ get_datasets <- function(ws) {
   handle_setheaders(h, .list = ws$.headers)
   uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
-
+  
   msg <- paste("No results returned from datasets(ws).", 
                "Please check your workspace credentials and api_endpoint are correct.")
   if(inherits(r, "error")){ stop(msg) }
   if(r$status_code >= 400){ stop(msg) }
-
+  
   x <- fromJSON(rawToChar(r$content))
   if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
@@ -62,8 +62,8 @@ get_datasets <- function(ws) {
                                d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
-                           d[, "Location"],
-                           d[, "AccessCredential"])
+                            d[, "Location"],
+                            d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
@@ -188,6 +188,7 @@ packageEnv <- function(exportenv = new.env(), packages=NULL, version = "3.1.0") 
     tryCatch(makeRepo(pkgDep(packages, 
                              repos = re, 
                              type = "win.binary",
+                             Rversion = version,
                              suggests = FALSE),
                       path = tp, 
                       repos = re, 
