@@ -6,7 +6,8 @@ context("Download multiple datasets")
 
 test_that("datasets(ws) returns results", {
   AzureML:::skip_if_missing_config(settingsFile)
-  
+  AzureML:::skip_if_offline()
+
   ws <<- workspace()
   
   x <- datasets(ws)
@@ -18,6 +19,9 @@ test_that("datasets(ws) returns results", {
 
 ## csv and .tsv files:
 test_that("Can download multiple .csv and .tsv files", {
+  AzureML:::skip_if_missing_config(settingsFile)
+  AzureML:::skip_if_offline()
+  
   # ds <- datasets(ws, filter = "samples")
   # ds[grep("[CT]SV", ds$DataTypeId), ]
   names <- c("Time Series Dataset", 
@@ -32,6 +36,9 @@ test_that("Can download multiple .csv and .tsv files", {
 })
 
 test_that("Can download .zip files", {
+  AzureML:::skip_if_missing_config(settingsFile)
+  AzureML:::skip_if_offline()
+  
   # ds <- datasets(ws, filter = "samples")
   # ds[ds$DataTypeId == "Zip", ]
   names <- c("text.preprocessing.zip", "fraudTemplateUtil.zip")
@@ -45,6 +52,9 @@ test_that("Can download .zip files", {
 
 
 test_that("Can download .arff files", {
+  AzureML:::skip_if_missing_config(settingsFile)
+  AzureML:::skip_if_offline()
+  
   # ds <- datasets(ws, filter = "samples")
   # ds[ds$DataTypeId == "ARFF", ]
   names <- c("Breast cancer data", "Forest fires data", "Iris Two Class Data")

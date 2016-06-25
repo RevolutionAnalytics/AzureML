@@ -4,7 +4,8 @@ context("Discover API schema")
 
 
 test_that("discoverSchema() returns help page information", {
-  
+  AzureML:::skip_if_offline()
+
   schemaUrl <- "https://studio.azureml.net/apihelp/workspaces/xxxxx/webservices/yyyyy/endpoints/zzzzz"
   expect_equal(
     getDetailsFromUrl(schemaUrl),

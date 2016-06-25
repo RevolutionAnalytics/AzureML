@@ -4,11 +4,16 @@
 
 if(interactive()) library("testthat")
 
+settingsFile <- AzureML.config.default
+
+
 context("Read dataset from experiment")
 
 test_that("Can read intermediate dataset from workspace", {
-  settingsFile <- AzureML:::AzureML.config.default
   AzureML:::skip_if_missing_config(settingsFile)
+  AzureML:::skip_if_offline()
+
+  settingsFile <- AzureML:::AzureML.config.default
   js <- jsonlite::fromJSON(settingsFile)
   id <- js$workspace$id
   auth <- js$workspace$authorization_token
