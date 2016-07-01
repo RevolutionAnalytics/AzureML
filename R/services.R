@@ -196,70 +196,68 @@ endpoints <- function(ws, service_id, endpoint_id, host = ws$.management_endpoin
 getEndpoints = endpoints
 
 
-#' Display AzureML Web Service Endpoint Help Screens
+#' Display AzureML Web Service Endpoint Help Screens.
 #'
 #' Download and return help for the specified AzureML web service endpoint.
 #'
-#' @param e an AzureML web service endpoint from the \code{\link{endpoints}} function.
+#' @param ep an AzureML web service endpoint from the \code{\link{endpoints}} function.
 #' @param type the type of help to display.
 #' 
-#' @return The help text is returned. If \code{type="apidocument"}, then the help
-#' is returned as a list from a parsed JSON document describing the service.
+#' @return Returns the help text. If \code{type = "apidocument"}, then returns the help as a list from a parsed JSON document describing the service.
 #' @family discovery functions
 #' @examples
 #' \dontrun{
-#' workspace_id <- ""          # Your AzureML workspace id
-#' authorization_token <- ""   # Your AzureML authorization token
-#'
-#' ws <- workspace(
-#'   id = workspace_id,
-#'   auth = authorization_token
-#' )
+#' ws <- workspace()
 #'
 #' s <- services(ws)
 #' e <- endpoints(ws, s[1,])
-#' endpointHelp(e[1,])
+#' endpointHelp(e)
 #'
 #' Particularly useful way to see expected service input and output:
-#' endpointHelp(e[1,])$definitions
-#' 
+#' endpointHelp(e)$definitions
 #' 
 #' }
 #' @export
-endpointHelp <- function(e, type = c("apidocument", "r-snippet","score","jobs","update"))
+endpointHelp <- function(ep, type = c("apidocument", "r-snippet", "score", "jobs", "update"))
 {
-  type = match.arg(type)
-  rsnip = FALSE
-  if(type=="r-snippet") {
-    type = "score"
-    rsnip = TRUE
+  if(!inherits(ep, "Endpoint")) stop("Object ep must be an endpoint")
+  type <- match.arg(type)
+  rsnip <- FALSE
+  if(type == "r-snippet") {
+    type <- "score"
+    rsnip <- TRUE
   }
-  uri = e$HelpLocation[1]
+  uri <- ep$HelpLocation[1]
   
   # XXX This is totally nuts, and not documented, but help hosts vary depending on type.
   # Arrghhh...
   if(type == "apidocument"){
-    uri = gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
-    uri = gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
+    uri <- gsub("studio.azureml.net/apihelp", "management.azureml.net", uri)
+    uri <- gsub("studio.azureml-int.net/apihelp", "management.azureml-int.net", uri)
   }
   
-  pattern = "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
-  con = curl(paste(uri, type, sep="/"))
-  text = paste(
-    gsub(
-      "&.?quot;", "'", 
-      gsub(pattern, "\\1", 
-           readLines(con, warn = FALSE)
-      )
-    ),
-    collapse="\n"
-  )
-  close(con)
+  uri <- paste(uri, type, sep = "/")
+  r <- try_fetch(uri, handle = new_handle())
+  txt = rawToChar(r$content)
+  
+  pattern <- "</?\\w+((\\s+\\w+(\\s*=\\s*(?:\".*?\"|'.*?'|[^'\">\\s]+))?)+\\s*|\\s*)/?>"
+  txt <- gsub(pattern, "\\1", txt)
+  txt <- gsub("&.?quot;", "'", txt)
+  txt <- paste(txt, collapse = "\n")
   if(rsnip) {
-    text = substr(text, 
-                  grepRaw("code-snippet-r", text) + nchar("code-snippet-r") + 2, nchar(text)
+    txt <- substr(txt, 
+                  grepRaw("code-snippet-r", txt) + nchar("code-snippet-r") + 2, nchar(txt)
     )
   }
-  if(type == "apidocument") text = fromJSON(text)
-  text
+  if(type == "apidocument"){
+    fromJSON(txt)
+  } else {
+    txt
+  }
+}
+
+endpointInputDefinition <- function(ep, input = "input1"){
+  help <- endpointHelp(ep, type = "apidocument")
+  help$definitions$ExecutionRequest$example$Inputs[[input]]
+  help$definitions$output1Item
 }

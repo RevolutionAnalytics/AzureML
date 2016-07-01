@@ -2,40 +2,32 @@
 % Please edit documentation in R/services.R
 \name{endpointHelp}
 \alias{endpointHelp}
-\title{Display AzureML Web Service Endpoint Help Screens}
+\title{Display AzureML Web Service Endpoint Help Screens.}
 \usage{
-endpointHelp(e, type = c("apidocument", "r-snippet", "score", "jobs",
+endpointHelp(ep, type = c("apidocument", "r-snippet", "score", "jobs",
   "update"))
 }
 \arguments{
-\item{e}{an AzureML web service endpoint from the \code{\link{endpoints}} function.}
+\item{ep}{an AzureML web service endpoint from the \code{\link{endpoints}} function.}
 
 \item{type}{the type of help to display.}
 }
 \value{
-The help text is returned. If \code{type="apidocument"}, then the help
-is returned as a list from a parsed JSON document describing the service.
+Returns the help text. If \code{type = "apidocument"}, then returns the help as a list from a parsed JSON document describing the service.
 }
 \description{
 Download and return help for the specified AzureML web service endpoint.
 }
 \examples{
 \dontrun{
-workspace_id <- ""          # Your AzureML workspace id
-authorization_token <- ""   # Your AzureML authorization token
-
-ws <- workspace(
-  id = workspace_id,
-  auth = authorization_token
-)
+ws <- workspace()
 
 s <- services(ws)
 e <- endpoints(ws, s[1,])
-endpointHelp(e[1,])
+endpointHelp(e)
 
 Particularly useful way to see expected service input and output:
-endpointHelp(e[1,])$definitions
-
+endpointHelp(e)$definitions
 
 }
 }

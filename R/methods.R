@@ -24,7 +24,7 @@
 stopIfNotWorkspace <- function(x){
   if(!is.Workspace(x)) {
     msg <- paste0("Error in ", as.character(sys.call(-1))[1], "()\n",
-                 "ws must be a Workspace object. See ?workspace"
+                  "ws must be a Workspace object. See ?workspace"
     )
     stop(msg, call. = FALSE)
   }
@@ -38,6 +38,15 @@ stopIfNotWorkspace <- function(x){
 #' @export
 is.Workspace <- function(x){
   inherits(x, "Workspace")
+}
+
+#' Test if an object is an Azure ML Dataset.
+#' 
+#' @param x an R object
+#' @return logical value, TRUE if \code{x} represents an Azure ML Dataset.
+#' @export
+is.Dataset <- function(x){
+  inherits(x, "Datasets")
 }
 
 

@@ -21,69 +21,6 @@
 # THE SOFTWARE.
 
 
-# `wrapper` is the expression executed in the AzureML R environment.  The
-# publishWebService function sets up the environment "exportenv" from which
-# this expression follows.
-
-wrapper = "inputDF <- maml.mapInputPort(1)\nload('src/env.RData')\n if(!is.null(exportenv$..packages))\n {\n install.packages(exportenv$..packages, repos=paste('file:///',getwd(),'/src/packages',sep=''), lib=getwd());.libPaths(new=getwd())\n lapply(exportenv$..packages, require, quietly=TRUE, character.only=TRUE)}\nparent.env(exportenv) = globalenv()\n\nattach(exportenv, warn.conflicts=FALSE)\nif(..data.frame){outputDF <- data.frame(..fun(inputDF)); colnames(outputDF) <- ..output_names} else{outputDF <- matrix(nrow=nrow(inputDF), ncol=length(..output_names)); colnames(outputDF) <- ..output_names; outputDF <- data.frame(outputDF); for(j in 1:nrow(inputDF)){outputDF[j, ] <- do.call('..fun', as.list(inputDF[j,]))}}\nmaml.mapOutputPort(\"outputDF\")"
-
-# Test the AzureML wrapper locally
-# @param inputDF data frame
-# @param wrapper the AzureML R wrapper code
-# @param fun a function to test
-# @param output_names character vector of function output names
-# @param data.frame i/o format
-test_wrapper <- function(inputDF, wrapper, fun, output_names, `data.frame`)
-{
-  exportenv = new.env()
-  maml.mapInputPort <- function(x) inputDF
-  maml.mapOutputPort <- function(x) get(x)
-  load <- function(x) invisible()
-  exportenv$..fun = fun
-  exportenv$..output_names = output_names
-  exportenv$..data.frame = `data.frame`
-  eval(parse(text=wrapper), envir=environment())
-}
-
-
-#' Convert input schema to API expected format.
-#'
-#' Helper function to convert the user-friendly input and output schema parameters to the publishWebService() function to the format expected by the API.
-#'
-#' @param argList list of expected input parameters in the format expected by \code{\link{publishWebService}}
-#' @return list of the format expected by the API
-#'
-#' @keywords internal
-azureSchema <- function(argList) {
-  form = list()
-  for (arg in names(argList)) {
-    type = argList[[arg]]
-    
-    if ("numeric" %in% type || "double" %in% type) {
-      form[[ arg ]] = list("type"="number", "format"="double")
-    }
-    else if ("date-time" %in% type || "time-span" %in% type) {
-      form[[arg]] = list("type"="string", "format"=type)
-    }
-    else if (any(c("uint16", "int16", "uint32", "int32", "uint64", "int64") %in% type)) {
-      form[[arg]] = list("type"="integer", "format"=type)
-    }
-    else if ("integer" %in% type) {
-      form[[arg]] = list("type"="integer", "format"="int32")
-    }
-    else if (any(c("logical", "bool", "boolean") %in% type)) {
-      form[[arg]] = list("type"="boolean")
-    }
-    else if (any(c("character", "string", "factor", "ordered") %in% type)) {
-      form[[arg]] = list("type"="string", "format"="string")
-    }
-    else {
-      stop(sprintf("Error: data type \"%s\" not supported", type), call. = TRUE)
-    }
-  }
-  return(form)
-}
-
 
 #' Publish a function as a Microsoft Azure Web Service.
 #'
@@ -146,9 +83,14 @@ azureSchema <- function(argList) {
 #' @importFrom uuid UUIDgenerate
 #' @importFrom curl new_handle handle_setheaders handle_setopt
 publishWebService <- function(ws, fun, name,
-                             inputSchema, outputSchema, `data.frame`=FALSE,
-                             export=character(0), noexport=character(0), packages,
-                             version="3.1.0", serviceId, host = ws$.management_endpoint)
+                              inputSchema, outputSchema, `data.frame`=FALSE,
+                              export=character(0), 
+                              noexport=character(0), 
+                              packages,
+                              version="3.1.0", 
+                              serviceId, 
+                              host = ws$.management_endpoint,
+                              .retry = 3)
 {
   # Perform validation on inputs
   stopIfNotWorkspace(ws)
@@ -160,62 +102,84 @@ publishWebService <- function(ws, fun, name,
   if(missing(serviceId) && as.character(match.call()[1]) == "updateWebService")
     stop("updateWebService requires that the serviceId parameter is specified")
   if(missing(name) && !missing(serviceId)) name = "" # unused in this case
-  if(missing(serviceId)) serviceId = gsub("-", "", UUIDgenerate(use.time=TRUE))
+  if(missing(serviceId)) serviceId = gsub("-", "", UUIDgenerate(use.time = TRUE))
   publishURL = sprintf("%s/workspaces/%s/webservices/%s",
                        host, ws$id, serviceId)
   # Make sure schema matches function signature
-  if(is.data.frame(inputSchema))
-  {
-    `data.frame` = TRUE
-    test = match.fun(fun)(head(inputSchema))
-    inputSchema = azureSchema(lapply(inputSchema, class))
-    if(missing(outputSchema))
-    {
-      if(is.data.frame(test) || is.list(test)) outputSchema = azureSchema(lapply(test, class))
-      else outputSchema = list(ans=class(test))
+  if(inputSchemaIsDataframe(inputSchema)){
+    `data.frame` <- TRUE
+  }
+  if(`data.frame`) {
+    function_output <- match.fun(fun)(head(inputSchema))
+    inputSchema <- azureSchema(inputSchema)
+    if(missing(outputSchema)) {
+      if(is.data.frame(function_output) || is.list(function_output)) {
+        outputSchema <- azureSchema(function_output)
+      } else {
+        outputSchema <- azureSchema(list(ans = class(function_output)))
+      }
     }
-  } else 
-  {
-    inputSchema = azureSchema(inputSchema)
-  }
-  outputSchema = azureSchema(outputSchema)
-  if(`data.frame`)
-  {
-    if(length(formals(fun)) != 1) stop("when data.frame=TRUE fun must only take one data.frame argument")
-  } else 
-  {
-    if(length(formals(fun)) != length(inputSchema)) stop("length(inputSchema) does not match the number of function arguments")
-  }
+  } else {
+    # not a data frame
+    inputSchema <- azureSchema(inputSchema)
+    if(missing(outputSchema)) {
+      function_output <- match.fun(fun)(inputSchema)
+      outputSchema <- azureSchema(function_output)[[1]]
+    } else {
+      outputSchema <- azureSchema(outputSchema)
+    }
+    
+  } 
+  # inputSchema <- azureSchema(inputSchema)
+  # outputSchema <- azureSchema(outputSchema)
+  # if(`data.frame`) {
+  #   if(length(formals(fun)) != 1) {
+  #     stop("when data.frame=TRUE fun must only take one data.frame argument")
+  #   }
+  # } else {
+  # if(length(formals(fun)) != length(inputSchema)) {
+  #   stop("length(inputSchema) does not match the number of function arguments")
+  # }
+  # }
   
-  # Get and encode the dependencies
+  ### Get and encode the dependencies
+  
   if(missing(packages)) packages=NULL
   exportenv = new.env()
-  .getexports(substitute(fun), exportenv, parent.frame(), good=export, bad=noexport)
-  # Assign required objects in the export environment
-  assign("..fun", fun, envir=exportenv)
-  assign("..output_names", names(outputSchema), envir=exportenv)
-  assign("..data.frame", `data.frame`, envir=exportenv)
+  .getexports(substitute(fun), 
+              exportenv, 
+              parent.frame(), 
+              good = export, 
+              bad = noexport
+  )
   
-  zipString = packageEnv(exportenv, packages=packages, version=version)
+  ### Assign required objects in the export environment
   
-  # Build the body of the request
+  assign("..fun", fun, envir = exportenv)
+  assign("..output_names", names(outputSchema), envir = exportenv)
+  assign("..data.frame", `data.frame`, envir = exportenv)
+  
+  zipString = packageEnv(exportenv, packages = packages, version = version)
+  
+  ### Build the body of the request
+  
   req = list(
     Name = name,
     Type = "Code",
     CodeBundle = list(
-      InputSchema = inputSchema,
+      InputSchema  = inputSchema,
       OutputSchema = outputSchema,
-      Language = "R-3.1-64",
-      SourceCode = wrapper,
-      ZipContents = zipString
+      Language     = "R-3.1-64",
+      SourceCode   = wrapper,
+      ZipContents  = zipString
     )
   )
   body = charToRaw(
-    paste(toJSON(req, auto_unbox=TRUE), collapse="\n")
+    paste(toJSON(req, auto_unbox = TRUE), collapse = "\n")
   )
   h = new_handle()
   httpheader = list(
-    Authorization = paste("Bearer", ws$.auth, sep=' '),
+    Authorization = paste("Bearer ", ws$.auth),
     `Content-Type` = "application/json",
     Accept = "application/json"
   )
@@ -227,14 +191,15 @@ publishWebService <- function(ws, fun, name,
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
-  r = try_fetch(publishURL, handle = h)
+  r = try_fetch(publishURL, handle = h, tries = .retry)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)
-  # refresh the workspace cache
+  
+  ### refresh the workspace cache
   refresh(ws, "services")
   
-  # Use discovery functions to get endpoints for immediate use
+  ### Use discovery functions to get endpoints for immediate use
   endpoints(ws, newService["Id"])
 }
 
@@ -244,39 +209,3 @@ publishWebService <- function(ws, fun, name,
 updateWebService = publishWebService
 
 
-#' Delete a Microsoft Azure Web Service
-#'
-#' Delete a Microsoft Azure Machine Learning  web service from your workspace.
-#'
-#' @export
-#'
-#' @inheritParams refresh
-#' @param name Either one row from the workspace \code{services} data.frame corresponding to a service to delete, or simply a service name character string.
-#' @param refresh Set to \code{FALSE} to supress automatic updating of the workspace list of services,
-#' useful when deleting many services in bulk.
-#' @note If more than one service matches the supplied \code{name}, the first listed service will be deleted.
-#' @return The updated data.frame of workspace services is invisibly returned.
-#' @seealso \code{\link{services}} \code{\link{publishWebService}} \code{\link{updateWebService}}
-#' @family publishing functions
-#' @example inst/examples/example_publish.R
-deleteWebService <- function(ws, name, refresh = TRUE)
-{
-  #DELETE https://management.azureml.net/workspaces/{id}/webservices/{id}[/endpoints/{name}]
-  
-  stopIfNotWorkspace(ws)
-  if(is.data.frame(name) || is.list(name)){
-    name = name$Id[1]
-  } else {
-    name = ws$services[ws$services$Name == name, "Id"][1]
-    if(is.na(name)) stop("service not found")
-  }
-  h = new_handle()
-  handle_setheaders(h, `Authorization`=sprintf("Bearer %s",ws$.auth), .list=ws$.headers)
-  handle_setopt(h, customrequest="DELETE")
-  uri = sprintf("%s/workspaces/%s/webservices/%s", 
-                ws$.management_endpoint, ws$id, name)
-  s = curl_fetch_memory(uri, handle=h)$status_code
-  if(s > 299) stop("HTTP error ",s)
-  if(refresh) refresh(ws, "services")
-  invisible(ws$services)
-}

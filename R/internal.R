@@ -40,12 +40,12 @@ get_datasets <- function(ws) {
   handle_setheaders(h, .list = ws$.headers)
   uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
   r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
-
+  
   msg <- paste("No results returned from datasets(ws).", 
                "Please check your workspace credentials and api_endpoint are correct.")
   if(inherits(r, "error")){ stop(msg) }
   if(r$status_code >= 400){ stop(msg) }
-
+  
   x <- fromJSON(rawToChar(r$content))
   if(is.null(x) || is.na(x$Name[1])){
     x = data.frame()
@@ -62,8 +62,8 @@ get_datasets <- function(ws) {
                                d[, "AccessCredential"])
   d = x[,"SchemaEndPoint"]
   x$SchemaEndPoint = paste0(d[, "BaseUri"], 
-                           d[, "Location"],
-                           d[, "AccessCredential"])
+                            d[, "Location"],
+                            d[, "AccessCredential"])
   class(x) = c("Datasets", "data.frame")
   x
 }
@@ -164,16 +164,17 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 # @keywords Internal
-packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
+packageEnv <- function(exportenv = new.env(), packages=NULL, version = "3.1.0") {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
-  if(!is.null(packages)) assign("..packages", packages, envir=exportenv)
-  d <- tempfile(pattern="dir")
-  on.exit(unlink(d, recursive=TRUE))
-  tryCatch(dir.create(d), warning=function(e) stop(e))
+  
+  if(!is.null(packages)) assign("..packages", packages, envir = exportenv)
+  td <- tempfile(pattern = "dir")
+  on.exit(unlink(td, recursive=TRUE))
+  tryCatch(dir.create(td), warning=function(e) stop(e))
   # zip, unfortunately a zip file is apparently an AzureML requirement.
   cwd = getwd()
-  on.exit(setwd(cwd), add=TRUE)
-  setwd(d)
+  on.exit(setwd(cwd), add = TRUE)
+  setwd(td)
   # save export environment to an RData file
   save(exportenv, file="env.RData")
   
@@ -181,18 +182,26 @@ packageEnv <- function(exportenv, packages=NULL, version="3.1.0") {
   if(!is.null(packages))
   {
     re = getOption("repos")
-    if(is.null(re)) re = c(CRAN="http://cran.revolutionanalytics.com")
-    p = paste(d,"packages",sep="/")
-    tryCatch(dir.create(p), warning=function(e) stop(e))
-    tryCatch(makeRepo(pkgDep(packages, repos=re, suggests=FALSE), path=p, re, type="win.binary", Rversion=version),
+    if(is.null(re)) re = c(CRAN = "http://cran.revolutionanalytics.com")
+    tp = file.path(td,"packages", fsep = "/")
+    tryCatch(dir.create(tp), warning = function(e) stop(e))
+    tryCatch(makeRepo(pkgDep(packages, 
+                             repos = re, 
+                             type = "win.binary",
+                             Rversion = version,
+                             suggests = FALSE),
+                      path = tp, 
+                      repos = re, 
+                      type = "win.binary", 
+                      Rversion = version),
              error=function(e) stop(e))
   }
   
   z = try({
-    zip(zipfile="export.zip", files=dir(), flags = "-r9Xq")
+    zip(zipfile = "export.zip", files = dir(), flags = "-r9Xq")
   })
   if(inherits(z, "error") || z > 0) stop("Unable to create zip file")
   setwd(cwd)
-  base64encode(paste(d, "export.zip", sep="/"))
+  base64encode(file.path(td, "export.zip", fsep="/"))
 }
 

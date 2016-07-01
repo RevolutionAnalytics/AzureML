@@ -7,11 +7,13 @@
 \usage{
 publishWebService(ws, fun, name, inputSchema, outputSchema,
   data.frame = FALSE, export = character(0), noexport = character(0),
-  packages, version = "3.1.0", serviceId, host = ws$.management_endpoint)
+  packages, version = "3.1.0", serviceId, host = ws$.management_endpoint,
+  .retry = 3)
 
 updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
   export = character(0), noexport = character(0), packages,
-  version = "3.1.0", serviceId, host = ws$.management_endpoint)
+  version = "3.1.0", serviceId, host = ws$.management_endpoint,
+  .retry = 3)
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}

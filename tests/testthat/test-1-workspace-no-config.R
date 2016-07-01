@@ -9,8 +9,7 @@ workspace <- function(..., .validate = FALSE) AzureML::workspace(..., .validate 
 context("workspace - connect to workspace with no config file")
 
 test_that("Can connect to workspace with no config file", {
-  # AzureML:::skip_if_missing_config(settingsFile)
-  
+
   opts <- getOption("AzureML.config")
   options(AzureML.config = tempfile(fileext = ".tmp"))
   on.exit(options(AzureML.config = opts))
