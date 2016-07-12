@@ -39,6 +39,8 @@ updateWebService(ws, fun, name, inputSchema, outputSchema, data.frame = FALSE,
 \item{serviceId}{optional Azure web service ID; use to update an existing service (see Note below).}
 
 \item{host}{optional Azure regional host, defaulting to the global \code{management_endpoint} set in \code{\link{workspace}}}
+
+\item{.retry}{number of tries before failing}
 }
 \value{
 A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.

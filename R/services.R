@@ -75,7 +75,7 @@ services <- function(ws, service_id, name, host = ws$.management_endpoint)
   }
   
   uri <- sprintf("%s/workspaces/%s/webservices%s", host, ws$id, service_id)
-  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, .retry = 3)
   #   if(inherits(r, "error")){
   #     msg <- paste("No results returned from datasets(ws).", 
   #                  "Please check your workspace credentials and api_endpoint are correct.")

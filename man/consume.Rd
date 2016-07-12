@@ -5,7 +5,7 @@
 \title{Use a web service to score data in list (key=value) format.}
 \usage{
 consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1",
-  tries = 5)
+  .retry = 5)
 }
 \arguments{
 \item{endpoint}{Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.}
@@ -17,6 +17,8 @@ consume(endpoint, ..., globalParam, retryDelay = 10, output = "output1",
 \item{retryDelay}{the time in seconds to delay before retrying in case of a server error}
 
 \item{output}{name of the output port to return usually 'output1' or 'output2'; set to NULL to return everything as raw results in JSON-encoded list form}
+
+\item{.retry}{number of tries before failing}
 }
 \value{
 data frame containing results returned from web service call

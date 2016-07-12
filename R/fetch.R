@@ -67,7 +67,7 @@ validate_response <- function(r){
 # @param uri the uri to fetch
 # @param handle a curl handle
 # @param retry_on HTTP status codes that result in retry
-# @param tries number of tries before failing
+# @param .retry number of tries before failing
 # @param delay in seconds between retries, subject to exponent
 # @param exponent increment each successive delay by delay^exponent
 # @param no_message_threshold Only show messages if delay is greater than this limit
@@ -77,7 +77,7 @@ validate_response <- function(r){
 # 
 try_fetch <- function(uri, handle, 
                       retry_on = c(400, 401, 440, 503, 504, 509), 
-                      tries = 6, 
+                      .retry = 6, 
                       delay = 1, exponent = 2,
                       no_message_threshold = 1)
 {
@@ -89,7 +89,7 @@ try_fetch <- function(uri, handle,
   }
   collisions = 1
   printed_message <- FALSE
-  while(collisions < (tries)) {
+  while(collisions < (.retry)) {
     r = curl_fetch_memory(uri, handle)
     if(!(r$status_code %in% retry_on)) {
       validate_response(r)
