@@ -50,7 +50,7 @@ Authorization token
 \if{latex}{\figure{authorizationToken.pdf}{options: width=7cm}}
 }
 
-\section{Using a \code{settings.json} file}{
+\section{Using a settings.json file}{
 
  If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:
  \preformatted{
@@ -58,8 +58,37 @@ Authorization token
    "id": "enter your AzureML workspace id here",
    "authorization_token": "enter your AzureML authorization token here",
    "api_endpoint": "https://studioapi.azureml.net",
+ }}
+}
+
+To explicitly add the management endpoint in the JSON file, use:
+ \preformatted{
+ {"workspace":{
+   "id": "enter your AzureML workspace id here",
+   "authorization_token": "enter your AzureML authorization token here",
+   "api_endpoint": "https://studioapi.azureml.net",
    "management_endpoint": "https://management.azureml.net"
  }}
+}
+}
+
+\section{Using a workspace in different Azure ML regions}{
+
+
+By default, the Azure Machine Learning workspace is located in US South Central, but it is possible to create a workspace in different regions, including Europe West and Asia Southeast.
+
+To use a workspace in Asia Southeast, you can modify the api endpoint line in the JSON file:
+ \preformatted{
+  {"workspace": {
+    "api_endpoint": ["https://asiasoutheast.studio.azureml.net"]
+  }}
+}
+
+Similarly, for a workspace in Europe West:
+ \preformatted{
+  {"workspace": {
+    "api_endpoint": ["https://europewest.studio.azureml.net"]
+  }}
 }
 }
 \seealso{
