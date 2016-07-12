@@ -86,42 +86,14 @@ discoverSchema <- function(helpURL, scheme = "https",
   
   # Accesses the names of the columns in the example
   # and stores it in a list of column names
-#   columnNames <- vector("list", length = length(inputExample))
-#   columnNames <- list()
-#   for(i in seq_along(inputExample)) {
-#     columnNames[[i]] = names(inputExample)[i]
-#   }
   columnNames <- lapply(seq_along(inputExample), function(i)names(inputExample[i]))
 
-    # Uses multiple nested loops to access the various paths in the 
-  # swagger document and find the execution path
-  foundExecPath = FALSE
-  pathNo = 0
-  execPathNo = -1
-  for(execPath in swagger$paths) {
-    pathNo = pathNo + 1
-    for(operationpath in execPath) {
-      for(operation in operationpath) {
-        # Goes through the characteristcs in every operation e.g. operationId
-        for(charac in operation) {
-          # Finds the path in which the 
-          # operationId (characteristic of the path) == execute 
-          # and sets the execution path number
-          if(charac[1] == "execute")
-          {
-            #Sets found execution path to true
-            foundExecPath = TRUE
-            execPathNo = pathNo
-            break
-          }
-        }
-      }
-    }
+  execPathNo <- grep("/execute\\?", names(swagger$paths))
+  if(is.numeric(execPathNo)) {
+    executePath <- names(swagger$paths)[[execPathNo]]
+  } else {
+    "Path not found"
   }
-  
-  # Stores the execution path
-  executePath <- if(foundExecPath) names(swagger$paths)[[execPathNo]] 
-  else "Path not found"
   
   # Constructs the request URL with the parameters as well as execution path found. 
   # The separator is set to an empty string
