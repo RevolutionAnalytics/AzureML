@@ -12,7 +12,7 @@ workspace(id, auth, api_endpoint, management_endpoint,
 
 \item{auth}{Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.}
 
-\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \code{https://studioap.azureml.net} if not provided and not specified in config.  See note.}
+\item{api_endpoint}{Optional AzureML API web service URI. Defaults to \code{https://studioapi.azureml.net} if not provided and not specified in config.  See note.}
 
 \item{management_endpoint}{Optional AzureML management web service URI. Defaults to \code{https://management.azureml.net} if not provided and not specified in config.  See note.}
 

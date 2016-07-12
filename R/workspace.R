@@ -88,7 +88,7 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' 
 #' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID. See the section "Finding your AzureML credentials" for more details.
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.
-#' @param api_endpoint Optional AzureML API web service URI. Defaults to \code{https://studioap.azureml.net} if not provided and not specified in config.  See note.
+#' @param api_endpoint Optional AzureML API web service URI. Defaults to \code{https://studioapi.azureml.net} if not provided and not specified in config.  See note.
 #' @param management_endpoint Optional AzureML management web service URI. Defaults to \code{https://management.azureml.net} if not provided and not specified in config.  See note.
 #' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}. See the section "Using a settings.json file" for more details.
 #' @param ... ignored
