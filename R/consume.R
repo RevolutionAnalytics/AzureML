@@ -137,7 +137,7 @@ callAPI <- function(apiKey, requestUrl, keyvalues, globalParam,
                   postfields = body
                 )
   )
-  r <- try_fetch(requestUrl, h, delay = retryDelay, .retry = .retry)
+  r <- try_fetch(requestUrl, h, no_retry_on = 400, delay = retryDelay, .retry = .retry)
   result <- fromJSON(rawToChar(r$content))
   if(r$status_code >= 400)  {
     stop(paste(capture.output(result), collapse="\n"))
