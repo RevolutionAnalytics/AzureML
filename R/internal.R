@@ -39,7 +39,7 @@ get_datasets <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list = ws$.headers)
   uri <- sprintf("%s/workspaces/%s/datasources", ws$.studioapi, ws$id)
-  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, .retry = 3)
   
   msg <- paste("No results returned from datasets(ws).", 
                "Please check your workspace credentials and api_endpoint are correct.")
@@ -89,7 +89,7 @@ get_experiments <- function(ws) {
   h = new_handle()
   handle_setheaders(h, .list=ws$.headers)
   uri = sprintf("%s/workspaces/%s/experiments", ws$.studioapi, ws$id)
-  r <- try_fetch(uri = uri, handle = h, delay = 0.25, tries = 3)
+  r <- try_fetch(uri = uri, handle = h, delay = 0.25, .retry = 3)
   
   msg <- paste("No results returned from experiments(ws).", 
                "Please check your workspace credentials and api_endpoint are correct.")

@@ -268,7 +268,7 @@ delete.datasets <- function(ws, name, host){
                    curl_escape(ws$id),
                    curl_escape(familyId)
     )
-    z <- try_fetch(uri, h, tries = 3, delay = 2)
+    z <- try_fetch(uri, h, .retry = 3, delay = 2)
     z$status_code
   }
   status_code <- vapply(datasets$FamilyId, delete_one, FUN.VALUE = numeric(1), USE.NAMES = FALSE)

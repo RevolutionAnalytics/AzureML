@@ -73,8 +73,18 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #' \if{html}{\figure{authorization_token.png}{options: width="60\%" alt="Figure: authorization_token.png"}}
 #' \if{latex}{\figure{authorizationToken.pdf}{options: width=7cm}}
 #'
-#' @section Using a \code{settings.json} file:
+#'
+#' @section Using a settings.json file:
 #'  If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:
+#'  \preformatted{
+#'  {"workspace":{
+#'    "id": "enter your AzureML workspace id here",
+#'    "authorization_token": "enter your AzureML authorization token here",
+#'    "api_endpoint": "https://studioapi.azureml.net",
+#'  }}
+#' }
+#' 
+#' To explicitly add the management endpoint in the JSON file, use:
 #'  \preformatted{
 #'  {"workspace":{
 #'    "id": "enter your AzureML workspace id here",
@@ -83,12 +93,31 @@ default_api <- function(api_endpoint = "https://studioapi.azureml.net"){
 #'    "management_endpoint": "https://management.azureml.net"
 #'  }}
 #' }
+#'    
+#' @section Using a workspace in different Azure Machine Learning regions:
+#' 
+#' By default, the Azure Machine Learning workspace is located in US South Central, but it is possible to create a workspace in different regions, including Europe West and Asia Southeast.
+#' 
+#' To use a workspace in Asia Southeast, you can modify the api endpoint line in the JSON file:
+#'  \preformatted{
+#'   {"workspace": {
+#'     "api_endpoint": ["https://asiasoutheast.studio.azureml.net"]
+#'   }}
+#' }
+#'
+#' Similarly, for a workspace in Europe West:
+#'  \preformatted{
+#'   {"workspace": {
+#'     "api_endpoint": ["https://europewest.studio.azureml.net"]
+#'   }}
+#' }
+#' 
 
 #' 
 #' 
 #' @param id Optional workspace id from ML studio -> settings -> WORKSPACE ID. See the section "Finding your AzureML credentials" for more details.
 #' @param auth Optional authorization token from ML studio -> settings -> AUTHORIZATION TOKENS. See the section "Finding your AzureML credentials" for more details.
-#' @param api_endpoint Optional AzureML API web service URI. Defaults to \code{https://studioap.azureml.net} if not provided and not specified in config.  See note.
+#' @param api_endpoint Optional AzureML API web service URI. Defaults to \code{https://studioapi.azureml.net} if not provided and not specified in config.  See note.
 #' @param management_endpoint Optional AzureML management web service URI. Defaults to \code{https://management.azureml.net} if not provided and not specified in config.  See note.
 #' @param config Optional settings file containing id and authorization info. Used if any of the other arguments are missing. The default config file is \code{~/.azureml/settings.json}, but you can change this location by setting \code{options(AzureML.config = "newlocation")}. See the section "Using a settings.json file" for more details.
 #' @param ... ignored

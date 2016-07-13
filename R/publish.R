@@ -29,6 +29,7 @@
 #' @export
 #'
 #' @inheritParams refresh
+#' @inheritParams workspace
 #' @param fun a function to publish; the function must have at least one argument.
 #' @param name name of the new web service; ignored when \code{serviceId} is specified (when updating an existing web service).
 #' 
@@ -43,6 +44,7 @@
 #' @param serviceId optional Azure web service ID; use to update an existing service (see Note below).
 #' @param host optional Azure regional host, defaulting to the global \code{management_endpoint} set in \code{\link{workspace}}
 #' @param data.frame \code{TRUE} indicates that the function \code{fun} accepts a data frame as input and returns a data frame output; automatically set to \code{TRUE} when \code{inputSchema} is a data frame.
+#' @param .retry number of tries before failing
 #' 
 #' @return A data.frame describing the new service endpoints, cf. \code{\link{endpoints}}. The output can be directly used by the \code{\link{consume}} function.
 #'  
@@ -83,11 +85,12 @@
 #' @importFrom uuid UUIDgenerate
 #' @importFrom curl new_handle handle_setheaders handle_setopt
 publishWebService <- function(ws, fun, name,
-                              inputSchema, outputSchema, `data.frame`=FALSE,
-                              export=character(0), 
-                              noexport=character(0), 
+                              inputSchema, outputSchema, 
+                              `data.frame` = FALSE,
+                              export = character(0), 
+                              noexport = character(0), 
                               packages,
-                              version="3.1.0", 
+                              version = "3.1.0", 
                               serviceId, 
                               host = ws$.management_endpoint,
                               .retry = 3)
@@ -130,18 +133,7 @@ publishWebService <- function(ws, fun, name,
     }
     
   } 
-  # inputSchema <- azureSchema(inputSchema)
-  # outputSchema <- azureSchema(outputSchema)
-  # if(`data.frame`) {
-  #   if(length(formals(fun)) != 1) {
-  #     stop("when data.frame=TRUE fun must only take one data.frame argument")
-  #   }
-  # } else {
-  # if(length(formals(fun)) != length(inputSchema)) {
-  #   stop("length(inputSchema) does not match the number of function arguments")
-  # }
-  # }
-  
+
   ### Get and encode the dependencies
   
   if(missing(packages)) packages=NULL
@@ -191,7 +183,7 @@ publishWebService <- function(ws, fun, name,
   )
   handle_setheaders(h, .list = httpheader)
   handle_setopt(h, .list = opts)
-  r = try_fetch(publishURL, handle = h, tries = .retry)
+  r = try_fetch(publishURL, handle = h, .retry = .retry)
   result = rawToChar(r$content)
   if(r$status_code >= 400) stop(result)
   newService = fromJSON(result)

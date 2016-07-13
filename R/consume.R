@@ -29,6 +29,7 @@
 #' @export
 #'
 #' @inheritParams refresh
+#' @inheritParams publishWebService
 #' @param endpoint Either an AzureML web service endpoint returned by \code{\link{publishWebService}}, \code{\link{endpoints}}, or simply an AzureML web service from \code{\link{services}}; in the latter case the default endpoint for the service will be used.
 #' @param ... variable number of requests entered as lists in key-value format; optionally a single data frame argument.
 #' @param globalParam global parameters entered as a list, default value is an empty list
@@ -43,7 +44,7 @@
 #' @family consumption functions
 #' @importFrom jsonlite fromJSON
 #' @example inst/examples/example_publish.R
-consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "output1", tries = 5)
+consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "output1", .retry = 5)
 {
   if(is.Service(endpoint))
   {
@@ -73,7 +74,7 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
     }
   }
   # Make API call with parameters
-  result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay, tries = tries)
+  result <- callAPI(apiKey, requestUrl, requestsLists,  globalParam, retryDelay, .retry = .retry)
   if(inherits(result, "error")) stop("AzureML returned an error code")
   
   # Access output by converting from JSON into list and indexing into Results
@@ -104,14 +105,14 @@ consume <- function(endpoint, ..., globalParam, retryDelay = 10, output = "outpu
 # @param keyvalues the data to be passed to the web service
 # @param globalParam the global parameters for the web service
 # @param retryDelay number of seconds to wait after failing (max 3 tries) to try again
-# @param tries the number of retry attempts
+# @param .retry the number of retry attempts
 # @return result the response
 #
 # @importFrom jsonlite toJSON
 # @importFrom curl handle_setheaders new_handle handle_setopt curl_fetch_memory
 # @keywords internal
 callAPI <- function(apiKey, requestUrl, keyvalues, globalParam, 
-                    retryDelay=10, tries = 5) {
+                    retryDelay=10, .retry = 5) {
   # Set number of tries and HTTP status to 0
   result <- NULL
   # Construct request payload
@@ -136,7 +137,7 @@ callAPI <- function(apiKey, requestUrl, keyvalues, globalParam,
                   postfields = body
                 )
   )
-  r <- try_fetch(requestUrl, h, delay = retryDelay, tries = tries)
+  r <- try_fetch(requestUrl, h, no_retry_on = 400, delay = retryDelay, .retry = .retry)
   result <- fromJSON(rawToChar(r$content))
   if(r$status_code >= 400)  {
     stop(paste(capture.output(result), collapse="\n"))
