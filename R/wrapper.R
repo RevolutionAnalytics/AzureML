@@ -83,7 +83,6 @@ wrapper <- "inputDF <- maml.mapInputPort(1)\nload(\"src/env.RData\")\nif (!is.nu
 # @examples
 # foo <- function(dat)head(dat, 10)
 # test_wrapper(foo, iris)
-#' @importFrom utils data
 test_wrapper <- function(fun = function(x)head(x, 3), inputDF, `data.frame` = TRUE)
 {
   if(missing(inputDF) || is.null(inputDF)){
