@@ -36,7 +36,9 @@ if(exists("oneOfEach")){
       AzureML:::skip_if_missing_config(settingsFile)
       AzureML:::skip_if_offline()
       
-      dl <- download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
+      dl <- suppressWarnings(
+        download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
+      )
       expect_is(dl, "data.frame")
       expect_true(nrow(dl) > 0)
     })
@@ -62,13 +64,13 @@ test_that("Multiple file download", {
   multiple <- oneOfEach[order(oneOfEach$Size, decreasing = FALSE), ][1:3, ]
   names <- multiple$Name
   
-  res <- download.datasets(ws, names)
+  res <- suppressWarnings(download.datasets(ws, names))
   expect_equal(names(res), names)
   
-  res <- download.datasets(datasets(ws), names)
+  res <- suppressWarnings(download.datasets(datasets(ws), names))
   expect_equal(names(res), names)
 
-  res <- download.datasets(multiple)
+  res <- suppressWarnings(download.datasets(multiple))
   expect_equal(names(res), names)
 })
 
