@@ -32,23 +32,26 @@
 
 # wrapperFunction <- function(){
 #   inputDF <- maml.mapInputPort(1)
-#   load('src/env.RData')
-#   if(!is.null(exportenv$..packages))
-#   {
-#     lapply(exportenv$..packages, function(pkg){
-#       if(!require(pkg, character.only = TRUE, quietly = TRUE))
-#         install.packages(pkg, 
-#                        repos = paste0('file:///', getwd(), '/src/packages'), 
-#                        lib = getwd()
-#       )
-#     })
-#     .libPaths(new = getwd())
-#     lapply(exportenv$..packages, require, 
-#            quietly = TRUE, character.only=TRUE)
-#   }
-#   parent.env(exportenv) = globalenv()
 #   
-#   attach(exportenv, warn.conflicts = FALSE)
+#   if(!is.element("exportenv ",search())) {
+#     load('src/env.RData')
+#     if(!is.null(exportenv$..packages)) {
+#       lapply(exportenv$..packages, function(pkg){
+#         if(!require(pkg, character.only = TRUE, quietly = TRUE))
+#           install.packages(pkg,
+#                            repos = paste0('file:///', getwd(), '/src/packages'),
+#                            lib = getwd()
+#           )
+#       })
+#       .libPaths(new = getwd())
+#       lapply(exportenv$..packages, require,
+#              quietly = TRUE, character.only=TRUE)
+#     }
+#     parent.env(exportenv) = globalenv()
+#     
+#     attach(exportenv, warn.conflicts = FALSE)
+#   }
+#   
 #   if(..data.frame){
 #     outputDF <- as.data.frame(..fun(inputDF))
 #     colnames(outputDF) <- ..output_names
@@ -65,12 +68,12 @@
 #   maml.mapOutputPort("outputDF")
 # }
 # 
-# wrapper <- paste(as.character(body(wrapperFunction)[-1]), 
+# wrapper <- paste(as.character(body(wrapperFunction)[-1]),
 #                  collapse = "\n")
 
 ### --- End of Do not remove ---------------------------------------------------
 
-wrapper <- "inputDF <- maml.mapInputPort(1)\nload(\"src/env.RData\")\nif (!is.null(exportenv$..packages)) {\n    lapply(exportenv$..packages, function(pkg) {\n        if (!require(pkg, character.only = TRUE, quietly = TRUE)) \n            install.packages(pkg, repos = paste0(\"file:///\", getwd(), \"/src/packages\"), lib = getwd())\n    })\n    .libPaths(new = getwd())\n    lapply(exportenv$..packages, require, quietly = TRUE, character.only = TRUE)\n}\nparent.env(exportenv) = globalenv()\nattach(exportenv, warn.conflicts = FALSE)\nif (..data.frame) {\n    outputDF <- as.data.frame(..fun(inputDF))\n    colnames(outputDF) <- ..output_names\n} else {\n    outputDF <- matrix(nrow = nrow(inputDF), ncol = length(..output_names))\n    outputDF <- as.data.frame(outputDF)\n    names(outputDF) <- ..output_names\n    for (i in 1:nrow(inputDF)) {\n        outputDF[i, ] <- do.call(\"..fun\", inputDF[i, ])\n    }\n}\nmaml.mapOutputPort(\"outputDF\")"
+wrapper <- "inputDF <- maml.mapInputPort(1)\nif (!is.element(\"exportenv \", search())) {\n    load(\"src/env.RData\")\n    if (!is.null(exportenv$..packages)) {\n        lapply(exportenv$..packages, function(pkg) {\n            if (!require(pkg, character.only = TRUE, quietly = TRUE)) \n                install.packages(pkg, repos = paste0(\"file:///\", getwd(), \"/src/packages\"), lib = getwd())\n        })\n        .libPaths(new = getwd())\n        lapply(exportenv$..packages, require, quietly = TRUE, character.only = TRUE)\n    }\n    parent.env(exportenv) = globalenv()\n    attach(exportenv, warn.conflicts = FALSE)\n}\nif (..data.frame) {\n    outputDF <- as.data.frame(..fun(inputDF))\n    colnames(outputDF) <- ..output_names\n} else {\n    outputDF <- matrix(nrow = nrow(inputDF), ncol = length(..output_names))\n    outputDF <- as.data.frame(outputDF)\n    names(outputDF) <- ..output_names\n    for (i in 1:nrow(inputDF)) {\n        outputDF[i, ] <- do.call(\"..fun\", inputDF[i, ])\n    }\n}\nmaml.mapOutputPort(\"outputDF\")"
 
 
 
