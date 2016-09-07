@@ -133,7 +133,7 @@ publishWebService <- function(ws, fun, name,
     }
     
   } 
-
+  
   ### Get and encode the dependencies
   
   if(missing(packages)) packages=NULL

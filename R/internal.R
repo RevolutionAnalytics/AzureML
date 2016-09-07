@@ -164,7 +164,7 @@ zipNotAvailableMessage = "Requires external zip utility. Please install zip, ens
 #' @importFrom base64enc base64encode
 #' @importFrom miniCRAN makeRepo pkgDep
 # @keywords Internal
-packageEnv <- function(exportenv = new.env(), packages=NULL, version = "3.1.0") {
+packageEnv <- function(exportenv = new.env(), packages=NULL, version = getOption("default_r_version")) {
   if(!zipAvailable()) stop(zipNotAvailableMessage)
   
   if(!is.null(packages)) assign("..packages", packages, envir = exportenv)
@@ -181,20 +181,31 @@ packageEnv <- function(exportenv = new.env(), packages=NULL, version = "3.1.0") 
   # Package up dependencies
   if(!is.null(packages))
   {
-    re = getOption("repos")
-    if(is.null(re)) re = c(CRAN = "http://cran.revolutionanalytics.com")
-    tp = file.path(td,"packages", fsep = "/")
+    re <- getOption("repos")
+    if(is.null(re)){
+      re <- c(CRAN = "http://cran.revolutionanalytics.com")
+    }
+    tp <- normalizePath(file.path(td, "packages"), winslash = "/", mustWork = FALSE)
     tryCatch(dir.create(tp), warning = function(e) stop(e))
-    tryCatch(makeRepo(pkgDep(packages, 
-                             repos = re, 
-                             type = "win.binary",
-                             Rversion = version,
-                             suggests = FALSE),
-                      path = tp, 
-                      repos = re, 
-                      type = "win.binary", 
-                      Rversion = version),
-             error=function(e) stop(e))
+    all_p <- pkgDep(packages, 
+                    repos = re, 
+                    type = "win.binary",
+                    Rversion = version,
+                    suggests = FALSE
+    )
+    tryCatch(
+      z <- makeRepo(all_p,
+               path = tp, 
+               repos = re, 
+               type = "win.binary", 
+               Rversion = version
+      ),
+      error=function(e) stop(e)
+    )
+    if(!all(grepl(tp, z))) {
+      warning("Packages did not copy properly in to AzureML. Please ensure you have miniCRAN v0.2.7 or above installed.")
+    }
+    z
   }
   
   z = try({
