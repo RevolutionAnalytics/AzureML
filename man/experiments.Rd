@@ -4,7 +4,7 @@
 \alias{experiments}
 \title{List experiments in an AzureML workspace.}
 \usage{
-experiments(ws, filter = c("all", "my datasets", "samples"))
+experiments(ws, filter = c("all", "my experiments", "samples"))
 }
 \arguments{
 \item{ws}{An AzureML workspace reference returned by \code{\link{workspace}}.}

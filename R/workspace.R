@@ -297,7 +297,7 @@ datasets <- function(ws, filter=c("all", "my datasets", "samples"))
 #' @export
 #' @family experiment functions
 #' @example inst/examples/example_experiments.R
-experiments <- function(ws, filter=c("all", "my datasets", "samples"))
+experiments <- function(ws, filter=c("all", "my experiments", "samples"))
 {
   filter = match.arg(filter)
   if(filter == "all") return(suppressWarnings(ws$experiments))
