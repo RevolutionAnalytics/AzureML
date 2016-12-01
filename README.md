@@ -1,5 +1,9 @@
 # AzureML 
 
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/AzureML)](http://cran.r-project.org/package=AzureML)
+[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/AzureML)](http://www.r-pkg.org/pkg/AzureML)
+
 An R interface to [AzureML](https://studio.azureml.net/) experiments, datasets, and web services.
 
 Use this package to upload and download datasets to and from AzureML, to interrogate experiments, to publish new R-based web services, and to run R data through existing web services and retrieve the output.
