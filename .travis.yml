@@ -1,0 +1,41 @@
+language: r
+sudo: required
+
+env: NOT_CRAN="true"
+cache: packages
+
+r_binary_packages:
+  - jsonlite
+  - curl
+  - foreign
+  - codetools
+  - base64enc
+  - miniCRAN
+  - uuid
+  
+  - testthat
+  - knitr
+  - rmarkdown
+  - lme4
+  - gbm
+  - MASS
+  
+  - assertthat
+  - openssl
+  - rprojroot
+  - httr
+  
+
+r_github_packages:
+  - andrie/secret
+
+branches:
+  only:
+    - master
+    - release
+    - dev
+    
+notifications:
+  email:
+    on_success: change
+    on_failure: change

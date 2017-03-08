@@ -3,6 +3,9 @@ if(interactive()) library("testthat")
 
 settingsFile <- AzureML.config.default
 workspace <- function(..., .validate = FALSE) AzureML::workspace(..., .validate = .validate)
+read_vault_or_config <- function(){
+  if(can_decrypt_vault()) decrypt_vault() else read.AzureML.config(settingsFile)
+}
 
 #  ------------------------------------------------------------------------
 
@@ -10,8 +13,7 @@ context("workspace - connect to workspace")
 
 test_that("Can connect to workspace with supplied id and auth", {
   AzureML:::skip_if_missing_config(settingsFile)
-  
-  js <- read.AzureML.config(settingsFile)
+  js <- read_vault_or_config()
   id <- js$workspace$id
   auth <- js$workspace$authorization_token
   
