@@ -1,11 +1,19 @@
 if(interactive()) library("testthat")
 
 settingsFile <- AzureML.config.default
+workspace <- function(..., .validate = FALSE) {
+  # AzureML::workspace(..., .validate = .validate)
+  js <- decrypt_vault()
+  id <- js$workspace$id
+  auth <- js$workspace$authorization_token
+  AzureML::workspace(id, auth, .validate = .validate)
+}
+
 context("Download one file of each DataTypeId")
 
 test_that("setup global variables", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   ws <<- workspace()
   ds <- datasets(ws, filter = "samples")
@@ -33,8 +41,8 @@ if(exists("oneOfEach")){
   # i.e. if the settings.json file could be found
   for(type in oneOfEach$DataTypeId){
     test_that(sprintf("Can download dataset of type %s", type), {
-      AzureML:::skip_if_missing_config(settingsFile)
-      AzureML:::skip_if_offline()
+      skip_if_missing_config(settingsFile)
+      skip_if_offline()
       
       dl <- suppressWarnings(
         download.datasets(ws, name = oneOfEach$Name[oneOfEach$DataTypeId == type])
@@ -47,8 +55,8 @@ if(exists("oneOfEach")){
 
 type <- "zip"
 test_that(sprintf("Can download dataset of type %s", type), {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   dl <- download.datasets(ws, Zip)
   class(dl)
@@ -58,8 +66,8 @@ test_that(sprintf("Can download dataset of type %s", type), {
 
 
 test_that("Multiple file download", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   multiple <- oneOfEach[order(oneOfEach$Size, decreasing = FALSE), ][1:3, ]
   names <- multiple$Name

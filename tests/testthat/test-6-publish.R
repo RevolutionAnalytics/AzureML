@@ -2,11 +2,17 @@ if(interactive()) library(testthat)
 
 context("Publish API")
 settingsFile <- AzureML.config.default
-
+workspace <- function(..., .validate = FALSE) {
+  # AzureML::workspace(..., .validate = .validate)
+  js <- decrypt_vault()
+  id <- js$workspace$id
+  auth <- js$workspace$authorization_token
+  AzureML::workspace(id, auth, .validate = .validate)
+}
 
 test_that(".getexports finds function and creates zip string", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   ws <<- workspace()
   endpoint <<- NA
@@ -16,18 +22,18 @@ test_that(".getexports finds function and creates zip string", {
   assign("add", function(x, y) x + y, envir = funEnv)
   
   exportEnv = new.env()
-  AzureML:::.getexports(substitute(add), e = exportEnv, env = funEnv)
+  .getexports(substitute(add), e = exportEnv, env = funEnv)
   
   expect_equal(
     ls(exportEnv),
     "add"
   )
   
-  za <- AzureML:::zipAvailable()
-  if(!za) skip(AzureML:::zipNotAvailableMessage)
+  za <- zipAvailable()
+  if(!za) skip(zipNotAvailableMessage)
   expect_true(za)
   
-  z <- AzureML:::packageEnv(exportEnv)
+  z <- packageEnv(exportEnv)
   expect_is(z, "character")
   expect_true(nchar(z) > 1)
   
@@ -36,8 +42,8 @@ test_that(".getexports finds function and creates zip string", {
 
 
 test_that("publishWebService throws error if fun is not a function", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
 
   add <- function(x,y) x + y
   
@@ -64,8 +70,8 @@ timestamped_name <- paste0("webservice-test-publish-",
 
 
 test_that("publishWebService works with simple function", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   add <- function(x,y) x + y
   
@@ -95,8 +101,8 @@ test_that("publishWebService works with simple function", {
 
 test_that("updateWebService works with simple function", {
   # Now test updateWebService
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   endpoint <- updateWebService(ws,
                                serviceId = endpoint$WebServiceId,
@@ -119,8 +125,8 @@ test_that("updateWebService works with simple function", {
 
 
 test_that("publishWebService works with data frame input", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   timestamped_name <- paste0("webservice-test-publish-",
                              format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))

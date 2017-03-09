@@ -33,5 +33,6 @@ Suggests:
     rmarkdown,
     lme4,
     gbm,
-    MASS
-RoxygenNote: 5.0.1
+    MASS,
+    secret
+RoxygenNote: 6.0.1

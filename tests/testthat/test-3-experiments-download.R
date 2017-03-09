@@ -5,21 +5,29 @@
 if(interactive()) library("testthat")
 
 settingsFile <- AzureML.config.default
-
+workspace <- function(..., .validate = FALSE) {
+  # AzureML::workspace(..., .validate = .validate)
+  js <- decrypt_vault()
+  id <- js$workspace$id
+  auth <- js$workspace$authorization_token
+  AzureML::workspace(id, auth, .validate = .validate)
+}
 
 context("Read dataset from experiment")
 
 test_that("Can read intermediate dataset from workspace", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
 
-  settingsFile <- AzureML:::AzureML.config.default
+  settingsFile <- AzureML.config.default
   js <- jsonlite::fromJSON(settingsFile)
   id <- js$workspace$id
   auth <- js$workspace$authorization_token
+  
+  js <- decrypt_vault("azure")
   exp_id <- js$workspace$exp_id
   node_id <- js$workspace$node_id
-  
+
   if(is.null(exp_id)  || is.null(node_id)) skip("exp_id or node_id not available")
   
   ws <- workspace()

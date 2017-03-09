@@ -1,10 +1,12 @@
 # read secret from package vault
 decrypt_vault <- function(secret = "azure", vault = "AzureML"){
+  vault <- system.file("vault", package = vault)
   secret::get_secret(secret, vault = vault)
 }
 
 can_decrypt_vault <- function(secret = "azure", vault = "AzureML"){
-  z <- tryCatch(decrypt_vault(secret, vault), error = function(e)e)
+  # vault <- system.file("vault", package = vault)
+  z <- tryCatch(decrypt_vault(secret, vault = vault), error = function(e)e)
   !inherits(z, "error")
 }
   
@@ -13,7 +15,7 @@ can_decrypt_vault <- function(secret = "azure", vault = "AzureML"){
 #
 skip_if_missing_config <- function(f){
   # attempt to read the secret from the package vault
-  if(can_decrypt_vault()) return(TRUE)
+  if(can_decrypt_vault()) return(invisible())
   if(!file.exists(f)) {
     msg <- paste("To run tests, add a file ~/.azureml/settings.json containing AzureML keys.",
                  "See ?workspace for help",

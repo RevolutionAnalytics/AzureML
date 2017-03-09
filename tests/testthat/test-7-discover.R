@@ -2,11 +2,18 @@ if(interactive()) library(testthat)
 
 context("Discover API")
 settingsFile <- "~/.azureml/settings.json" 
+workspace <- function(..., .validate = FALSE) {
+  # AzureML::workspace(..., .validate = .validate)
+  js <- decrypt_vault()
+  id <- js$workspace$id
+  auth <- js$workspace$authorization_token
+  AzureML::workspace(id, auth, .validate = .validate)
+}
 
 test_that("discoverSchema() can discover endpoints starting from workspace ID", {
   
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   ws <<- workspace()
   timestamped_name <<- paste0("webservice-test-publish-", 
@@ -44,8 +51,8 @@ test_that("discoverSchema() can discover endpoints starting from workspace ID", 
 
 
 test_that("API location is returned and able to be used immediately", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   ss <- services(ws, name = timestamped_name)
   testEP <- endpoints(ws, ss)[1, ]
@@ -58,8 +65,8 @@ test_that("API location is returned and able to be used immediately", {
 
 
 test_that("Discovery function handles error correctly", {
-  AzureML:::skip_if_missing_config(settingsFile)
-  AzureML:::skip_if_offline()
+  skip_if_missing_config(settingsFile)
+  skip_if_offline()
   
   expect_error(
     services(ws, "foo-does-not-exist"), 
