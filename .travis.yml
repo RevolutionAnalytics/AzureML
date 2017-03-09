@@ -24,6 +24,9 @@ r_binary_packages:
   - openssl
   - httr
   
+r_packages:
+  - rprojroot
+  
 
 r_github_packages:
   - andrie/secret
