@@ -21,12 +21,12 @@ getWebServices(ws, service_id, name, host = ws$.management_endpoint)
 \value{
 Returns a data.frame with variables:
 \itemize{
-  \item Id
-  \item Name
-  \item Description
-  \item CreationTime
-  \item WorkspaceId
-  \item DefaultEndpointName
+\item Id
+\item Name
+\item Description
+\item CreationTime
+\item WorkspaceId
+\item DefaultEndpointName
 }
 Each row of the returned data.frame corresponds to a service.
 }

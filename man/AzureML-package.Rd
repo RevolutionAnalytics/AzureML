@@ -10,46 +10,38 @@ Allows you to work with Azure ML Studio datasets and experiments directly from R
 }
 \section{Summary of functions}{
 
-
-1. Create a reference to an Azure ML workspace
-
+\enumerate{
+\item Create a reference to an Azure ML workspace
 \itemize{
-\item Workspace: \code{\link{workspace}}
+\item Workspace: \code{\link[=workspace]{workspace()}}
+}
+\item Datasets
+\itemize{
+\item List available datasets: \code{\link[=datasets]{datasets()}}
+\item Download datasets: \code{\link[=download.datasets]{download.datasets()}}
+\item Upload a dataset: \code{\link[=upload.dataset]{upload.dataset()}}
+\item Delete datasets: \code{\link[=delete.datasets]{delete.datasets()}}
+}
+\item Experiments
+\itemize{
+\item Get experiments: \code{\link[=experiments]{experiments()}}
+\item Get data from an experiment port: \code{\link[=download.intermediate.dataset]{download.intermediate.dataset()}}
+}
+\item Web Services
+\itemize{
+\item List available services: \code{\link[=services]{services()}}
+\item Consume a web service (run data through it and retrieve result): \code{\link[=consume]{consume()}}
+\item Publish an R function as a web service: \code{\link[=publishWebService]{publishWebService()}}
+\item Update an existing web service: \code{\link[=updateWebService]{updateWebService()}}
+\item List web service endpoints: \code{\link[=endpoints]{endpoints()}}
+}
+\item Configure a settings file with your AzureML secrets
 }
 
-2. Datasets
-
+The \code{\link[=workspace]{workspace()}} function optionally reads your AzureML credentials from a settings file located at \code{~/.azureml/settings.json}. You can read and write this file using:
 \itemize{
-   \item List available datasets: \code{\link{datasets}}
-   \item Download datasets: \code{\link{download.datasets}}
-   \item Upload a dataset: \code{\link{upload.dataset}}
-   \item Delete datasets: \code{\link{delete.datasets}}
-}
-
-3. Experiments
-
-\itemize{
-   \item Get experiments: \code{\link{experiments}}
-   \item Get data from an experiment port: \code{\link{download.intermediate.dataset}}
-}
-
-4. Web Services
-
-\itemize{
-   \item List available services: \code{\link{services}}
-   \item Consume a web service (run data through it and retrieve result): \code{\link{consume}}
-   \item Publish an R function as a web service: \code{\link{publishWebService}}
-   \item Update an existing web service: \code{\link{updateWebService}}
-   \item List web service endpoints: \code{\link{endpoints}}
-}
-
-5. Configure a settings file with your AzureML secrets
-
-The \code{\link{workspace}} function optionally reads your AzureML credentials from a settings file located at \code{~/.azureml/settings.json}. You can read and write this file using:
-
-\itemize{
-   \item Write: \code{\link{write.AzureML.config}}
-   \item Read: \code{\link{read.AzureML.config}}
+\item Write: \code{\link[=write.AzureML.config]{write.AzureML.config()}}
+\item Read: \code{\link[=read.AzureML.config]{read.AzureML.config()}}
 }
 }
 

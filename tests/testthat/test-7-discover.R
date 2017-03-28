@@ -16,6 +16,7 @@ test_that("discoverSchema() can discover endpoints starting from workspace ID", 
   skip_if_offline()
   
   ws <<- workspace()
+  refresh(ws, what = "services")
   timestamped_name <<- paste0("webservice-test-publish-", 
                               format(Sys.time(), format="%Y-%m-%d--%H-%M-%S"))
   

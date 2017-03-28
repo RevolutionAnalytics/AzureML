@@ -21,20 +21,20 @@ getEndpoints(ws, service_id, endpoint_id, host = ws$.management_endpoint)
 \value{
 Returns a data.frame with variables:
 \itemize{
- \item Name
- \item Description
- \item CreationTime
- \item WorkspaceId
- \item WebServiceId
- \item HelpLocation
- \item PrimaryKey
- \item SecondaryKey
- \item ApiLocation
- \item Version
- \item MaxConcurrentCalls
- \item DiagnosticsTraceLevel
- \item ThrottleLevel
- }
+\item Name
+\item Description
+\item CreationTime
+\item WorkspaceId
+\item WebServiceId
+\item HelpLocation
+\item PrimaryKey
+\item SecondaryKey
+\item ApiLocation
+\item Version
+\item MaxConcurrentCalls
+\item DiagnosticsTraceLevel
+\item ThrottleLevel
+}
 Each row of the data.frame corresponds to an end point.
 }
 \description{

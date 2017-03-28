@@ -10,7 +10,7 @@ test_that("datasets(ws) returns results", {
   skip_if_offline()
 
   ws <<- workspace()
-  
+
   x <- datasets(ws)
   expect_is(x, "data.frame")
 })
@@ -28,7 +28,9 @@ test_that("Can download multiple .csv and .tsv files", {
   names <- c("Time Series Dataset", 
              "Sample Named Entity Recognition Articles")
   
-  res <- suppressWarnings(download.datasets(ws, names))
+  res <- suppressWarnings(
+    download.datasets(ws, names)
+    )
   expect_equal(names(res), names)
   
   res <- suppressWarnings(download.datasets(datasets(ws), names))

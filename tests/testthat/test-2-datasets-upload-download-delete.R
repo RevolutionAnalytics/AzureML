@@ -45,18 +45,16 @@ test_that("Can download dataset", {
   expect_equal(dl, airquality)
 })
 
+
 test_that("Can delete dataset from workspace", {
   skip_if_missing_config(settingsFile)
   skip_if_offline()
   
   z <- delete.datasets(ws, timestamped_name)
   expect_true(timestamped_name %in% z$Name && z$Deleted[z$Name == timestamped_name])
-  # Force refresh - sometime this fails in non-interactive
-  Sys.sleep(3); refresh(ws, what = "datasets")
   ds <- datasets(ws, filter = "my")
   expect_true(nrow(ds) == 0 || !timestamped_name %in% ds$Name)
 })
-
 
 
 test_that("Invalid input throws helpful error", {
@@ -64,9 +62,3 @@ test_that("Invalid input throws helpful error", {
                "You specified a dataset name that is not in the workspace. See help file for `download.datasets`"
   )
 })
-
-
-
-
-
-

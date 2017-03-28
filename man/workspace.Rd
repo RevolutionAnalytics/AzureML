@@ -25,9 +25,9 @@ workspace(id, auth, api_endpoint, management_endpoint,
 \value{
 An R environment of class \code{Workspace} containing at least the following objects:
 \itemize{
-  \item{experiments: Collection of experiments in the workspace represented as an \code{Experiments} object. See \code{\link{experiments}}}
-  \item{datasets: Collection of datasets in the workspace represented as a \code{Datasets} object. See \code{\link{datasets}}}
-  \item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{services}}}
+\item{experiments: Collection of experiments in the workspace represented as an \code{Experiments} object. See \code{\link{experiments}}}
+\item{datasets: Collection of datasets in the workspace represented as a \code{Datasets} object. See \code{\link{datasets}}}
+\item{services: Collection of web services in the workspace represented as a \code{Services} object. See \code{\link{services}}}
 }
 }
 \description{
@@ -42,8 +42,6 @@ Workspace ID
 \if{html}{\figure{workspace_id.png}{options: width="60\%" alt="Figure: workspace_id.png"}}
 \if{latex}{\figure{workspaceId.pdf}{options: width=7cm}}
 
-
-
 Authorization token
 
 \if{html}{\figure{authorization_token.png}{options: width="60\%" alt="Figure: authorization_token.png"}}
@@ -52,8 +50,8 @@ Authorization token
 
 \section{Using a settings.json file}{
 
- If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:
- \preformatted{
+If any of the \code{id}, \code{auth}, \code{api_endpoint} or \code{management_endpoint} arguments are missing, the function attempts to read values from the \code{config} file with JSON format:
+\preformatted{
  {"workspace":{
    "id": "enter your AzureML workspace id here",
    "authorization_token": "enter your AzureML authorization token here",
@@ -62,7 +60,7 @@ Authorization token
 }
 
 To explicitly add the management endpoint in the JSON file, use:
- \preformatted{
+\preformatted{
  {"workspace":{
    "id": "enter your AzureML workspace id here",
    "authorization_token": "enter your AzureML authorization token here",
@@ -78,14 +76,14 @@ To explicitly add the management endpoint in the JSON file, use:
 By default, the Azure Machine Learning workspace is located in US South Central, but it is possible to create a workspace in different regions, including Europe West and Asia Southeast.
 
 To use a workspace in Asia Southeast, you can modify the api endpoint line in the JSON file:
- \preformatted{
+\preformatted{
   {"workspace": {
     "api_endpoint": ["https://asiasoutheast.studio.azureml.net"]
   }}
 }
 
 Similarly, for a workspace in Europe West:
- \preformatted{
+\preformatted{
   {"workspace": {
     "api_endpoint": ["https://europewest.studio.azureml.net"]
   }}
@@ -94,7 +92,7 @@ Similarly, for a workspace in Europe West:
 
 \seealso{
 \code{\link{datasets}}, \code{\link{experiments}}, \code{\link{refresh}},
-         \code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
+\code{\link{services}}, \code{\link{consume}}, \code{\link{publishWebService}}
 
 Other dataset functions: \code{\link{datasets}},
   \code{\link{delete.datasets}},

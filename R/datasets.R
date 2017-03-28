@@ -90,6 +90,7 @@ download.datasets <- function(dataset, name, ...)
   
   if(is.Workspace(dataset)){
     ws <- dataset   # make it clear it is a workspace
+    refresh(ws, what = "datasets")
     datasets = datasets(ws)
     if(missing(name)){
       msg <- "Specify the dataset names to download."
@@ -278,6 +279,10 @@ delete.datasets <- function(ws, name, host){
     status_code = status_code,
     stringsAsFactors = FALSE
   )
+  ds <- ws$datasets
   refresh(ws, "datasets")
+  to_delete <- ds$Name %in% ans$Name[ans$Deleted]
+  ds <- ds[!to_delete, ]
+  ws$datasets <- ds
   ans
 }

@@ -83,9 +83,6 @@ try_fetch <- function(uri, handle,
                       no_message_threshold = 1)
 {
   r = curl_fetch_memory(uri, handle)
-  # if(r$status_code == 400){
-  #   validate_response(r)
-  # }
   if(!missing(no_retry_on) && !is.null(no_retry_on)){
     retry_on <- setdiff(retry_on, no_retry_on)
   }

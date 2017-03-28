@@ -126,18 +126,18 @@ get_dataset <- function(x, h, quote = "\"", ...) {
   if(missing(h)) h = new_handle()
   conn = "r"
   if(tolower(x$DataTypeId) == "zip") conn = "rb"
-  uri = curl(x$DownloadLocation, handle = h, open = conn)
   on.exit(tryCatch(close(uri), error = invisible), add = TRUE)
-  
+  uri = curl(x$DownloadLocation, handle = h, open = conn)
+
   # Existence of DataTypeId, DowloadLocation guaranteed by caller
   switch(
     tolower(x$DataTypeId),
     arff               = read.arff(uri),
     plaintext          = paste(readLines(uri, warn = FALSE), collapse="\n"),
-    generictsvnoheader = read.table(uri, sep = "\t", header = FALSE, quote, ...),
-    generictsv         = read.table(uri, sep = "\t", header = TRUE, quote, ...),
-    genericcsvnoheader = read.table(uri, sep = ",", header = FALSE, quote, ...),
-    genericcsv         = read.table(uri, sep = ",", header = TRUE, quote, ...),
+    generictsvnoheader = read.table(uri, sep = "\t", header = FALSE, quote = quote, ...),
+    generictsv         = read.table(uri, sep = "\t", header = TRUE, quote = quote, ...),
+    genericcsvnoheader = read.table(uri, sep = ",", header = FALSE, quote = quote, ...),
+    genericcsv         = read.table(uri, sep = ",", header = TRUE, quote = quote, ...),
     zip                = readBin(uri, what = "raw", n = x$Size, ...),
     stop("unsupported data type: '",x$DataTypeId,"'")
   )

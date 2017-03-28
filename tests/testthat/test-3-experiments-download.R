@@ -19,10 +19,10 @@ test_that("Can read intermediate dataset from workspace", {
   skip_if_missing_config(settingsFile)
   skip_if_offline()
 
-  settingsFile <- AzureML.config.default
-  js <- jsonlite::fromJSON(settingsFile)
-  id <- js$workspace$id
-  auth <- js$workspace$authorization_token
+  # settingsFile <- AzureML.config.default
+  # js <- jsonlite::fromJSON(settingsFile)
+  # id <- js$workspace$id
+  # auth <- js$workspace$authorization_token
   
   js <- decrypt_vault("azure")
   exp_id <- js$workspace$exp_id

@@ -31,7 +31,6 @@ TSV- and CSV-formatted datasets return data frame results with \code{stringsAsFa
 
 \bold{Supported DataTypeId options}
 
-
 This function can download datasets with various CSV and TSV \code{DataTypeId} (with or without headers), in addition to "ARFF", "PlainText" and "Zip". Other "DataTypeIds" return an error. See the AzureML Data Format Conversion modules to convert data to a supported format.
 }
 \seealso{

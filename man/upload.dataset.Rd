@@ -27,7 +27,7 @@ Upload any R data frame to an AzureML workspace using the \code{GenericTSV} form
 }
 \note{
 The additional \code{\link[utils]{write.table}} options may not include \code{sep} or \code{row.names} or \code{file}, but any other options are accepted.
-The AzureML API does not support uploads for _replacing_ datasets with new data by re-using a name. If you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
+The AzureML API does not support uploads for \emph{replacing} datasets with new data by re-using a name. If you need to do this, first delete the dataset from the AzureML Studio interface, then upload a new version.
 }
 \examples{
 \dontrun{
