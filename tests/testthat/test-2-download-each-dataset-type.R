@@ -26,6 +26,7 @@ test_that("setup global variables", {
   Zip <<- oneOfEach[oneOfEach$DataTypeId %in% c("Zip"), ]
   oneOfEach <<- oneOfEach[!oneOfEach$DataTypeId %in% c("Zip"), ]
   # oneOfEach$DataTypeId
+  expect_is(oneOfEach, "Datasets")
 })
 
 if(exists("oneOfEach")){

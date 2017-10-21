@@ -33,5 +33,6 @@ Suggests:
     rmarkdown,
     lme4,
     gbm,
-    MASS
+    MASS,
+    mockery
 RoxygenNote: 5.0.1

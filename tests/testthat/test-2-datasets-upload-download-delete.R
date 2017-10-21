@@ -50,8 +50,17 @@ test_that("Can delete dataset from workspace", {
   z <- delete.datasets(ws, timestamped_name)
   expect_true(timestamped_name %in% z$Name && z$Deleted[z$Name == timestamped_name])
   # Force refresh - sometime this fails in non-interactive
-  Sys.sleep(1); refresh(ws, what = "datasets")
+  max_wait <- 15
+  wait_period <- 3
+  i <- 0
   ds <- datasets(ws, filter = "my")
+  while(i < max_wait && nrow(ds) > 0 && timestamped_name %in% ds$Name) {
+    Sys.sleep(wait_period)
+    i <- i + wait_period
+    refresh(ws, what = "datasets")
+    ds <- datasets(ws, filter = "my")
+  }
+  if(nrow(ds) > 0  || timestamped_name %in% ds$Name) skip("skip waiting for delete")
   expect_true(nrow(ds) == 0 || !timestamped_name %in% ds$Name)
 })
 

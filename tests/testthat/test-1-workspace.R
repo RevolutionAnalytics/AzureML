@@ -44,7 +44,7 @@ test_that("workspace() throws helpful 401 error with invalid id", {
   .expect_error_in <- function(object, msgs){
     if(missing(object) || is.null(object)) return(FALSE)
     ptn <- sprintf("[%s]", paste(sprintf("(%s)", msgs), collapse = "|"))
-    grepl(ptn, object)
+    expect_true(grepl(ptn, object))
   }
   
   m <- .catchError(workspace(id = "x", auth = "y", .validate = TRUE))
