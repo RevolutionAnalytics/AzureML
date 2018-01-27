@@ -189,7 +189,6 @@ packageEnv <- function(exportenv = new.env(), packages=NULL, version = getOption
     tryCatch(dir.create(tp), warning = function(e) stop(e))
     all_p <- pkgDep(packages, 
                     repos = re, 
-                    type = "win.binary",
                     Rversion = version,
                     suggests = FALSE
     )
@@ -197,7 +196,6 @@ packageEnv <- function(exportenv = new.env(), packages=NULL, version = getOption
       z <- makeRepo(all_p,
                path = tp, 
                repos = re, 
-               type = "win.binary", 
                Rversion = version
       ),
       error=function(e) stop(e)
