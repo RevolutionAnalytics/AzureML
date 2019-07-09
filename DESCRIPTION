@@ -7,7 +7,8 @@ Description: Functions and datasets to support Azure Machine Learning. This
 Version: 0.2.14
 Date: 2017-10-21
 Authors@R: c(
-      person("Rich", "Calaway", role=c("cre"), email="richcala@microsoft.com"),
+      person("Hong", "Ooi", role="cre", email="hongooi@microsoft.com"),
+      person("Rich", "Calaway", role="ctb"),
       person("Andrie", "de Vries", role=c("aut"), email="apdevries@gmail.com"),
       person(family="Microsoft Corporation", role="cph"),
       person(family="Revolution Analytics", role="cph", comment="Code adapted from the foreach package")
