@@ -4,8 +4,8 @@ Title: Interface with Azure Machine Learning Datasets, Experiments and Web Servi
 Description: Functions and datasets to support Azure Machine Learning. This
     allows you to interact with datasets, as well as publish and consume R functions
     as API services.
-Version: 0.2.14
-Date: 2017-10-21
+Version: 0.2.15
+Date: 2019-07-15
 Authors@R: c(
       person("Hong", "Ooi", role="cre", email="hongooi@microsoft.com"),
       person("Rich", "Calaway", role="ctb"),
